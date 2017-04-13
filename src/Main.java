@@ -13,7 +13,11 @@ public class Main {
         String fileName = "Instances/A1.txt";
 
         Instance instance1 = helper.fileToInstance(fileName);
+        helper.initTSP(instance1);
 
+        for (Node node: instance1.completeTSP){
+            System.out.println(node.index);
+        }
 
 
     }

@@ -8,24 +8,23 @@ public class Instance {
     int nodeCount;
     int routeCount;
     ArrayList<Node> nodesList = new ArrayList<>();
+    ArrayList<Node> completeTSP=new ArrayList<>();
+    ArrayList<Node> backHaulTSP= new ArrayList<>();
+    ArrayList<Node> lineHaulTSP= new ArrayList<>();
 
     ArrayList<Integer> indexesLineHaulTSP = new ArrayList<>();
     ArrayList<Integer> indexesBackHaulTSP = new ArrayList<>();
     ArrayList<Integer> indexesCompleteTSP = new ArrayList<>();
 
 
-    ArrayList<Node> completeTSP=createTSPFromNodes(nodesList,indexesCompleteTSP);
-    ArrayList<Node> backHaulTSP=createTSPFromNodes(nodesList,indexesBackHaulTSP);
-    ArrayList<Node> lineHaulTSP=createTSPFromNodes(nodesList,indexesLineHaulTSP);
+    public  ArrayList<Node> createTSPFromNodes(ArrayList<Node> nodes, ArrayList<Integer> indexes){
 
-    public static ArrayList<Node> createTSPFromNodes(ArrayList<Node> nodes, ArrayList<Integer> indexes){
-
-        ArrayList<Node> completeTSP=new ArrayList<>();
+        ArrayList<Node> TSP=new ArrayList<>();
 
         for (int i = 0; i <indexes.size() ; i++) {
 
-            completeTSP.add(nodes.get(indexes.get(i)));
+            TSP.add(nodes.get(indexes.get(i)));
         }
-        return completeTSP;
+        return TSP;
     }
 }

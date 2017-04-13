@@ -85,7 +85,7 @@ public class Helper {
 
 
             }
-            //System.out.println(nodeCount + " "+ routeCount);
+
             // Always close files.
             bufferedReader.close();
         }
@@ -102,8 +102,15 @@ public class Helper {
             // ex.printStackTrace();
         }
 
+
+
         return instance;
 
     }
 
+    public void initTSP(Instance instance){
+        instance.completeTSP=instance.createTSPFromNodes(instance.nodesList,instance.indexesCompleteTSP);
+        instance.backHaulTSP=instance.createTSPFromNodes(instance.nodesList,instance.indexesBackHaulTSP);
+        instance.lineHaulTSP=instance.createTSPFromNodes(instance.nodesList,instance.indexesLineHaulTSP);
+    }
 }
