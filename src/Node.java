@@ -17,4 +17,12 @@ public class Node {
         this.index = index;
     }
 
+    public void take(Node node){
+        node.taken = true;
+    }
+
+    public void release(Node node){
+        node.taken = false;
+    }
+
 }
