@@ -7,6 +7,7 @@ public class Instance {
 
     int nodeCount;
     int routeCount;
+    int maxWeight;
     ArrayList<Node> nodesList = new ArrayList<>();
     ArrayList<Node> completeTSP=new ArrayList<>();
     ArrayList<Node> backHaulTSP= new ArrayList<>();

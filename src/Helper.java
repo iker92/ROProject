@@ -1,7 +1,9 @@
+import Utils.MaxWeightException;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
 
 /**
  * Created by loriz on 4/13/17.
@@ -61,6 +63,7 @@ public class Helper {
                             Coordinates coordinates =new Coordinates(Integer.valueOf(splitted[0]),Integer.valueOf(splitted[1]));
                             Node node = new Node(coordinates,Values.nodeType.WAREHOUSE ,Integer.valueOf(splitted[3]),false,i-7);
                             instance.nodesList.add(node);
+                            instance.maxWeight = Integer.valueOf(splitted[3]);
                         }
                         else {
                             Coordinates coordinates = new Coordinates(Integer.valueOf(splitted[0]), Integer.valueOf(splitted[1]));
@@ -113,4 +116,50 @@ public class Helper {
         instance.backHaulTSP=instance.createTSPFromNodes(instance.nodesList,instance.indexesBackHaulTSP);
         instance.lineHaulTSP=instance.createTSPFromNodes(instance.nodesList,instance.indexesLineHaulTSP);
     }
+
+
+    public ArrayList<Route> createRoutesFromInstance(Instance instance1) {
+
+        ArrayList<Route> routes = new ArrayList<>();
+
+        Route route = new Route(instance1.maxWeight);
+
+        while (instance1.lineHaulTSP.size()-1 >= 0) {
+
+
+            try {
+                route.addNode(instance1.lineHaulTSP.get(0));
+                instance1.lineHaulTSP.remove(0);
+            } catch (MaxWeightException e) {
+                routes.add(route);
+                route = new Route(instance1.maxWeight);
+            }
+
+        }
+
+        if (route.nodeList.size() != 0) {
+            routes.add(route);
+        }
+
+        int oldRouteSize = routes.size();
+        while (routes.size() < instance1.routeCount) {
+
+            route = new Route(instance1.maxWeight);
+
+            for (int i=0; i < oldRouteSize; i++) {
+
+                if (routes.get(i).nodeList.size() > 1) {
+                    try {
+                        Node node = routes.get(i).getNode(0);
+                        route.addNode(node);
+                        routes.get(i).removeNode(node);
+                        routes.add(route);
+                        break;
+                    } catch (MaxWeightException e) {}
+                }
+            }
+        }
+        return routes;
+    }
+
 }
