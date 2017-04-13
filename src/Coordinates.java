@@ -4,8 +4,8 @@
 
 public class Coordinates {
 
-    public int x;
-    public int y;
+    public double x;
+    public double y;
 
     public Coordinates(int x, int y){
         this.x=x;
