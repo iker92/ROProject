@@ -12,7 +12,7 @@ public class Node {
     public Node(Coordinates coordinates, Values.nodeType nodeType, int weight, boolean taken, int index){
         this.coordinates = coordinates;
         this.nodeType = nodeType;
-        this.weight = weight;
+        this.weight = nodeType == Values.nodeType.BACKHAUL ? -weight :  weight;
         this.taken = taken;
         this.index = index;
     }

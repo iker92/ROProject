@@ -105,8 +105,6 @@ public class Helper {
             // ex.printStackTrace();
         }
 
-
-
         return instance;
 
     }
@@ -118,18 +116,31 @@ public class Helper {
     }
 
 
+    /**
+     * createRoutesFromInstance takes an instance and generates an arraylist of routes. The routes are popolated
+     *                          by filling up each route with as many nodes taken from the linehaulTSP as possible
+     *                          (until the weight limit is reached). Then it ensures that all routes are popolated
+     *                          and the backhaul are inserted.
+     * @param instance1 input instance
+     * @return the corresponding ArrayList<Route>
+     */
     public ArrayList<Route> createRoutesFromInstance(Instance instance1) {
 
         ArrayList<Route> routes = new ArrayList<>();
 
         Route route = new Route(instance1.maxWeight);
 
-        while (instance1.lineHaulTSP.size()-1 >= 0) {
+        ArrayList<Node> lineHaulTSP = instance1.lineHaulTSP;
 
+        // TODO: this is not tested for cases where the linehauls form a number of routes bigger than the limit
+
+        /////////////////////// ROUTES GENERATION (LINEHAUL ONLY, ROUTES NUMBER NOT VERIFIED) ////////////////////////////
+
+        while (lineHaulTSP.size()-1 >= 0) {
 
             try {
-                route.addNode(instance1.lineHaulTSP.get(0));
-                instance1.lineHaulTSP.remove(0);
+                route.addNode(lineHaulTSP.get(0));
+                lineHaulTSP.remove(0);
             } catch (MaxWeightException e) {
                 routes.add(route);
                 route = new Route(instance1.maxWeight);
@@ -140,6 +151,11 @@ public class Helper {
         if (route.nodeList.size() != 0) {
             routes.add(route);
         }
+
+        //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+        ////////////////////////////////// ROUTES NUMBER VERIFICATION AND REARRANGEMENT //////////////////////////////////
 
         int oldRouteSize = routes.size();
         while (routes.size() < instance1.routeCount) {
@@ -159,6 +175,27 @@ public class Helper {
                 }
             }
         }
+
+        //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+        ///////////////////////////////////////// ADDING BACKHAULS TO ROUTES /////////////////////////////////////////////
+
+        ArrayList<Node> backHaulTSP = instance1.backHaulTSP;
+
+        //TODO: this is untested for cases where you have more backhaul than routes, it SHOULD work
+        for (int i=0; i < backHaulTSP.size(); i++) {
+
+            try {
+                // this exception can never be triggered, this try/catch is useless but needed because Java likes o' piesc
+                routes.get(i % (routes.size()-1 )).addNode(backHaulTSP.get(i));
+            } catch (MaxWeightException e) {}
+
+        }
+
+        //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
         return routes;
     }
 
