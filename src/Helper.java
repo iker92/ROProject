@@ -39,27 +39,27 @@ public class Helper {
                     case 4: {
 
                         for (int j = 0; j <=instance.nodeCount; j++) {
-                            instance.completeTSP.add(Integer.valueOf(splitted[j]));
+                            instance.indexesCompleteTSP.add(Integer.valueOf(splitted[j]));
                         }
                         break;
 
                     }
                     case 5: {
                         for (int j = 0; j <splitted.length; j++) {
-                            instance.lineHaulTSP.add(Integer.valueOf(splitted[j]));
+                            instance.indexesLineHaulTSP.add(Integer.valueOf(splitted[j]));
                         }
                         break;
                     }
                     case 6: {
                         for (int j = 0; j <splitted.length; j++) {
-                            instance.backHaulTSP.add(Integer.valueOf(splitted[j]));
+                            instance.indexesBackHaulTSP.add(Integer.valueOf(splitted[j]));
                         }
                         break;
                     }
                     default:
                         if (i == 7) {
                             Coordinates coordinates =new Coordinates(Integer.valueOf(splitted[0]),Integer.valueOf(splitted[1]));
-                            Node node = new Node(coordinates,Values.nodeType.WAREHOUSE ,Integer.valueOf(splitted[3]),false);
+                            Node node = new Node(coordinates,Values.nodeType.WAREHOUSE ,Integer.valueOf(splitted[3]),false,i-7);
                             instance.nodesList.add(node);
                         }
                         else {
@@ -71,10 +71,10 @@ public class Helper {
                                 nodeType = Values.nodeType.LINEHAUL;
                             }
                             if (nodeType == Values.nodeType.BACKHAUL) {
-                                Node node = new Node(coordinates, nodeType, Integer.valueOf(splitted[3]), false);
+                                Node node = new Node(coordinates, nodeType, Integer.valueOf(splitted[3]), false,i-7);
                                 instance.nodesList.add(node);
                             } else {
-                                Node node = new Node(coordinates, nodeType, Integer.valueOf(splitted[2]), false);
+                                Node node = new Node(coordinates, nodeType, Integer.valueOf(splitted[2]), false,i-7);
                                 instance.nodesList.add(node);
                             }
                         }
