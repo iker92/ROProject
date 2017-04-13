@@ -20,6 +20,8 @@ public class Main {
         }
 
 
+        ArrayList<Route> routes = helper.createRoutesFromInstance(instance1);
+
     }
 
 }
