@@ -1,5 +1,7 @@
 import java.util.ArrayList;
 
+import static java.lang.Math.abs;
+
 /**
  * Created by andream16 on 13.04.17.
  */
@@ -15,9 +17,9 @@ public class Distances {
     public double [][] calculateDistances (ArrayList<Node> nodes){
         int nodesSize = nodes.size();
         distances = new double[nodesSize][nodesSize];
-        for( int i=0; i<=nodesSize; i++){
-            for( int j=0; j<=nodesSize; j++){
-                distances[i][j] = Math.sqrt((nodes.get(i).coordinates.x - nodes.get(j).coordinates.x) + (nodes.get(i).coordinates.y - nodes.get(j).coordinates.y));
+        for( int i=0; i<nodesSize; i++){
+            for( int j=0; j<nodesSize; j++){
+                distances[i][j] = Math.sqrt(abs((nodes.get(i).coordinates.x - nodes.get(j).coordinates.x)) + abs(nodes.get(i).coordinates.y - nodes.get(j).coordinates.y));
             }
         }
 

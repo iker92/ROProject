@@ -1,3 +1,5 @@
+import Utils.MaxWeightException;
+
 import java.util.ArrayList;
 
 /**
@@ -21,6 +23,21 @@ public class Main {
 
 
         ArrayList<Route> routes = helper.createRoutesFromInstance(instance1);
+        ArrayList<Route> new_routes=new ArrayList<>();
+
+        Distances distances=new Distances(instance1.nodesList);
+
+        double [] [] dist=distances.calculateDistances(instance1.nodesList);
+
+        Relocate relocate=new Relocate(distances,routes);
+        try {
+         new_routes= relocate.relocate(routes.get(0).nodeList.get(0),routes.get(1));
+        } catch (MaxWeightException e) {
+            e.printStackTrace();
+        }
+
+        boolean bo=false;
+
 
     }
 
