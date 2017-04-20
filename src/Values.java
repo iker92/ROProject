@@ -7,6 +7,4 @@ public class Values {
         BACKHAUL, LINEHAUL, WAREHOUSE
     }
 
-
-
 }

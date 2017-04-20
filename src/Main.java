@@ -11,23 +11,20 @@ public class Main {
 
         Helper helper = new Helper();
 
-        // The name of the file to open.
         String fileName = "Instances/A1.txt";
-
         Instance instance1 = helper.fileToInstance(fileName);
+
+        Distances distances=Distances.getInstance(instance1.nodesList);
+
         helper.initTSP(instance1);
 
         for (Node node: instance1.completeTSP){
             System.out.println(node.index);
         }
 
-
         ArrayList<Route> routes = helper.createRoutesFromInstance(instance1);
         ArrayList<Route> new_routes=new ArrayList<>();
-
-        Distances distances=new Distances(instance1.nodesList);
-
-        double [] [] dist=distances.calculateDistances(instance1.nodesList);
+        
 
         Relocate relocate=new Relocate(distances,routes);
         try {

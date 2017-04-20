@@ -12,10 +12,18 @@ public class Route {
 
     public int weight = 0;
     public ArrayList<Node> nodeList = new ArrayList<>();
+    private Distances distances = null;
+    private double actualDistance = 0.0;
 
 
     public Route(int maxWeight) {
         MAX_WEIGHT = maxWeight;
+
+        distances = Distances.getInstance();
+        if (distances == null) {
+            System.err.println("!!! Error - Distance Matrix wasn't initialized !!!");
+        }
+
     }
 
     @Nullable
@@ -35,6 +43,7 @@ public class Route {
             nodeList.add(position, node);
             weight += node.weight;
         }
+        updateRouteDistance();
     }
 
     public void addNode(Node node) throws MaxWeightException{
@@ -44,6 +53,7 @@ public class Route {
             nodeList.add(node);
             weight += node.weight;
         }
+        updateRouteDistance();
     }
 
 
@@ -55,10 +65,9 @@ public class Route {
         } else {
             System.err.println("!!! Error - Node to remove is out of range !!!");
         }
-
-
-
+        updateRouteDistance();
     }
+
 
     public void removeNode(Node node) {
         if (nodeList.contains(node)) {
@@ -67,9 +76,21 @@ public class Route {
         } else {
             System.err.println("!!! Error - Node to remove wasn't found in this route !!!");
         }
-
-
+        updateRouteDistance();
     }
 
+    private void updateRouteDistance() {
+        if (nodeList.size() > 1 && distances != null) {
+
+            for (int i = 0; i < nodeList.size(); i++) {
+                actualDistance += distances.getDistance(nodeList.get(i), nodeList.get((i + 1) % nodeList.size()));
+            }
+
+        } else actualDistance = 0.0;
+    }
+
+    public double getActualDistance() {
+        return actualDistance;
+    }
 }
 

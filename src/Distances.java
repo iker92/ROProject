@@ -10,11 +10,29 @@ public class Distances {
     public ArrayList<Node> nodes;
     private double[][] distances;
 
-    public Distances(ArrayList<Node> nodes){
-        this.nodes = nodes;
+    private static Distances instance = null;
+
+    public static Distances getInstance(ArrayList<Node> nodes) {
+        if(instance == null) {
+            instance = new Distances(nodes);
+        }
+        return instance;
     }
 
-    public double [][] calculateDistances (ArrayList<Node> nodes){
+    public static Distances getInstance() {
+        if(instance == null) {
+           return null;
+        }
+        return instance;
+    }
+
+
+    private Distances(ArrayList<Node> nodes){
+        this.nodes = nodes;
+        calculateDistances();
+    }
+
+    private void calculateDistances(){
         int nodesSize = nodes.size();
         distances = new double[nodesSize][nodesSize];
         for( int i=0; i<nodesSize; i++){
@@ -22,9 +40,6 @@ public class Distances {
                 distances[i][j] = Math.sqrt(abs((nodes.get(i).coordinates.x - nodes.get(j).coordinates.x)) + abs(nodes.get(i).coordinates.y - nodes.get(j).coordinates.y));
             }
         }
-
-        return distances;
-
     }
 
     public double getDistance (Node node_1, Node node_2){
