@@ -1,4 +1,5 @@
 import utils.MaxWeightException;
+import utils.NodeNotFoundException;
 
 import java.util.ArrayList;
 
@@ -23,17 +24,20 @@ public class Main {
         }
 
         ArrayList<Route> routes = helper.createRoutesFromInstance(instance1);
-        ArrayList<Route> new_routes=new ArrayList<>();
+        ArrayList<Route> relocatedRoutes = new ArrayList<>();
 
 
-        Relocate relocate=new Relocate(distances,routes);
-        try {
-         new_routes= relocate.relocate(routes.get(0).nodeList.get(0),routes.get(1));
+        Relocate relocate = new Relocate(distances,routes, helper);
+        try
+        {
+         relocatedRoutes = relocate.findBestRelocate(instance1.completeTSP);
         } catch (MaxWeightException e) {
+            e.printStackTrace();
+        } catch (NodeNotFoundException e) {
             e.printStackTrace();
         }
 
-        boolean bo=false;
+        boolean bo = false;
 
 
     }

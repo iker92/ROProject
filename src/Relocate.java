@@ -1,4 +1,5 @@
-import Utils.MaxWeightException;
+import utils.MaxWeightException;
+import utils.NodeNotFoundException;
 
 import java.util.ArrayList;
 
@@ -9,93 +10,102 @@ public class Relocate {
 
     DistanceMatrix distances;
     ArrayList<Route> routes;
+    public double old_cost = 0;
+    public double actual_cost = 0;
+    Node temp;
+    Helper helper;
 
-    public Relocate(DistanceMatrix distances, ArrayList<Route> routes){
+    public Relocate(DistanceMatrix distances, ArrayList<Route> routes, Helper helper){
         this.distances = distances;
-        this.routes    = routes;
+        this.routes = routes;
+        this.helper = helper;
     }
 
-    public ArrayList<Route> relocate (Node node, Route route) throws MaxWeightException {
-        BestRelocateResult best_move = findBestRelocate(node, route);
-        int pos_1_node = 0, pos_1_route;
-        for(Route route1:routes) {
+    public ArrayList<Route> findBestRelocate(ArrayList<Node> completeTSP) throws MaxWeightException, NodeNotFoundException {
 
-            if (route1.nodeList.indexOf(node) != -1 && route != route1) {
-                pos_1_node = route1.nodeList.indexOf(node);
-                route1.removeNode(pos_1_node);
-            }
+        for (int i = 0; i < routes.size(); i++) {
+            old_cost += routes.get(i).getActualDistance();
         }
-        pos_1_route = routes.indexOf(best_move.route);
-
-        //route.addNode(pos_1,best_move.node_2);
-        //best_move.route.removeNode(pos_2) ;
-        //best_move.route.addNode(pos_2,node);
-        ArrayList<Route> new_routes = routes;
-        new_routes.remove(pos_1_route);
-        //new_routes.add();
-        new_routes.add(pos_1_route,best_move.route);
-        new_routes.get(pos_1_route).addNode(pos_1_node,best_move.node);
 
 
-        return new_routes;
-    }
+        /***
+         * external counters are useful for remove pointed node
+         *    internal counters are useful for insert external node in internal route after internal node position
+         */
 
-    public BestRelocateResult findBestRelocate(Node node, Route route){
+        for (int i = 1; i < completeTSP.size(); i++) {
 
-        BestRelocateResult best_move = null;
-        int current_node_position = route.nodeList.indexOf(node);
-        int current_route_position = routes.indexOf(route);
-        ArrayList<Node> node_list = route.nodeList;
-        int nodeList_size = node_list.size();
-        int routes_number = routes.size();
-        double distance;
-        double tmp_distance = 0.0;
+            Node currentNode = completeTSP.get(i);
+            Route currentRoute = new Route(currentNode.getRoute());
+            int routeIndex = helper.getRouteIndexByNode(routes, currentNode);
 
-        //Foreach node in current route
-        for (int i = current_node_position+1; i< nodeList_size; i++){
-            distance = distances.getDistance(node, node_list.get(i));
-            if( i == current_node_position+1 || distance < tmp_distance){
-                if(node.weight + route.weight <= route.MAX_WEIGHT){
-                    if(node.nodeType == node_list.get(i).nodeType){
-                        best_move = new BestRelocateResult(node, route);
-                        tmp_distance = distance;
-                    }
-                }
-            }
-        }
-        int current_weight=0;
-        //Foreach route in routes
-        for(int current_route = current_route_position+1; current_route<routes_number; current_route++ ){
-            ArrayList<Node> current_nodeList = route.nodeList;
-            current_weight=routes.get(current_route).weight;
-            //For each node in it
-            for(int j=0; j< current_nodeList.size(); j++){
-                distance = distances.getDistance(node, current_nodeList.get(j));
-                if( distance < tmp_distance){
-                    if(node.weight + current_weight <= route.MAX_WEIGHT){
-                        if(node.nodeType == current_nodeList.get(j).nodeType || route.nodeList.size() - 1 == current_node_position){
-                            best_move = new BestRelocateResult(node, routes.get(current_route));
-                            tmp_distance = distance;
+            //Control every route
+            for (int currentInternalRoute = 0; currentInternalRoute < routes.size(); currentInternalRoute++)
+            {
+                //Control every node
+                for (int currentInternalNode = 0; currentInternalNode < routes.get(currentInternalRoute).nodeList.size(); currentInternalNode++)
+                {
+                    //control node type
+                    if(currentNode.nodeType == routes.get(currentInternalRoute).nodeList.get(currentInternalNode).nodeType)
+                    {
+                        //control if current_node is different from the passed node
+                        if (currentNode != routes.get(currentInternalRoute).getNode(currentInternalNode))
+                        {
+                            int index = currentNode.getRoute().nodeList.indexOf(currentNode);
 
+                            //if don't exceed maximum weight
+                            if (currentNode.getRoute() != routes.get(currentInternalRoute))
+                            {
+                                if (routes.get(currentInternalRoute).canAdd(currentNode))
+                                {
+                                    currentNode.getRoute().removeNode(currentNode);
+                                    routes.get(currentInternalRoute).addNode(currentInternalNode, currentNode);
+
+                                    actual_cost = 0;
+
+                                    for (int j = 0; j < routes.size(); j++) {
+                                        actual_cost += routes.get(j).getActualDistance();
+                                    }
+
+                                    //if the total cost is greater than the old, undo the swap
+                                    if (actual_cost >= old_cost)
+                                    {
+                                        routes.get(currentInternalRoute).removeNode(currentNode);
+                                        if (index == currentRoute.nodeList.size())
+                                        {
+                                            routes.get(routeIndex).addNode(currentNode);
+                                        } else {
+                                            routes.get(routeIndex).addNode(index, currentNode);
+                                        }
+                                    }
+                                }
+                            } else {
+                                currentNode.getRoute().removeNode(currentNode);
+                                routes.get(currentInternalRoute).addNode(currentInternalNode, currentNode);
+
+                                actual_cost = 0;
+                                for (int j = 0; j < routes.size(); j++) {
+                                    actual_cost += routes.get(j).getActualDistance();
+                                }
+
+                                //if the total cost is greater than the old, undo the swap
+                                if (actual_cost >= old_cost)
+                                {
+                                    routes.get(currentInternalRoute).removeNode(currentNode);
+                                    if (index == currentRoute.nodeList.size()) {
+                                        routes.get(routeIndex).addNode(currentNode);
+                                    } else {
+                                        routes.get(routeIndex).addNode(index, currentNode);
+                                    }
+                                }
+                            }
                         }
                     }
                 }
             }
         }
 
-        return best_move;
-
-    }
-
-}
-
-class BestRelocateResult {
-    public Node node;
-    public Route route;
-
-    public BestRelocateResult(Node node, Route route){
-
-        this.node = node;
-        this.route = route;
+        return routes;
     }
 }
+

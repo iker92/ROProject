@@ -1,5 +1,7 @@
 import core.Coordinates;
 import utils.MaxWeightException;
+import utils.NodeNotFoundException;
+
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -198,6 +200,15 @@ public class Helper {
 
 
         return routes;
+    }
+
+    public int getRouteIndexByNode(ArrayList<Route> routes, Node node) {
+        int index = -1;
+        for (Route route : routes) {
+            index = (route.nodeList.contains(node) ? routes.indexOf(route) : -1);
+            if(index != -1) return index;
+        }
+        return index;
     }
 
 }

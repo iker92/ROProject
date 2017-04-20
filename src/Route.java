@@ -25,7 +25,15 @@ public class Route {
         if (distances == null) {
             System.err.println("!!! Error - Distance Matrix wasn't initialized !!!");
         }
+    }
 
+    public Route(Route route){
+        this.nodeList = route.nodeList;
+        this.actualDistance = route.actualDistance;
+        this.distances = route.distances;
+        this.weightBackhaul = route.weightBackhaul;
+        this.weightLinehaul = route.weightLinehaul;
+        this.MAX_WEIGHT = route.MAX_WEIGHT;
     }
 
     @Nullable
