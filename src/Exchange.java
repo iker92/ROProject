@@ -6,10 +6,10 @@
 ////Input(DistanceMatrix m, Arraylist<Route> a); Output: Arraylist<Route>;
 //public class Exchange {
 //
-//    Distances distances;
+//    DistanceMatrix distances;
 //    ArrayList<Route> routes;
 //
-//    public Exchange(Distances distances, ArrayList<Route> routes){
+//    public Exchange(DistanceMatrix distances, ArrayList<Route> routes){
 //       this.distances = distances;
 //       this.routes    = routes;
 //    }
@@ -76,11 +76,11 @@
 //}
 //
 //class BestExchangeResult {
-//    public Node node_1, node_2;
+//    public Node node, node_2;
 //    public Route route;
 //
-//    public BestExchangeResult(Node node_1, Node node_2, Route route){
-//      this.node_1 = node_1;
+//    public BestExchangeResult(Node node, Node node_2, Route route){
+//      this.node = node;
 //      this.node_2 = node_2;
 //      this.route = route;
 //    }

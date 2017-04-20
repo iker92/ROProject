@@ -12,14 +12,14 @@ public class Route {
 
     public int weight = 0;
     public ArrayList<Node> nodeList = new ArrayList<>();
-    private Distances distances = null;
+    private DistanceMatrix distances = null;
     private double actualDistance = 0.0;
 
 
     public Route(int maxWeight) {
         MAX_WEIGHT = maxWeight;
 
-        distances = Distances.getInstance();
+        distances = DistanceMatrix.getInstance();
         if (distances == null) {
             System.err.println("!!! Error - Distance Matrix wasn't initialized !!!");
         }

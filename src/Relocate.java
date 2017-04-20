@@ -7,10 +7,10 @@ import java.util.ArrayList;
  */
 public class Relocate {
 
-    Distances distances;
+    DistanceMatrix distances;
     ArrayList<Route> routes;
 
-    public Relocate(Distances distances, ArrayList<Route> routes){
+    public Relocate(DistanceMatrix distances, ArrayList<Route> routes){
         this.distances = distances;
         this.routes    = routes;
     }
@@ -34,7 +34,7 @@ public class Relocate {
         new_routes.remove(pos_1_route);
         //new_routes.add();
         new_routes.add(pos_1_route,best_move.route);
-        new_routes.get(pos_1_route).addNode(pos_1_node,best_move.node_1);
+        new_routes.get(pos_1_route).addNode(pos_1_node,best_move.node);
 
 
         return new_routes;
@@ -90,12 +90,12 @@ public class Relocate {
 }
 
 class BestRelocateResult {
-    public Node node_1;
+    public Node node;
     public Route route;
 
-    public BestRelocateResult(Node node_1, Route route){
+    public BestRelocateResult(Node node, Route route){
 
-        this.node_1 = node_1;
+        this.node = node;
         this.route = route;
     }
 }

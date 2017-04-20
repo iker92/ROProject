@@ -5,21 +5,21 @@ import static java.lang.Math.abs;
 /**
  * Created by andream16 on 13.04.17.
  */
-public class Distances {
+public class DistanceMatrix {
 
     public ArrayList<Node> nodes;
     private double[][] distances;
 
-    private static Distances instance = null;
+    private static DistanceMatrix instance = null;
 
-    public static Distances getInstance(ArrayList<Node> nodes) {
+    public static DistanceMatrix getInstance(ArrayList<Node> nodes) {
         if(instance == null) {
-            instance = new Distances(nodes);
+            instance = new DistanceMatrix(nodes);
         }
         return instance;
     }
 
-    public static Distances getInstance() {
+    public static DistanceMatrix getInstance() {
         if(instance == null) {
            return null;
         }
@@ -27,7 +27,7 @@ public class Distances {
     }
 
 
-    private Distances(ArrayList<Node> nodes){
+    private DistanceMatrix(ArrayList<Node> nodes){
         this.nodes = nodes;
         calculateDistances();
     }

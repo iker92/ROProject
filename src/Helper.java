@@ -132,9 +132,9 @@ public class Helper {
 
         ArrayList<Node> lineHaulTSP = instance1.lineHaulTSP;
 
-        // TODO: this is not tested for cases where the linehauls form a number of routes bigger than the limit
-
         /////////////////////// ROUTES GENERATION (LINEHAUL ONLY, ROUTES NUMBER NOT VERIFIED) ////////////////////////////
+
+        // TODO: this is not tested for cases where the linehauls form a number of routes bigger than the limit
 
         while (lineHaulTSP.size()-1 >= 0) {
 

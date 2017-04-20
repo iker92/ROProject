@@ -14,7 +14,7 @@ public class Main {
         String fileName = "Instances/A1.txt";
         Instance instance1 = helper.fileToInstance(fileName);
 
-        Distances distances=Distances.getInstance(instance1.nodesList);
+        DistanceMatrix distances= DistanceMatrix.getInstance(instance1.nodesList);
 
         helper.initTSP(instance1);
 
@@ -24,7 +24,7 @@ public class Main {
 
         ArrayList<Route> routes = helper.createRoutesFromInstance(instance1);
         ArrayList<Route> new_routes=new ArrayList<>();
-        
+
 
         Relocate relocate=new Relocate(distances,routes);
         try {
