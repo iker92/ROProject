@@ -129,5 +129,9 @@ public class Route {
             throw new NodeNotFoundException("Index exceeds the number of nodes!");
         }
     }
+
+    public boolean canAdd(Node node) {
+        return ((node.nodeType == Values.nodeType.LINEHAUL ? node.weight + weightLinehaul : node.weight + weightBackhaul) <= MAX_WEIGHT);
+    }
 }
 
