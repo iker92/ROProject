@@ -12,7 +12,7 @@ public class DistanceMatrix {
 
     private static DistanceMatrix instance = null;
 
-    public static DistanceMatrix getInstance(ArrayList<Node> nodes) {
+    public static DistanceMatrix initialize(ArrayList<Node> nodes) {
         if(instance == null) {
             instance = new DistanceMatrix(nodes);
         }

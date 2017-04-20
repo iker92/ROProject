@@ -1,4 +1,4 @@
-import Utils.MaxWeightException;
+import utils.MaxWeightException;
 
 import java.util.ArrayList;
 
@@ -14,7 +14,7 @@ public class Main {
         String fileName = "Instances/A1.txt";
         Instance instance1 = helper.fileToInstance(fileName);
 
-        DistanceMatrix distances= DistanceMatrix.getInstance(instance1.nodesList);
+        DistanceMatrix distances= DistanceMatrix.initialize(instance1.nodesList);
 
         helper.initTSP(instance1);
 
