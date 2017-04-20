@@ -3,8 +3,9 @@
  */
 public class Node {
 
-    Coordinates coordinates;
     Values.nodeType nodeType;
+    Coordinates coordinates;
+    private Route route = null;
     int weight;
     boolean taken;
     int index = 0;
@@ -23,6 +24,14 @@ public class Node {
 
     public void release(Node node){
         node.taken = false;
+    }
+
+    public void setRoute(Route route) {
+        this.route = route;
+    }
+
+    public Route getRoute() {
+        return route;
     }
 
 }

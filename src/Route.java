@@ -43,6 +43,7 @@ public class Route {
             nodeList.add(position, node);
             weight += node.weight;
         }
+        node.setRoute(this);
         updateRouteDistance();
     }
 
@@ -53,6 +54,7 @@ public class Route {
             nodeList.add(node);
             weight += node.weight;
         }
+        node.setRoute(this);
         updateRouteDistance();
     }
 
@@ -61,6 +63,7 @@ public class Route {
 
         if (nodeList.size() > position) {
             weight -= nodeList.get(position).weight;
+            nodeList.get(position).setRoute(null);
             nodeList.remove(position);
         } else {
             System.err.println("!!! Error - Node to remove is out of range !!!");
@@ -76,6 +79,7 @@ public class Route {
         } else {
             System.err.println("!!! Error - Node to remove wasn't found in this route !!!");
         }
+        node.setRoute(null);
         updateRouteDistance();
     }
 
