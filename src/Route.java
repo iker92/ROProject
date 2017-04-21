@@ -16,6 +16,7 @@ public class Route {
     public ArrayList<Node> nodeList = new ArrayList<>();
     private DistanceMatrix distances = null;
     private double actualDistance = 0.0;
+    Route newRoute = null;
 
 
     public Route(int maxWeight) {
@@ -27,13 +28,16 @@ public class Route {
         }
     }
 
-    public Route(Route route){
-        this.nodeList = route.nodeList;
-        this.actualDistance = route.actualDistance;
-        this.distances = route.distances;
-        this.weightBackhaul = route.weightBackhaul;
-        this.weightLinehaul = route.weightLinehaul;
-        this.MAX_WEIGHT = route.MAX_WEIGHT;
+    public Route getCopyOfRoute(Route route){
+        newRoute = new Route(MAX_WEIGHT);
+        newRoute.nodeList = new ArrayList<>(route.nodeList);
+        newRoute.actualDistance = route.actualDistance;
+        newRoute.distances = route.distances;
+        newRoute.weightBackhaul = route.weightBackhaul;
+        newRoute.weightLinehaul = route.weightLinehaul;
+        newRoute.MAX_WEIGHT = route.MAX_WEIGHT;
+
+        return newRoute;
     }
 
     @Nullable
@@ -125,6 +129,8 @@ public class Route {
 
     private void updateRouteDistance() {
         if (nodeList.size() > 1 && distances != null) {
+
+            actualDistance = 0.0;
 
             for (int i = 0; i < nodeList.size(); i++) {
                 actualDistance += distances.getDistance(nodeList.get(i), nodeList.get((i + 1) % nodeList.size()));
