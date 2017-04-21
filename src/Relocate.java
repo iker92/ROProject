@@ -36,7 +36,7 @@ public class Relocate {
         for (int i = 1; i < completeTSP.size(); i++) {
 
             Node currentNode = completeTSP.get(i);
-            Route currentRoute = new Route(currentNode.getRoute());
+            Route currentRoute = currentNode.getRoute().getCopyOfRoute(currentNode.getRoute());
             int routeIndex = helper.getRouteIndexByNode(routes, currentNode);
 
             //Control every route
@@ -53,9 +53,9 @@ public class Relocate {
                         {
                             int index = currentNode.getRoute().nodeList.indexOf(currentNode);
 
-                            //if don't exceed maximum weight
                             if (currentNode.getRoute() != routes.get(currentInternalRoute))
                             {
+                                //if don't exceed maximum weight
                                 if (routes.get(currentInternalRoute).canAdd(currentNode))
                                 {
                                     currentNode.getRoute().removeNode(currentNode);
