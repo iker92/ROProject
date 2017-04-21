@@ -58,7 +58,14 @@ public class Route {
             nodeList.add(position, node);
             if (node.nodeType == Values.nodeType.LINEHAUL)  {weightLinehaul += node.weight;} else {weightBackhaul += node.weight;}
         }
-        node.setRoute(this);
+
+        if (node.nodeType != Values.nodeType.WAREHOUSE) {
+            if (node.getRoute() != null) {
+                node.getRoute().removeNode(node);
+            }
+            node.setRoute(this);
+        }
+
         updateRouteDistance();
     }
 
@@ -69,7 +76,15 @@ public class Route {
             nodeList.add(node);
             if (node.nodeType == Values.nodeType.LINEHAUL)  {weightLinehaul += node.weight;} else {weightBackhaul += node.weight;}
         }
-        node.setRoute(this);
+
+        if (node.nodeType != Values.nodeType.WAREHOUSE) {
+            if (node.getRoute() != null) {
+                node.getRoute().removeNode(node);
+            }
+            node.setRoute(this);
+        }
+
+
         updateRouteDistance();
     }
 
@@ -140,6 +155,20 @@ public class Route {
 
     public boolean canAdd(Node node) {
         return ((node.nodeType == Values.nodeType.LINEHAUL ? node.weight + weightLinehaul : node.weight + weightBackhaul) <= MAX_WEIGHT);
+    }
+
+    public boolean validate() {
+
+        boolean valid = true;
+
+        if (nodeList.get(0).nodeType != Values.nodeType.WAREHOUSE || nodeList.get(nodeList.size()-1).nodeType != Values.nodeType.WAREHOUSE) valid = false;
+
+        for (int index = 1; index < nodeList.size()-1; index++) {
+            if (nodeList.get(index).getType() == Values.nodeType.BACKHAUL && nodeList.get(index+1).getType() == Values.nodeType.LINEHAUL) valid = false;
+        }
+
+        return valid;
+
     }
 }
 
