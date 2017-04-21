@@ -40,7 +40,7 @@ public class Relocate {
                 for (int currentInternalNode = 0; currentInternalNode < routes.get(currentInternalRoute).nodeList.size(); currentInternalNode++)
                 {
                     //control node type
-                    if(currentNode.nodeType == routes.get(currentInternalRoute).nodeList.get(currentInternalNode).nodeType)
+                    if(currentNode.nodeType.equals(Values.nodeType.LINEHAUL))
                     {
                         //control if current_node is different from the passed node
                         if (currentNode != routes.get(currentInternalRoute).getNode(currentInternalNode))
@@ -54,52 +54,79 @@ public class Relocate {
                                 //if don't exceed maximum weight
                                 if (routes.get(currentInternalRoute).canAdd(currentNode))
                                 {
-                                    //remove examined node from its route
-                                    currentNode.getRoute().removeNode(currentNode);
-                                    //add the node in new route
-                                    routes.get(currentInternalRoute).addNode(currentInternalNode, currentNode);
-
-                                    //calculate new total cost
-                                    actual_cost = 0;
-
-                                    for (int j = 0; j < routes.size(); j++) {
-                                        actual_cost += routes.get(j).getActualDistance();
-                                    }
-
-                                    //if the new total cost is greater than the old, undo the swap
-                                    if (actual_cost >= old_cost)
+                                    if(routes.get(currentInternalRoute).nodeList.get(currentInternalNode).nodeType.equals(Values.nodeType.LINEHAUL))
                                     {
-                                        routes.get(currentInternalRoute).removeNode(currentNode);
-                                        if (index == currentRoute.nodeList.size())
-                                        {
-                                            routes.get(routeIndex).addNode(currentNode);
-                                        } else {
-                                            routes.get(routeIndex).addNode(index, currentNode);
-                                        }
-                                    } else {
-                                        old_cost = actual_cost;
+                                        //remove examined node from its route
+                                        currentRoute = moveNodeandCheck(currentNode, currentRoute, currentInternalNode, currentInternalRoute, index, routeIndex);
+                                        routeIndex=helper.getRouteIndexByNode(routes, currentNode);
+                                    } else{
+                                        currentRoute = moveNodeandCheck(currentNode, currentRoute, currentInternalNode, currentInternalRoute, index, routeIndex);
+                                        routeIndex=helper.getRouteIndexByNode(routes, currentNode);
+                                        currentInternalNode++;
                                     }
                                 }
                             } else {
-                                currentNode.getRoute().removeNode(currentNode);
-                                routes.get(currentInternalRoute).addNode(currentInternalNode, currentNode);
-
-                                actual_cost = 0;
-                                for (int j = 0; j < routes.size(); j++) {
-                                    actual_cost += routes.get(j).getActualDistance();
+                                if(routes.get(currentInternalRoute).nodeList.get(currentInternalNode).nodeType.equals(Values.nodeType.LINEHAUL)){
+                                    //remove examined node from its route
+                                    currentRoute = moveNodeandCheck(currentNode, currentRoute, currentInternalNode, currentInternalRoute, index, routeIndex);
+                                    routeIndex=helper.getRouteIndexByNode(routes, currentNode);
+                                } else{
+                                    currentRoute = moveNodeandCheck(currentNode, currentRoute, currentInternalNode, currentInternalRoute, index, routeIndex);
+                                    routeIndex=helper.getRouteIndexByNode(routes, currentNode);
+                                    currentInternalRoute++;
                                 }
 
-                                //if the total cost is greater than the old, undo the swap
-                                if (actual_cost >= old_cost)
-                                {
-                                    routes.get(currentInternalRoute).removeNode(currentNode);
-                                    if (index == currentRoute.nodeList.size()) {
-                                        routes.get(routeIndex).addNode(currentNode);
+                            }
+                        }
+                    } else if(currentNode.nodeType.equals(Values.nodeType.BACKHAUL)) {
+                        //control if current_node is different from the passed node
+                        if (currentNode != routes.get(currentInternalRoute).getNode(currentInternalNode))
+                        {
+
+                            //index of the current node in original position
+                            int index = currentNode.getRoute().nodeList.indexOf(currentNode);
+
+                            //if the route of examined node is different from the actual route
+                            if (currentNode.getRoute() != routes.get(currentInternalRoute)) {
+                                //if don't exceed maximum weight
+                                if (routes.get(currentInternalRoute).canAdd(currentNode)) {
+                                    if (routes.get(currentInternalRoute).nodeList.get(currentInternalNode).nodeType.equals(Values.nodeType.LINEHAUL)) {
+                                        if (currentInternalNode == routes.get(currentInternalRoute).nodeList.size() - 1) {
+
+                                            currentInternalNode = routes.get(currentInternalRoute).nodeList.size();
+                                            currentRoute = moveNodeandCheck(currentNode, currentRoute, currentInternalNode, currentInternalRoute, index, routeIndex);
+                                            routeIndex = helper.getRouteIndexByNode(routes, currentNode);
+                                        }
                                     } else {
-                                        routes.get(routeIndex).addNode(index, currentNode);
+                                        if (currentInternalNode == routes.get(currentInternalRoute).nodeList.size() - 1) {
+
+                                            currentRoute = moveNodeandCheck(currentNode, currentRoute, currentInternalNode, currentInternalRoute, index, routeIndex);
+                                            routeIndex = helper.getRouteIndexByNode(routes, currentNode);
+                                            currentInternalNode = routes.get(currentInternalRoute).nodeList.size();
+                                            currentRoute = moveNodeandCheck(currentNode, currentRoute, currentInternalNode, currentInternalRoute, index, routeIndex);
+                                            routeIndex = helper.getRouteIndexByNode(routes, currentNode);
+                                        } else {
+                                            currentRoute = moveNodeandCheck(currentNode, currentRoute, currentInternalNode, currentInternalRoute, index, routeIndex);
+                                            routeIndex = helper.getRouteIndexByNode(routes, currentNode);
+                                        }
                                     }
+                                }
+                            } else {
+                                if (routes.get(currentInternalRoute).nodeList.get(currentInternalNode).nodeType.equals(Values.nodeType.LINEHAUL)) {
+                                    if (currentInternalNode >= routes.get(currentInternalRoute).nodeList.size() - 1) {
+                                        currentInternalNode = routes.get(currentInternalRoute).nodeList.size();
+                                        currentRoute = moveNodeandCheck(currentNode, currentRoute, currentInternalNode, currentInternalRoute, index, routeIndex);
+                                        routeIndex = helper.getRouteIndexByNode(routes, currentNode);
+                                    }
+
                                 } else {
-                                    old_cost = actual_cost;
+                                    if (currentInternalNode == routes.get(currentInternalRoute).nodeList.size() - 1) {
+                                        currentRoute = moveNodeandCheck(currentNode, currentRoute, currentInternalNode, currentInternalRoute, index, routeIndex);
+                                        routeIndex = helper.getRouteIndexByNode(routes, currentNode);
+                                        currentInternalNode = routes.get(currentInternalRoute).nodeList.size();
+                                        currentRoute = moveNodeandCheck(currentNode, currentRoute, currentInternalNode, currentInternalRoute, index, routeIndex);
+                                        routeIndex = helper.getRouteIndexByNode(routes, currentNode);
+                                    }
                                 }
                             }
                         }
@@ -110,5 +137,50 @@ public class Relocate {
 
         return routes;
     }
+
+    private Route moveNodeandCheck(Node currentNode, Route currentRoute, int currentInternalNode, int currentInternalRoute,int index,int routeIndex) throws MaxWeightException {
+
+        if(currentNode.getRoute().nodeList.size() == currentInternalNode)
+        {
+            //remove examined node from its route
+            currentNode.getRoute().removeNode(currentNode);
+
+            //add the node in new route
+            routes.get(currentInternalRoute).addNode(currentNode);
+        }
+        else{
+            //remove examined node from its route
+            currentNode.getRoute().removeNode(currentNode);
+
+            //add the node in new route
+            routes.get(currentInternalRoute).addNode(currentInternalNode, currentNode);
+        }
+
+        //calculate new total cost
+        actual_cost = 0;
+
+        for (int j = 0; j < routes.size(); j++) {
+            actual_cost += routes.get(j).getActualDistance();
+        }
+
+        //if the new total cost is greater than the old, undo the swap
+        if (actual_cost >= old_cost)
+        {
+            routes.get(currentInternalRoute).removeNode(currentNode);
+            if (index >= currentRoute.nodeList.size())
+            {
+                routes.get(routeIndex).addNode(currentNode);
+            } else {
+                routes.get(routeIndex).addNode(index, currentNode);
+            }
+        } //otherwise old cost became actual cost (in order to store best result) and update the current node route
+        else {
+            old_cost = actual_cost;
+            currentRoute = currentNode.getRoute().getCopyOfRoute(currentNode.getRoute());
+        }
+
+        return currentRoute;
+    }
+
 }
 

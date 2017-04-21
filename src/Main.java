@@ -28,9 +28,8 @@ public class Main {
 
 
         Relocate relocate = new Relocate(distances,routes, helper);
-        try
-        {
-         relocatedRoutes = relocate.findBestRelocate(instance1.completeTSP);
+        try {
+            relocatedRoutes = relocate.findBestRelocate(instance1.completeTSP);
         } catch (MaxWeightException e) {
             e.printStackTrace();
         } catch (NodeNotFoundException e) {
@@ -39,7 +38,5 @@ public class Main {
 
         boolean bo = false;
 
-
     }
-
 }
