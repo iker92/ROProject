@@ -76,6 +76,8 @@ public class Relocate {
                                         } else {
                                             routes.get(routeIndex).addNode(index, currentNode);
                                         }
+                                    } else {
+                                        old_cost = actual_cost;
                                     }
                                 }
                             } else {
@@ -96,6 +98,8 @@ public class Relocate {
                                     } else {
                                         routes.get(routeIndex).addNode(index, currentNode);
                                     }
+                                } else {
+                                    old_cost = actual_cost;
                                 }
                             }
                         }
