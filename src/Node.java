@@ -9,7 +9,7 @@ public class Node {
     Coordinates coordinates;
     private Route route = null;
     int weight;
-    boolean taken;
+    boolean taken = false;
     int index = 0;
 
     public Node(Coordinates coordinates, Values.nodeType nodeType, int weight, boolean taken, int index){
@@ -20,12 +20,12 @@ public class Node {
         this.index = index;
     }
 
-    public void take(Node node){
-        node.taken = true;
+    public void take(){
+        this.taken = true;
     }
 
-    public void release(Node node){
-        node.taken = false;
+    public void release(){
+        this.taken = false;
     }
 
     public void setRoute(Route route) {

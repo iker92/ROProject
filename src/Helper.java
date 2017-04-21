@@ -1,12 +1,13 @@
 import core.Coordinates;
 import utils.MaxWeightException;
-import utils.NodeNotFoundException;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Random;
 
 /**
  * Created by loriz on 4/13/17.
@@ -64,7 +65,7 @@ public class Helper {
                     default:
                         if (i == 7) {
                             Coordinates coordinates =new Coordinates(Integer.valueOf(splitted[0]),Integer.valueOf(splitted[1]));
-                            Node node = new Node(coordinates,Values.nodeType.WAREHOUSE ,Integer.valueOf(splitted[3]),false,i-7);
+                            Node node = new Node(coordinates,Values.nodeType.WAREHOUSE ,0,false,i-7);
                             instance.nodesList.add(node);
                             instance.maxWeight = Integer.valueOf(splitted[3]);
                         }
@@ -124,82 +125,134 @@ public class Helper {
      *                          by filling up each route with as many nodes taken from the linehaulTSP as possible
      *                          (until the weight limit is reached). Then it ensures that all routes are popolated
      *                          and the backhaul are inserted.
-     * @param instance1 input instance
+     * @param instance input instance
      * @return the corresponding ArrayList<Route>
      */
-    public ArrayList<Route> createRoutesFromInstance(Instance instance1) {
+    public ArrayList<Route> createRoutesFromInstance(Instance instance)  {
+
+        System.out.println("Creating routes from an instance...\n");
+
 
         ArrayList<Route> routes = new ArrayList<>();
 
-        Route route = new Route(instance1.maxWeight);
+        Route route = new Route(instance.maxWeight);
 
-        ArrayList<Node> lineHaulTSP = instance1.lineHaulTSP;
+        ArrayList<Node> tsp = instance.completeTSP;
 
-        /////////////////////// ROUTES GENERATION (LINEHAUL ONLY, ROUTES NUMBER NOT VERIFIED) ////////////////////////////
+        Node warehouse = tsp.get(0);
+        tsp.remove(0);
 
-        // TODO: this is not tested for cases where the linehauls form a number of routes bigger than the limit
+        int tspSize = tsp.size();
 
-        while (lineHaulTSP.size()-1 >= 0) {
-
-            try {
-                route.addNode(lineHaulTSP.get(0));
-                lineHaulTSP.remove(0);
-            } catch (MaxWeightException e) {
-                routes.add(route);
-                route = new Route(instance1.maxWeight);
-            }
-
-        }
-
-        if (route.nodeList.size() != 0) {
-            routes.add(route);
-        }
-
-        //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        int routeSize = tspSize/instance.routeCount;
 
 
-        ////////////////////////////////// ROUTES NUMBER VERIFICATION AND REARRANGEMENT //////////////////////////////////
+        while (tsp.size() - 1 >= 0) {
 
-        int oldRouteSize = routes.size();
-        while (routes.size() < instance1.routeCount) {
+            if (route.nodeList.size() < routeSize) {
 
-            route = new Route(instance1.maxWeight);
-
-            for (int i=0; i < oldRouteSize; i++) {
-
-                if (routes.get(i).nodeList.size() > 1) {
+                try {
+                    route.addNode(tsp.get(0));
+                    tsp.remove(0);
+                } catch (MaxWeightException e) {
                     try {
-                        Node node = routes.get(i).getNode(0);
-                        route.addNode(node);
-                        routes.get(i).removeNode(node);
+                        route = routeBuilder(route, warehouse);
                         routes.add(route);
-                        break;
-                    } catch (MaxWeightException e) {}
+                    } catch (MaxWeightException e1) {}
+                    route = new Route(instance.maxWeight);
                 }
+
+            } else {
+
+                try {
+                    route = routeBuilder(route, warehouse);
+                    routes.add(route);
+                } catch (MaxWeightException e) {}
+                route = new Route(instance.maxWeight);
+
+            }
+
+        }
+
+        ///////////////////////////////////// SCRAPPED NODES MANAGEMENT //////////////////////////////////////////////
+
+        Route scrapped = route;
+
+        if (scrapped.nodeList.size() != 0) {
+            System.out.println("Now starting the management for the nodes that wouldn't fit the nodes on the first pass... \n");
+            System.out.println("//////////////////////////////////////////////////////////////////////////////////////////////////////\n");
+
+        }
+
+        while (scrapped.nodeList.size() != 0) {
+
+            try {
+                relocateScrapped(scrapped, routes);
+                System.out.println("Relocation of misplaced nodes successful! \n");
+
+            } catch (Exception e) {
+
+                System.out.println("!!! Couldn't relocate all the scrapped nodes with actual setup... !!!");
+
+                int lightestRouteIndex = getLightestRoute(routes, Values.nodeType.LINEHAUL);
+
+                System.out.println("Making space in the lightest route (index = " + lightestRouteIndex + ") and retrying... \n");
+
+                try {
+                    relocateScrapped(routes.get(lightestRouteIndex), routes);
+                } catch (Exception e1) {}
+
+
             }
         }
 
-        //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        System.out.println("//////////////////////////////////////////////////////////////////////////////////////////////////////");
+
+        System.out.println("\nRoutes ready! Now validating... ");
 
 
-        ///////////////////////////////////////// ADDING BACKHAULS TO ROUTES /////////////////////////////////////////////
+        boolean validationFailed = false;
 
-        ArrayList<Node> backHaulTSP = instance1.backHaulTSP;
-
-        //TODO: this is untested for cases where you have more backhaul than routes, it SHOULD work
-        for (int i=0; i < backHaulTSP.size(); i++) {
-
-            try {
-                // this exception can never be triggered, this try/catch is useless but needed because Java likes o' piesc
-                routes.get(i % (routes.size()-1 )).addNode(backHaulTSP.get(i));
-            } catch (MaxWeightException e) {}
-
+        for (Route r : routes) {
+            if ( r.validate() == false ) {
+                validationFailed = true;
+                System.out.println("Route " + routes.indexOf(r) + " is invalid");
+            }
         }
 
-        //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        if (validationFailed) {
+            System.out.println("\n!!! Validation terminated with errors! Check them up here! !!!");
+        } else {
+            System.out.println("\nValidation terminated without errors!");
+        }
 
 
         return routes;
+    }
+
+    private Route routeBuilder(Route route, Node warehouse) throws MaxWeightException {
+
+        long seed = System.nanoTime();
+        Collections.shuffle(route.nodeList, new Random(seed));
+
+        for (int nodeIndex = 0; nodeIndex < route.nodeList.size(); nodeIndex++) {
+            if (route.getNode(nodeIndex).getType() == Values.nodeType.BACKHAUL && route.getNode(nodeIndex).taken == false) {
+
+                //  Node node = route.getNode(nodeIndex);
+                //   route.removeNode(nodeIndex);
+                route.getNode(nodeIndex).take();
+                route.addNode(route.getNode(nodeIndex));
+
+                nodeIndex--;
+            }
+        }
+
+        for (Node n : route.nodeList) n.release();
+
+        route.addNode(0, warehouse);
+        route.addNode(warehouse);
+
+        return route;
     }
 
     public int getRouteIndexByNode(ArrayList<Route> routes, Node node) {
@@ -209,6 +262,72 @@ public class Helper {
             if(index != -1) return index;
         }
         return index;
+    }
+
+    public int getLightestRoute(ArrayList<Route> routes, Values.nodeType type) {
+
+        int oldWeight = -1;
+        Route chosenRoute = null;
+
+        for (Route r : routes) {
+
+            int actualWeight = (type == Values.nodeType.LINEHAUL? r.weightLinehaul : r.weightBackhaul);
+
+            if (oldWeight == -1 || actualWeight < oldWeight) {
+                oldWeight = actualWeight;
+                chosenRoute = r;
+            }
+
+        }
+
+        return routes.indexOf(chosenRoute);
+    }
+
+
+    public void relocateScrapped(Route route, ArrayList<Route> routes) throws Exception {
+
+
+
+        ArrayList<Node> mNodes = new ArrayList<>(route.nodeList);
+
+        for (Node n : mNodes) {
+
+            if (n.getType() == Values.nodeType.WAREHOUSE) continue;
+
+            try {
+                relocateScrapped(n, routes);
+            } catch (Exception e) {}
+
+        }
+
+
+        if (route.nodeList.size() != 0) {
+            throw new Exception("!!! Cannot relocate all the nodes !!!");
+        }
+
+    }
+
+
+    public void relocateScrapped(Node node, ArrayList<Route> routes) throws Exception {
+
+        boolean relocated = false;
+
+        for (Route r : routes) {
+
+            if (r.nodeList.contains(node)) continue;
+
+            try {
+                r.addNode( (node.getType() == Values.nodeType.BACKHAUL? r.nodeList.size()-1 : 1), node);
+                relocated = true;
+                break;
+            } catch (MaxWeightException e) {}
+        }
+
+
+        if (relocated == false) {
+            throw new Exception("!!! Cannot relocate the node !!!");
+        }
+
     }
 
 }
