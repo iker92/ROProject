@@ -12,7 +12,6 @@ public class Relocate {
     ArrayList<Route> routes;
     public double old_cost = 0;
     public double actual_cost = 0;
-    Node temp;
     Helper helper;
 
     public Relocate(DistanceMatrix distances, ArrayList<Route> routes, Helper helper){
@@ -27,22 +26,17 @@ public class Relocate {
             old_cost += routes.get(i).getActualDistance();
         }
 
-
-        /***
-         * external counters are useful for remove pointed node
-         *    internal counters are useful for insert external node in internal route after internal node position
-         */
-
+        /** the external for is useful for analyze all nodes only one time per node ***/
         for (int i = 1; i < completeTSP.size(); i++) {
 
             Node currentNode = completeTSP.get(i);
             Route currentRoute = currentNode.getRoute().getCopyOfRoute(currentNode.getRoute());
             int routeIndex = helper.getRouteIndexByNode(routes, currentNode);
 
-            //Control every route
+            //For every route
             for (int currentInternalRoute = 0; currentInternalRoute < routes.size(); currentInternalRoute++)
             {
-                //Control every node
+                //For every node
                 for (int currentInternalNode = 0; currentInternalNode < routes.get(currentInternalRoute).nodeList.size(); currentInternalNode++)
                 {
                     //control node type
@@ -51,23 +45,28 @@ public class Relocate {
                         //control if current_node is different from the passed node
                         if (currentNode != routes.get(currentInternalRoute).getNode(currentInternalNode))
                         {
+                            //index of the current node in original position
                             int index = currentNode.getRoute().nodeList.indexOf(currentNode);
 
+                            //if the route of examined node is different from the actual route
                             if (currentNode.getRoute() != routes.get(currentInternalRoute))
                             {
                                 //if don't exceed maximum weight
                                 if (routes.get(currentInternalRoute).canAdd(currentNode))
                                 {
+                                    //remove examined node from its route
                                     currentNode.getRoute().removeNode(currentNode);
+                                    //add the node in new route
                                     routes.get(currentInternalRoute).addNode(currentInternalNode, currentNode);
 
+                                    //calculate new total cost
                                     actual_cost = 0;
 
                                     for (int j = 0; j < routes.size(); j++) {
                                         actual_cost += routes.get(j).getActualDistance();
                                     }
 
-                                    //if the total cost is greater than the old, undo the swap
+                                    //if the new total cost is greater than the old, undo the swap
                                     if (actual_cost >= old_cost)
                                     {
                                         routes.get(currentInternalRoute).removeNode(currentNode);
