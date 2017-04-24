@@ -1,5 +1,6 @@
 import core.Coordinates;
 import utils.MaxWeightException;
+import utils.SwapFailedException;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
@@ -341,7 +342,7 @@ public class Helper {
 
 
 
-    public void swapNodes(Node first, Node second) {
+    public void swapNodes(Node first, Node second) throws SwapFailedException {
         // if called with nodes of the same route, call the appropriate function
         if (first.getRoute() == second.getRoute()) {
             first.getRoute().swap(first,second);
@@ -362,7 +363,9 @@ public class Helper {
                 try {
                     firstRoute.addNode(firstPosition, second);
                     secondRoute.addNode(secondPosition, first);
-                } catch (MaxWeightException e) {}
+                } catch (MaxWeightException e) {
+                    throw new SwapFailedException("!!! Swap failed! !!!");
+                }
 
             }
         }

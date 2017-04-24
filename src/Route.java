@@ -222,6 +222,7 @@ public class Route {
     }
 
     // TODO: Highly experimental! To be deeply tested (all tests succeded so far).
+    // canSwap MUST BE CALLED with the node of the calling route as first parameter
     public boolean canSwap(Node internal, Node external) {
 
         Values.nodeType inType = internal.getType();
