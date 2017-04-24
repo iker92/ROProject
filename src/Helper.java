@@ -19,7 +19,6 @@ public class Helper {
         Instance instance = new Instance();
 
         String line = null;
-
         try {
             // FileReader reads text files in the default encoding.
             FileReader fileReader =
@@ -138,8 +137,7 @@ public class Helper {
 
         Route route = new Route(instance.maxWeight);
 
-        ArrayList<Node> tsp = instance.completeTSP;
-        ArrayList<Node> tempTSP=new ArrayList<>(tsp);
+        ArrayList<Node> tsp = new ArrayList<Node>(instance.completeTSP);
 
         Node warehouse = tsp.get(0);
         tsp.remove(0);
@@ -147,7 +145,6 @@ public class Helper {
         int tspSize = tsp.size();
 
         int routeSize = tspSize/instance.routeCount;
-
 
 
         while (tsp.size() - 1 >= 0) {
@@ -177,39 +174,48 @@ public class Helper {
 
         }
 
+        if (routes.size() < instance.routeCount) {
+            try {
+                route = routeBuilder(route, warehouse);
+                routes.add(route);
+            } catch (MaxWeightException e) {}
+            route = new Route(instance.maxWeight);
+        }
+
         ///////////////////////////////////// SCRAPPED NODES MANAGEMENT //////////////////////////////////////////////
 
         Route scrapped = route;
 
-        if (scrapped.nodeList.size() != 0) {
+        if (scrapped.nodeList.size() != 0 && routes.size() == instance.routeCount) {
             System.out.println("Now starting the management for the nodes that wouldn't fit the nodes on the first pass... \n");
             System.out.println("//////////////////////////////////////////////////////////////////////////////////////////////////////\n");
 
-        }
 
-        while (scrapped.nodeList.size() != 0) {
-
-            try {
-                relocateScrapped(scrapped, routes);
-                System.out.println("Relocation of misplaced nodes successful! \n");
-
-            } catch (Exception e) {
-
-                System.out.println("!!! Couldn't relocate all the scrapped nodes with actual setup... !!!");
-
-                int lightestRouteIndex = getLightestRoute(routes, Values.nodeType.LINEHAUL);
-
-                System.out.println("Making space in the lightest route (index = " + lightestRouteIndex + ") and retrying... \n");
+            while (scrapped.nodeList.size() != 0) {
 
                 try {
-                    relocateScrapped(routes.get(lightestRouteIndex), routes);
-                } catch (Exception e1) {}
+                    relocateScrapped(scrapped, routes);
+                    System.out.println("Relocation of misplaced nodes successful! \n");
+
+                } catch (Exception e) {
+
+                    System.out.println("!!! Couldn't relocate all the scrapped nodes with actual setup... !!!");
+
+                    int lightestRouteIndex = getLightestRoute(routes, Values.nodeType.LINEHAUL);
+
+                    System.out.println("Making space in the lightest route (index = " + lightestRouteIndex + ") and retrying... \n");
+
+                    try {
+                        relocateScrapped(routes.get(lightestRouteIndex), routes);
+                    } catch (Exception e1) {
+                    }
 
 
+                }
             }
+
         }
 
-        instance.completeTSP=tempTSP;
         System.out.println("//////////////////////////////////////////////////////////////////////////////////////////////////////");
 
         System.out.println("\nRoutes ready! Now validating... ");

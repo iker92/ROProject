@@ -3,6 +3,7 @@ import com.sun.istack.internal.Nullable;
 import utils.NodeNotFoundException;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 /**
  * Created by loriz on 4/13/17.
@@ -57,7 +58,7 @@ public class Route {
 
     public void addNode(int position, Node node) throws MaxWeightException{
         if ( (node.nodeType == Values.nodeType.LINEHAUL ? weightLinehaul : weightBackhaul) + node.weight > MAX_WEIGHT && !this.nodeList.contains(node)) {
-              throw new MaxWeightException("Cannot add node to route! Weight would exceed the maximum weight!");
+            throw new MaxWeightException("Cannot add node to route! Weight would exceed the maximum weight!");
         } else {
             nodeList.add(position, node);
             if (node.nodeType == Values.nodeType.LINEHAUL)  {weightLinehaul += node.weight;} else {weightBackhaul += node.weight;}
@@ -74,22 +75,38 @@ public class Route {
     }
 
     public void addNode(Node node) throws MaxWeightException{
-        if ( (node.nodeType == Values.nodeType.LINEHAUL ? weightLinehaul : weightBackhaul) + node.weight > MAX_WEIGHT && !this.nodeList.contains(node)) {
+        if ( node.getRoute() != this && (node.nodeType == Values.nodeType.LINEHAUL ? weightLinehaul : weightBackhaul) + node.weight > MAX_WEIGHT ) {
             throw new MaxWeightException("Cannot add node to route! Weight would exceed the maximum weight!");
         } else {
-            nodeList.add(node);
-            if (node.nodeType == Values.nodeType.LINEHAUL)  {weightLinehaul += node.weight;} else {weightBackhaul += node.weight;}
-        }
 
-        if (node.nodeType != Values.nodeType.WAREHOUSE) {
-            if (node.getRoute() != null) {
-                node.getRoute().removeNode(node);
+            if (node.nodeType != Values.nodeType.WAREHOUSE) {
+
+                if (nodeList.size() != 0 && nodeList.get(nodeList.size()-1).nodeType == Values.nodeType.WAREHOUSE) {
+                    nodeList.add(nodeList.size()-1, node);
+                } else {
+                    nodeList.add(node);
+                }
+
+                if (node.nodeType == Values.nodeType.LINEHAUL) {
+                    weightLinehaul += node.weight;
+                } else {
+                    weightBackhaul += node.weight;
+                }
+
+                if (node.getRoute() != null) {
+                    node.getRoute().removeNode(node);
+                }
+                node.setRoute(this);
+
+            } else {
+
+                nodeList.add(node);
+
             }
-            node.setRoute(this);
+
+
+            updateRouteDistance();
         }
-
-
-        updateRouteDistance();
     }
 
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -125,6 +142,27 @@ public class Route {
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
+    ////////////////////////////////////////////// MOVEMENT METHODS //////////////////////////////////////////////////
+
+
+    public void swap(Node first, Node second) {
+        //swap inside the same route
+        if (first.getRoute() == second.getRoute() && first.getRoute() == this){
+            Collections.swap(nodeList, nodeList.indexOf(first), nodeList.indexOf(second));
+        }
+    }
+
+    public void moveToEnd(Node node) {
+
+        if (node.getRoute() == this) {
+            nodeList.add(node);
+        }
+
+    }
+
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
     ////////////////////////////////////////////// DISTANCE METHODS //////////////////////////////////////////////////
 
     private void updateRouteDistance() {
@@ -132,6 +170,8 @@ public class Route {
 
             actualDistance = 0.0;
 
+
+            //TODO: skip last check (distance betwen warehouse and warehouse)
             for (int i = 0; i < nodeList.size(); i++) {
                 actualDistance += distances.getDistance(nodeList.get(i), nodeList.get((i + 1) % nodeList.size()));
             }
