@@ -24,6 +24,7 @@ public class Main {
         }
 
         ArrayList<Route> routes = helper.createRoutesFromInstance(instance1);
+
         ArrayList<Route> relocatedRoutes = new ArrayList<>();
 
 

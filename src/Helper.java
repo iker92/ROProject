@@ -120,14 +120,8 @@ public class Helper {
     }
 
 
-    /**
-     * createRoutesFromInstance takes an instance and generates an arraylist of routes. The routes are popolated
-     *                          by filling up each route with as many nodes taken from the linehaulTSP as possible
-     *                          (until the weight limit is reached). Then it ensures that all routes are popolated
-     *                          and the backhaul are inserted.
-     * @param instance input instance
-     * @return the corresponding ArrayList<Route>
-     */
+
+
     public ArrayList<Route> createRoutesFromInstance(Instance instance)  {
 
         System.out.println("Creating routes from an instance...\n");
@@ -213,7 +207,6 @@ public class Helper {
 
                 }
             }
-
         }
 
         System.out.println("//////////////////////////////////////////////////////////////////////////////////////////////////////");
@@ -236,9 +229,11 @@ public class Helper {
             System.out.println("\nValidation terminated without errors!");
         }
 
-
         return routes;
     }
+
+
+
 
     private Route routeBuilder(Route route, Node warehouse) throws MaxWeightException {
 
@@ -248,8 +243,6 @@ public class Helper {
         for (int nodeIndex = 0; nodeIndex < route.nodeList.size(); nodeIndex++) {
             if (route.getNode(nodeIndex).getType() == Values.nodeType.BACKHAUL && route.getNode(nodeIndex).taken == false) {
 
-                //  Node node = route.getNode(nodeIndex);
-                //   route.removeNode(nodeIndex);
                 route.getNode(nodeIndex).take();
                 route.addNode(route.getNode(nodeIndex));
 
@@ -265,6 +258,9 @@ public class Helper {
         return route;
     }
 
+
+
+
     public int getRouteIndexByNode(ArrayList<Route> routes, Node node) {
         int index = -1;
         for (Route route : routes) {
@@ -273,6 +269,9 @@ public class Helper {
         }
         return index;
     }
+
+
+
 
     public int getLightestRoute(ArrayList<Route> routes, Values.nodeType type) {
 
@@ -294,9 +293,9 @@ public class Helper {
     }
 
 
+
+
     public void relocateScrapped(Route route, ArrayList<Route> routes) throws Exception {
-
-
 
         ArrayList<Node> mNodes = new ArrayList<>(route.nodeList);
 
@@ -307,15 +306,15 @@ public class Helper {
             try {
                 relocateScrapped(n, routes);
             } catch (Exception e) {}
-
         }
-
 
         if (route.nodeList.size() != 0) {
             throw new Exception("!!! Cannot relocate all the nodes !!!");
         }
 
     }
+
+
 
 
     public void relocateScrapped(Node node, ArrayList<Route> routes) throws Exception {
@@ -339,5 +338,36 @@ public class Helper {
         }
 
     }
+
+
+
+    public void swapNodes(Node first, Node second) {
+        // if called with nodes of the same route, call the appropriate function
+        if (first.getRoute() == second.getRoute()) {
+            first.getRoute().swap(first,second);
+        } else {
+
+            // check if swapping the nodes (second in place of the first and vice versa) would cause trouble
+            if (first.getRoute().canSwap(first, second) && second.getRoute().canSwap(second, first)) {
+
+                int firstPosition = first.getRoute().nodeList.indexOf(first);
+                int secondPosition = second.getRoute().nodeList.indexOf(second);
+
+                Route firstRoute = first.getRoute();
+                Route secondRoute = second.getRoute();
+
+                firstRoute.removeNode(first);
+                secondRoute.removeNode(second);
+
+                try {
+                    firstRoute.addNode(firstPosition, second);
+                    secondRoute.addNode(secondPosition, first);
+                } catch (MaxWeightException e) {}
+
+            }
+        }
+    }
+
+
 
 }

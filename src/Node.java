@@ -5,7 +5,7 @@ import core.Coordinates;
  */
 public class Node {
 
-    Values.nodeType nodeType;
+    private Values.nodeType nodeType;
     Coordinates coordinates;
     private Route route = null;
     int weight;

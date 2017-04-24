@@ -40,7 +40,7 @@ public class Relocate {
                 for (int currentInternalNode = 0; currentInternalNode < routes.get(currentInternalRoute).nodeList.size(); currentInternalNode++)
                 {
                     //control node type
-                    if(currentNode.nodeType.equals(Values.nodeType.LINEHAUL))
+                    if(currentNode.getType().equals(Values.nodeType.LINEHAUL))
                     {
                         //control if current_node is different from the passed node
                         if (currentNode != routes.get(currentInternalRoute).getNode(currentInternalNode))
@@ -54,7 +54,7 @@ public class Relocate {
                                 //if don't exceed maximum weight
                                 if (routes.get(currentInternalRoute).canAdd(currentNode))
                                 {
-                                    if(routes.get(currentInternalRoute).nodeList.get(currentInternalNode).nodeType.equals(Values.nodeType.LINEHAUL))
+                                    if(routes.get(currentInternalRoute).nodeList.get(currentInternalNode).getType().equals(Values.nodeType.LINEHAUL))
                                     {
                                         //remove examined node from its route
                                         currentRoute = moveNodeandCheck(currentNode, currentRoute, currentInternalNode, currentInternalRoute, index, routeIndex);
@@ -66,7 +66,7 @@ public class Relocate {
                                     }
                                 }
                             } else {
-                                if(routes.get(currentInternalRoute).nodeList.get(currentInternalNode).nodeType.equals(Values.nodeType.LINEHAUL)){
+                                if(routes.get(currentInternalRoute).nodeList.get(currentInternalNode).getType().equals(Values.nodeType.LINEHAUL)){
                                     //remove examined node from its route
                                     currentRoute = moveNodeandCheck(currentNode, currentRoute, currentInternalNode, currentInternalRoute, index, routeIndex);
                                     routeIndex=helper.getRouteIndexByNode(routes, currentNode);
@@ -78,7 +78,7 @@ public class Relocate {
 
                             }
                         }
-                    } else if(currentNode.nodeType.equals(Values.nodeType.BACKHAUL)) {
+                    } else if(currentNode.getType().equals(Values.nodeType.BACKHAUL)) {
                         //control if current_node is different from the passed node
                         if (currentNode != routes.get(currentInternalRoute).getNode(currentInternalNode))
                         {
@@ -90,7 +90,7 @@ public class Relocate {
                             if (currentNode.getRoute() != routes.get(currentInternalRoute)) {
                                 //if don't exceed maximum weight
                                 if (routes.get(currentInternalRoute).canAdd(currentNode)) {
-                                    if (routes.get(currentInternalRoute).nodeList.get(currentInternalNode).nodeType.equals(Values.nodeType.LINEHAUL)) {
+                                    if (routes.get(currentInternalRoute).nodeList.get(currentInternalNode).getType().equals(Values.nodeType.LINEHAUL)) {
                                         if (currentInternalNode == routes.get(currentInternalRoute).nodeList.size() - 1) {
 
                                             currentInternalNode = routes.get(currentInternalRoute).nodeList.size();
@@ -112,7 +112,7 @@ public class Relocate {
                                     }
                                 }
                             } else {
-                                if (routes.get(currentInternalRoute).nodeList.get(currentInternalNode).nodeType.equals(Values.nodeType.LINEHAUL)) {
+                                if (routes.get(currentInternalRoute).nodeList.get(currentInternalNode).getType().equals(Values.nodeType.LINEHAUL)) {
                                     if (currentInternalNode >= routes.get(currentInternalRoute).nodeList.size() - 1) {
                                         currentInternalNode = routes.get(currentInternalRoute).nodeList.size();
                                         currentRoute = moveNodeandCheck(currentNode, currentRoute, currentInternalNode, currentInternalRoute, index, routeIndex);
