@@ -56,8 +56,8 @@ public class Route {
     ///////////////////////////////////////////// METHODS TO ADD NODES ///////////////////////////////////////////////
 
     public void addNode(int position, Node node) throws MaxWeightException{
-        if ( (node.nodeType == Values.nodeType.LINEHAUL ? weightLinehaul : weightBackhaul) + node.weight > MAX_WEIGHT) {
-            throw new MaxWeightException("Cannot add node to route! Weight would exceed the maximum weight!");
+        if ( (node.nodeType == Values.nodeType.LINEHAUL ? weightLinehaul : weightBackhaul) + node.weight > MAX_WEIGHT && !this.nodeList.contains(node)) {
+              throw new MaxWeightException("Cannot add node to route! Weight would exceed the maximum weight!");
         } else {
             nodeList.add(position, node);
             if (node.nodeType == Values.nodeType.LINEHAUL)  {weightLinehaul += node.weight;} else {weightBackhaul += node.weight;}
@@ -74,7 +74,7 @@ public class Route {
     }
 
     public void addNode(Node node) throws MaxWeightException{
-        if ( (node.nodeType == Values.nodeType.LINEHAUL ? weightLinehaul : weightBackhaul) + node.weight > MAX_WEIGHT) {
+        if ( (node.nodeType == Values.nodeType.LINEHAUL ? weightLinehaul : weightBackhaul) + node.weight > MAX_WEIGHT && !this.nodeList.contains(node)) {
             throw new MaxWeightException("Cannot add node to route! Weight would exceed the maximum weight!");
         } else {
             nodeList.add(node);
@@ -168,6 +168,7 @@ public class Route {
         boolean valid = true;
 
         if (nodeList.get(0).nodeType != Values.nodeType.WAREHOUSE || nodeList.get(nodeList.size()-1).nodeType != Values.nodeType.WAREHOUSE) valid = false;
+
 
         for (int index = 1; index < nodeList.size()-1; index++) {
             if (nodeList.get(index).getType() == Values.nodeType.BACKHAUL && nodeList.get(index+1).getType() == Values.nodeType.LINEHAUL) valid = false;

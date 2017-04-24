@@ -19,6 +19,7 @@ public class Helper {
         Instance instance = new Instance();
 
         String line = null;
+
         try {
             // FileReader reads text files in the default encoding.
             FileReader fileReader =
@@ -138,6 +139,7 @@ public class Helper {
         Route route = new Route(instance.maxWeight);
 
         ArrayList<Node> tsp = instance.completeTSP;
+        ArrayList<Node> tempTSP=new ArrayList<>(tsp);
 
         Node warehouse = tsp.get(0);
         tsp.remove(0);
@@ -145,6 +147,7 @@ public class Helper {
         int tspSize = tsp.size();
 
         int routeSize = tspSize/instance.routeCount;
+
 
 
         while (tsp.size() - 1 >= 0) {
@@ -206,6 +209,7 @@ public class Helper {
             }
         }
 
+        instance.completeTSP=tempTSP;
         System.out.println("//////////////////////////////////////////////////////////////////////////////////////////////////////");
 
         System.out.println("\nRoutes ready! Now validating... ");
