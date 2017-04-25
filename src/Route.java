@@ -32,14 +32,14 @@ public class Route {
         }
     }
 
-    public Route getCopyOfRoute(Route route){
+    public Route getCopyOfRoute(){
         newRoute = new Route(MAX_WEIGHT);
-        newRoute.nodeList = new ArrayList<>(route.nodeList);
-        newRoute.actualDistance = route.actualDistance;
-        newRoute.distances = route.distances;
-        newRoute.weightBackhaul = route.weightBackhaul;
-        newRoute.weightLinehaul = route.weightLinehaul;
-        newRoute.MAX_WEIGHT = route.MAX_WEIGHT;
+        newRoute.nodeList = new ArrayList<>(this.nodeList);
+        newRoute.actualDistance = this.actualDistance;
+        newRoute.distances = this.distances;
+        newRoute.weightBackhaul = this.weightBackhaul;
+        newRoute.weightLinehaul = this.weightLinehaul;
+        newRoute.MAX_WEIGHT = this.MAX_WEIGHT;
 
         return newRoute;
     }
