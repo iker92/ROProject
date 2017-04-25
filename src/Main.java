@@ -27,17 +27,24 @@ public class Main {
 
         ArrayList<Route> relocatedRoutes = new ArrayList<>();
 
+        Exchange exchange = new Exchange(distances, routes, helper);
 
-        Relocate relocate = new Relocate(distances,routes, helper);
         try {
-            relocatedRoutes = relocate.findBestRelocate(instance1.completeTSP);
+            relocatedRoutes = exchange.findBestExchange(instance1.completeTSP);
         } catch (MaxWeightException e) {
             e.printStackTrace();
         } catch (NodeNotFoundException e) {
             e.printStackTrace();
         }
 
-        boolean bo = false;
+        /*Relocate relocate = new Relocate(distances, routes, helper);
+        try {
+            relocatedRoutes = relocate.findBestRelocate(instance1.completeTSP);
+        } catch (MaxWeightException e) {
+            e.printStackTrace();
+        } catch (NodeNotFoundException e) {
+            e.printStackTrace();
+        }*/
 
     }
 }

@@ -21,7 +21,6 @@ public class Route {
     private Helper helper;
     Route newRoute = null;
 
-
     public Route(int maxWeight) {
         MAX_WEIGHT = maxWeight;
 
