@@ -37,7 +37,7 @@ public class Relocate {
             for (int currentInternalRoute = 0; currentInternalRoute < routes.size(); currentInternalRoute++)
             {
                 //For every node
-                for (int currentInternalNode = 0; currentInternalNode < routes.get(currentInternalRoute).nodeList.size(); currentInternalNode++)
+                for (int currentInternalNode = 1; currentInternalNode < routes.get(currentInternalRoute).nodeList.size() -1; currentInternalNode++)
                 {
                     //control node type
                     if(currentNode.getType().equals(Values.nodeType.LINEHAUL))
@@ -91,18 +91,18 @@ public class Relocate {
                                 //if don't exceed maximum weight
                                 if (routes.get(currentInternalRoute).canAdd(currentNode)) {
                                     if (routes.get(currentInternalRoute).nodeList.get(currentInternalNode).getType().equals(Values.nodeType.LINEHAUL)) {
-                                        if (currentInternalNode == routes.get(currentInternalRoute).nodeList.size() - 1) {
+                                        if (currentInternalNode == routes.get(currentInternalRoute).nodeList.size() - 2) {
 
-                                            currentInternalNode = routes.get(currentInternalRoute).nodeList.size();
+                                            currentInternalNode = routes.get(currentInternalRoute).nodeList.size() -1;
                                             currentRoute = moveNodeandCheck(currentNode, currentRoute, currentInternalNode, currentInternalRoute, index, routeIndex);
                                             routeIndex = helper.getRouteIndexByNode(routes, currentNode);
                                         }
                                     } else {
-                                        if (currentInternalNode == routes.get(currentInternalRoute).nodeList.size() - 1) {
+                                        if (currentInternalNode == routes.get(currentInternalRoute).nodeList.size() - 2) {
 
                                             currentRoute = moveNodeandCheck(currentNode, currentRoute, currentInternalNode, currentInternalRoute, index, routeIndex);
                                             routeIndex = helper.getRouteIndexByNode(routes, currentNode);
-                                            currentInternalNode = routes.get(currentInternalRoute).nodeList.size();
+                                            currentInternalNode = routes.get(currentInternalRoute).nodeList.size() -1;
                                             currentRoute = moveNodeandCheck(currentNode, currentRoute, currentInternalNode, currentInternalRoute, index, routeIndex);
                                             routeIndex = helper.getRouteIndexByNode(routes, currentNode);
                                         } else {
@@ -113,17 +113,17 @@ public class Relocate {
                                 }
                             } else {
                                 if (routes.get(currentInternalRoute).nodeList.get(currentInternalNode).getType().equals(Values.nodeType.LINEHAUL)) {
-                                    if (currentInternalNode >= routes.get(currentInternalRoute).nodeList.size() - 1) {
-                                        currentInternalNode = routes.get(currentInternalRoute).nodeList.size();
+                                    if (currentInternalNode >= routes.get(currentInternalRoute).nodeList.size() - 2) {
+                                        currentInternalNode = routes.get(currentInternalRoute).nodeList.size() -1;
                                         currentRoute = moveNodeandCheck(currentNode, currentRoute, currentInternalNode, currentInternalRoute, index, routeIndex);
                                         routeIndex = helper.getRouteIndexByNode(routes, currentNode);
                                     }
 
                                 } else {
-                                    if (currentInternalNode == routes.get(currentInternalRoute).nodeList.size() - 1) {
+                                    if (currentInternalNode == routes.get(currentInternalRoute).nodeList.size() - 2) {
                                         currentRoute = moveNodeandCheck(currentNode, currentRoute, currentInternalNode, currentInternalRoute, index, routeIndex);
                                         routeIndex = helper.getRouteIndexByNode(routes, currentNode);
-                                        currentInternalNode = routes.get(currentInternalRoute).nodeList.size();
+                                        currentInternalNode = routes.get(currentInternalRoute).nodeList.size() -1;
                                         currentRoute = moveNodeandCheck(currentNode, currentRoute, currentInternalNode, currentInternalRoute, index, routeIndex);
                                         routeIndex = helper.getRouteIndexByNode(routes, currentNode);
                                     }
@@ -140,22 +140,22 @@ public class Relocate {
 
     private Route moveNodeandCheck(Node currentNode, Route currentRoute, int currentInternalNode, int currentInternalRoute,int index,int routeIndex) throws MaxWeightException {
 
-        if(currentNode.getRoute().nodeList.size() == currentInternalNode)
+       /* if(currentNode.getRoute().nodeList.size() -2 == currentInternalNode)
         {
             //remove examined node from its route
-            currentNode.getRoute().removeNode(currentNode);
+            //currentNode.getRoute().removeNode(currentNode);
 
             //add the node in new route
             routes.get(currentInternalRoute).addNode(currentNode);
         }
         else{
             //remove examined node from its route
-            currentNode.getRoute().removeNode(currentNode);
+            //currentNode.getRoute().removeNode(currentNode);
 
             //add the node in new route
             routes.get(currentInternalRoute).addNode(currentInternalNode, currentNode);
-        }
-
+        }*/
+        routes.get(currentInternalRoute).addNode(currentInternalNode, currentNode);
         //calculate new total cost
         actual_cost = 0;
 
