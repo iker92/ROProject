@@ -38,12 +38,13 @@ public class Exchange {
                 if(node.getType().equals(Values.nodeType.WAREHOUSE)) continue;
 
                 //Get current node index
-                int currNodeIndex = routeClone.getIndexByNode(node);
+                int currNodeIndex = currentNodes.indexOf(node);
 
                 //Starting from the next node
                 for( int i=currNodeIndex+1; i<currentRouteSize; i++ ){
                     //Get next's node index
-                    Node currentNode = routeClone.getNodeByIndex(i);
+                    Node currentNode = currentNodes.get(i);
+
                     //If it is possible to swap them
                     if(routeClone.canSwap(node, currentNode)){
                         //Swap them indeed
