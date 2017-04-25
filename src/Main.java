@@ -1,5 +1,6 @@
 import utils.MaxWeightException;
 import utils.NodeNotFoundException;
+import utils.SwapFailedException;
 
 import java.util.ArrayList;
 
@@ -8,7 +9,7 @@ import java.util.ArrayList;
  */
 public class Main {
 
-    public static void main(String [] args) {
+    public static void main(String [] args) throws SwapFailedException {
 
         Helper helper = new Helper();
 
@@ -27,10 +28,10 @@ public class Main {
 
         ArrayList<Route> relocatedRoutes = new ArrayList<>();
 
-        Exchange exchange = new Exchange(distances, routes, helper);
+        Exchange exchange = new Exchange(routes, helper);
 
         try {
-            relocatedRoutes = exchange.findBestExchange(instance1.completeTSP);
+            relocatedRoutes = exchange.findBestExchange();
         } catch (MaxWeightException e) {
             e.printStackTrace();
         } catch (NodeNotFoundException e) {

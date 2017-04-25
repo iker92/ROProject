@@ -9,17 +9,15 @@ import java.util.ArrayList;
  */
 public class Exchange {
 
-    DistanceMatrix distances;
     ArrayList<Route> routes;
     Helper helper;
 
-    public Exchange(DistanceMatrix distances, ArrayList<Route> routes, Helper helper){
-        this.distances = distances;
+    public Exchange(ArrayList<Route> routes, Helper helper){
         this.routes = routes;
         this.helper = helper;
     }
 
-    public ArrayList<Route> findBestExchange(ArrayList<Route> routes) throws MaxWeightException, NodeNotFoundException, SwapFailedException {
+    public ArrayList<Route> findBestExchange() throws MaxWeightException, NodeNotFoundException, SwapFailedException {
 
         //Routes clone
         ArrayList<Route> routesClone = new ArrayList<>(routes);
