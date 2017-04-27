@@ -13,6 +13,10 @@ public class RouteList extends ArrayList<Route> implements Route.RouteListener{
         }
     }
 
+    public RouteList() {
+
+    }
+
 
     ///////////////////////////////////////// INITIALIZATION METHODS ///////////////////////////////////////////////////
 

@@ -15,8 +15,6 @@ import java.util.Random;
  */
 public class Helper {
 
-    DistanceMatrix distances = DistanceMatrix.getInstance();
-
     public Instance fileToInstance(String fileName) {
 
         Instance instance = new Instance();
@@ -385,6 +383,7 @@ public class Helper {
 
     private double swapAndCalculateDistance(Node first, Node second) {
 
+        DistanceMatrix distances = DistanceMatrix.getInstance();
         Route firstRoute = first.getRoute();
 
         int firstIndex = firstRoute.nodeList.indexOf(first);

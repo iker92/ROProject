@@ -15,7 +15,7 @@ public class Main {
         String fileName = "Instances/A1.txt";
         Instance instance1 = helper.fileToInstance(fileName);
 
-        DistanceMatrix distances= DistanceMatrix.initialize(instance1.nodesList);
+        DistanceMatrix distances = DistanceMatrix.initialize(instance1.nodesList);
 
         helper.initTSP(instance1);
 
@@ -25,19 +25,18 @@ public class Main {
 
         RouteList routes =  helper.createRoutesFromInstance(instance1);
 
-        RouteList relocatedRoutes = new RouteList();
+        RouteList exchangedRoutes = new RouteList();
 
+        Exchange exchange = new Exchange(routes, helper);
 
-        Relocate relocate = new Relocate(distances,routes, helper);
         try {
-            relocatedRoutes = relocate.findBestRelocate(instance1.completeTSP);
+            exchangedRoutes = exchange.findBestExchange();
+            exchangedRoutes.size();
         } catch (MaxWeightException e) {
             e.printStackTrace();
         } catch (NodeNotFoundException e) {
             e.printStackTrace();
         }
-
-        boolean bo = false;
 
     }
 }

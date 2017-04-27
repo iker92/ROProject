@@ -30,7 +30,7 @@ public class Relocate {
         for (int i = 1; i < completeTSP.size(); i++) {
 
             Node currentNode = completeTSP.get(i);
-            Route currentRoute = currentNode.getRoute().getCopyOfRoute(currentNode.getRoute());
+            Route currentRoute = currentNode.getRoute().getCopyOfRoute();
             int routeIndex = helper.getRouteIndexByNode(routes, currentNode);
 
             //For every route
@@ -176,7 +176,7 @@ public class Relocate {
         } //otherwise old cost became actual cost (in order to store best result) and update the current node route
         else {
             old_cost = actual_cost;
-            currentRoute = currentNode.getRoute().getCopyOfRoute(currentNode.getRoute());
+            currentRoute = currentNode.getRoute().getCopyOfRoute();
         }
 
         return currentRoute;
