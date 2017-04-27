@@ -13,6 +13,7 @@ public class Route {
 
     public int MAX_WEIGHT = -1;
 
+    private RouteListener mRouteListener = null;
     public int weightLinehaul = 0;
     public int weightBackhaul = 0;
     public ArrayList<Node> nodeList = new ArrayList<>();
@@ -31,6 +32,10 @@ public class Route {
         if (distances == null) {
             System.err.println("!!! Error - Distance Matrix wasn't initialized !!!");
         }
+    }
+
+    public void setOnRouteChangeListener(RouteListener listener) {
+        mRouteListener = listener;
     }
 
     public Route getCopyOfRoute(Route route){
@@ -179,17 +184,24 @@ public class Route {
     ////////////////////////////////////////////// DISTANCE METHODS //////////////////////////////////////////////////
 
     private void updateRouteDistance() {
+
+        double oldDistance = actualDistance;
+
         if (nodeList.size() > 1 && distances != null) {
 
             actualDistance = 0.0;
 
-
-            //TODO: skip last check (distance betwen warehouse and warehouse)
+            //TODO: skip last check (distance between warehouse and warehouse)
             for (int i = 0; i < nodeList.size(); i++) {
                 actualDistance += distances.getDistance(nodeList.get(i), nodeList.get((i + 1) % nodeList.size()));
             }
 
         } else actualDistance = 0.0;
+
+        if (mRouteListener != null) {
+            mRouteListener.OnRouteChange(this, oldDistance);
+        }
+
     }
 
     public double getActualDistance() {
@@ -292,5 +304,12 @@ public class Route {
         return valid;
 
     }
+
+
+
+    public interface RouteListener {
+         void OnRouteChange(Route route, double oldDistance);
+    }
+
 }
 

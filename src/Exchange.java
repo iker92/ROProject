@@ -3,25 +3,25 @@
 ///**
 // * Created by andream16 on 13.04.17.
 // */
-////Input(DistanceMatrix m, Arraylist<Route> a); Output: Arraylist<Route>;
+////Input(DistanceMatrix m, RouteList a); Output: RouteList;
 //public class Exchange {
 //
 //    DistanceMatrix distances;
-//    ArrayList<Route> routes;
+//    RouteList routes;
 //
-//    public Exchange(DistanceMatrix distances, ArrayList<Route> routes){
+//    public Exchange(DistanceMatrix distances, RouteList routes){
 //       this.distances = distances;
 //       this.routes    = routes;
 //    }
 //
-//    public ArrayList<Route> exchange (Node node, Route route){
+//    public RouteList exchange (Node node, Route route){
 //        BestExchangeResult best_move = findBestExchange(node, route);
 //        int pos_1, pos_2;
 //        pos_1 = route.nodeList.indexOf(node);
 //        pos_2 = best_move.route.indexOf(best_move.node_2);
 //        route.get(pos_1) = best_move.node_2;
 //        best_move.route.get(pos_2) = node;
-//        ArrayList<Route> new_routes = routes;
+//        RouteList new_routes = routes;
 //        new_routes.at(route) = route;
 //        new_routes.at(best_move.route) = best_move.route;
 //

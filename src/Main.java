@@ -23,9 +23,9 @@ public class Main {
             System.out.println(node.index);
         }
 
-        ArrayList<Route> routes = helper.createRoutesFromInstance(instance1);
+        RouteList routes =  helper.createRoutesFromInstance(instance1);
 
-        ArrayList<Route> relocatedRoutes = new ArrayList<>();
+        RouteList relocatedRoutes = new RouteList();
 
 
         Relocate relocate = new Relocate(distances,routes, helper);

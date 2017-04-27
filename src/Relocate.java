@@ -9,18 +9,18 @@ import java.util.ArrayList;
 public class Relocate {
 
     DistanceMatrix distances;
-    ArrayList<Route> routes;
+    RouteList routes;
     public double old_cost = 0;
     public double actual_cost = 0;
     Helper helper;
 
-    public Relocate(DistanceMatrix distances, ArrayList<Route> routes, Helper helper){
+    public Relocate(DistanceMatrix distances, RouteList routes, Helper helper){
         this.distances = distances;
         this.routes = routes;
         this.helper = helper;
     }
 
-    public ArrayList<Route> findBestRelocate(ArrayList<Node> completeTSP) throws MaxWeightException, NodeNotFoundException {
+    public RouteList findBestRelocate(ArrayList<Node> completeTSP) throws MaxWeightException, NodeNotFoundException {
 
         for (int i = 0; i < routes.size(); i++) {
             old_cost += routes.get(i).getActualDistance();
