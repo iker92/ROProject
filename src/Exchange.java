@@ -60,7 +60,7 @@ public class Exchange {
                 }
 
                 /** Swaps on Other Routes **/
-                for(Route otherRoute : routes){
+                for(Route otherRoute : routesClone){
 
                     //If we get the same route skip
                     if(otherRoute.equals(route)) continue;

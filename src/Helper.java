@@ -15,59 +15,6 @@ import java.util.Random;
  */
 public class Helper {
 
-    //Objective Function Value. It's the sum of each route actualDistances.
-    private double obj_fun = 0.0;
-
-    public double getObjectiveFunction(){
-        return obj_fun;
-    }
-
-    public double setObjectiveFunction(double new_obj_fun){
-        obj_fun = new_obj_fun;
-        return getObjectiveFunction();
-    }
-
-    public double incrementObjectiveFunction(double amount){
-        double currObjFunction = getObjectiveFunction();
-        return currObjFunction + amount;
-    }
-
-    public double decrementObjectiveFunction(double amount){
-        double currObjFunction = getObjectiveFunction();
-        currObjFunction = currObjFunction - amount;
-        if(currObjFunction < 0.0){
-            try {
-                throw new Exception("Objective Function cannot be negative. Actual value: " + getObjectiveFunction());
-            } catch (Exception e) {}
-        }
-        return currObjFunction - amount;
-    }
-
-    //You can Use this method to Calculate the actual value of the objective funcion given a set of routes
-    public double calculateObjectiveFunction(ArrayList<Route> routes){
-
-        double currObjFunction = 0.0;
-
-        for( Route route : routes){
-            currObjFunction += incrementObjectiveFunction(route.getActualDistance());
-        }
-
-        return currObjFunction;
-    }
-
-    //You can use this method to check whether a new calculated objective function is minimized.
-    public boolean isItMinimized(double new_obj_fun){
-
-        double actual_obj_fun = getObjectiveFunction();
-
-        if(new_obj_fun < actual_obj_fun){
-            return true;
-        } else {
-            return false;
-        }
-
-    }
-
     public Instance fileToInstance(String fileName) {
 
         Instance instance = new Instance();
