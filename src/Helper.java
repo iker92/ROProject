@@ -121,11 +121,15 @@ public class Helper {
         instance.lineHaulTSP=instance.createTSPFromNodes(instance.nodesList,instance.indexesLineHaulTSP);
     }
 
-    public ArrayList<Route> createRoutesFromInstance(Instance instance)  {
+
+
+
+    public RouteList createRoutesFromInstance(Instance instance)  {
 
         System.out.println("Creating routes from an instance...\n");
 
-        ArrayList<Route> routes = new ArrayList<>();
+
+        RouteList routes = new RouteList();
 
         Route route = new Route(instance.maxWeight);
 
@@ -259,7 +263,7 @@ public class Helper {
 
 
 
-    public int getRouteIndexByNode(ArrayList<Route> routes, Node node) {
+    public int getRouteIndexByNode(RouteList routes, Node node) {
         int index = -1;
         for (Route route : routes) {
             index = (route.nodeList.contains(node) ? routes.indexOf(route) : -1);
@@ -271,7 +275,7 @@ public class Helper {
 
 
 
-    public int getLightestRoute(ArrayList<Route> routes, Values.nodeType type) {
+    public int getLightestRoute(RouteList routes, Values.nodeType type) {
 
         int oldWeight = -1;
         Route chosenRoute = null;
@@ -293,7 +297,7 @@ public class Helper {
 
 
 
-    public void relocateScrapped(Route route, ArrayList<Route> routes) throws Exception {
+    public void relocateScrapped(Route route, RouteList routes) throws Exception {
 
         ArrayList<Node> mNodes = new ArrayList<>(route.nodeList);
 
@@ -315,7 +319,7 @@ public class Helper {
 
 
 
-    public void relocateScrapped(Node node, ArrayList<Route> routes) throws Exception {
+    public void relocateScrapped(Node node, RouteList routes) throws Exception {
 
         boolean relocated = false;
 
