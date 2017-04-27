@@ -38,7 +38,7 @@ public class Route {
         mRouteListener = listener;
     }
 
-    public Route getCopyOfRoute(Route route){
+    public Route getCopyOfRoute(){
         newRoute = new Route(MAX_WEIGHT);
         newRoute.nodeList = new ArrayList<>(route.nodeList);
         newRoute.actualDistance = route.actualDistance;
@@ -162,6 +162,8 @@ public class Route {
 
                 if (first.getRoute() == second.getRoute() && first.getRoute() == this && canSwap(first, second)){
                     Collections.swap(nodeList, nodeList.indexOf(first), nodeList.indexOf(second));
+                    //Update ObjectiveFunction with new distance
+                    updateRouteDistance();
                 }
 
             } else {

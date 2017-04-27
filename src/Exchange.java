@@ -1,87 +1,110 @@
-//import java.util.ArrayList;
-//
-///**
-// * Created by andream16 on 13.04.17.
-// */
-////Input(DistanceMatrix m, RouteList a); Output: RouteList;
-//public class Exchange {
-//
-//    DistanceMatrix distances;
-//    RouteList routes;
-//
-//    public Exchange(DistanceMatrix distances, RouteList routes){
-//       this.distances = distances;
-//       this.routes    = routes;
-//    }
-//
-//    public RouteList exchange (Node node, Route route){
-//        BestExchangeResult best_move = findBestExchange(node, route);
-//        int pos_1, pos_2;
-//        pos_1 = route.nodeList.indexOf(node);
-//        pos_2 = best_move.route.indexOf(best_move.node_2);
-//        route.get(pos_1) = best_move.node_2;
-//        best_move.route.get(pos_2) = node;
-//        RouteList new_routes = routes;
-//        new_routes.at(route) = route;
-//        new_routes.at(best_move.route) = best_move.route;
-//
-//        return new_routes;
-//    }
-//
-//    public BestExchangeResult findBestExchange(Node node, Route route){
-//
-//        BestExchangeResult best_move = null;
-//        int current_node_position = route.nodeList.indexOf(node);
-//        int current_route_position = routes.at(route);
-//        ArrayList<Node> node_list = route.nodeList;
-//        int nodeList_size = node_list.size();
-//        int routes_number = routes.size();
-//        double distance;
-//        double tmp_distance = 0.0;
-//
-//        //Foreach node in current route
-//        for (int i = current_node_position+1; i<= nodeList_size; i++){
-//           distance = distances.getDistance(node, node_list.get(i));
-//           if( i == current_node_position+1 || distance < tmp_distance){
-//               if(node.weight + route.weight <= route.maxWeight){
-//                   if(node.nodeType == node_list.get(i).nodeType){
-//                       best_move = new BestExchangeResult(node, node_list.get(i), route);
-//                       tmp_distance = distance;
-//                   }
-//               }
-//           }
-//        }
-//
-//        //Foreach route in routes
-//        for(int current_route = current_route_position+1; current_route<=routes_number; current_route++ ){
-//            ArrayList<Node> current_nodeList = current_route.nodeList;
-//            //For each node in it
-//            for(int j=0; j<= current_nodeList.size(); j++){
-//                distance = distances.getDistance(node, current_nodeList.get(j));
-//                if( distance < tmp_distance){
-//                    if(node.weight + current_route.weight <= current_route.maxWeight){
-//                        if(node.nodeType == current_nodeList.get(j).nodeType || route.nodeList.size() - 1 == current_node_position){
-//                            best_move = new BestExchangeResult(node, node_list.get(j), routes.at(current_route));
-//                            tmp_distance = distance;
-//                        }
-//                    }
-//                }
-//            }
-//        }
-//
-//        return best_move;
-//
-//    }
-//
-//}
-//
-//class BestExchangeResult {
-//    public Node node, node_2;
-//    public Route route;
-//
-//    public BestExchangeResult(Node node, Node node_2, Route route){
-//      this.node = node;
-//      this.node_2 = node_2;
-//      this.route = route;
-//    }
-//}
+import utils.MaxWeightException;
+import utils.NodeNotFoundException;
+import utils.SwapFailedException;
+
+import java.util.ArrayList;
+
+/**
+ * Created by andream16 on 25.04.17.
+ */
+public class Exchange {
+
+    ArrayList<Route> routes;
+    Helper helper;
+
+    public Exchange(ArrayList<Route> routes, Helper helper){
+        this.routes = routes;
+        this.helper = helper;
+    }
+
+    public RouteList findBestExchange() throws MaxWeightException, NodeNotFoundException, SwapFailedException {
+
+        //Routes clone
+        RouteList fakeRoutes = new RouteList(routes);
+
+        //For each route
+        for(Route route : fakeRoutes){
+
+            Route fakeRoute = route.getCopyOfRoute();
+            ArrayList<Node> currentNodes = fakeRoute.nodeList;
+            int currentRouteSize = currentNodes.size();
+            double routeActualWeight = fakeRoute.getActualDistance();
+            int currentRouteIndex = fakeRoutes.indexOf(route);
+
+            //For each node in current route
+            for(Node node : currentNodes){
+
+                Node fakeNode = new Node(node);
+
+                /** Swaps on the same Route **/
+                //If currentNode is a Warehouse node indeed we skip it
+                if(node.getType().equals(Values.nodeType.WAREHOUSE)) continue;
+
+                //Get current node index
+                int currNodeIndex = currentNodes.indexOf(node);
+
+                //Starting from the next node
+                for( int i=currNodeIndex+1; i<currentRouteSize; i++ ){
+                    //Get next's node index
+                    Node currentNode = currentNodes.get(i);
+
+                    //If the next node is a warehouse skip
+                    if(currentNode.getType().equals(Values.nodeType.WAREHOUSE)) continue;
+
+                    //If it is possible to swap them
+                    if(fakeRoute.canSwap(node, currentNode)){
+                        //Swap them indeed
+                        fakeRoute.swap(node, currentNode);
+                        //Let's check if the exchange is worth
+                        double newActualWeight = fakeRoute.getActualDistance();
+                        //If it's worth indeed
+                        if(newActualWeight < routeActualWeight){
+                           //Let's apply the changes into the real route
+                           route.swap(node, currentNode);
+                        }
+                    }
+                }
+
+                /** Swaps on Other Routes **/
+                for(int j=currentRouteIndex+1; j<fakeRoutes.size(); j++){
+
+                    Route otherRoute = fakeRoutes.get(j);
+
+                    //Else let's get a clone of otherRoute
+                    Route otherFakeRoute = otherRoute.getCopyOfRoute();
+                    ArrayList<Node> otherRouteNodes = otherFakeRoute.nodeList;
+
+                    //For each node in otherFakeRoute
+                    for(Node otherRouteNode : otherRouteNodes){
+                        //If we can swap
+                        if(fakeRoute.canSwap(node, otherRouteNode)){
+                            
+                            double oldObjectiveFunction = fakeRoutes.getObjectiveFunction();
+                            
+                            //Then lets do the swap between the clones
+                            helper.swapNodes(node, otherRouteNode);
+
+                            //If it minimizes the objective function
+                            if( fakeRoutes.isItMinimized(oldObjectiveFunction) ){
+                               //Let's swap also the real one
+                               helper.swapNodes(node, otherRouteNode);
+                               //Let's overwrite the objective function value
+                               helper.setObjectiveFunction(new_obj_fun_value);
+                            } else {
+                                //If it is not worth, let's swap back
+                                helper.swapNodes(otherRouteNode, node);
+                            }
+                        }
+                    }
+
+                }
+
+            }
+
+        }
+
+        return routes;
+
+    }
+
+}
