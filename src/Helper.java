@@ -114,11 +114,14 @@ public class Helper {
 
     }
 
+
+
     public void initTSP(Instance instance){
         instance.completeTSP=instance.createTSPFromNodes(instance.nodesList,instance.indexesCompleteTSP);
         instance.backHaulTSP=instance.createTSPFromNodes(instance.nodesList,instance.indexesBackHaulTSP);
         instance.lineHaulTSP=instance.createTSPFromNodes(instance.nodesList,instance.indexesLineHaulTSP);
     }
+
 
 
     public RouteList createRoutesFromInstance(Instance instance)  {
@@ -233,7 +236,6 @@ public class Helper {
 
 
 
-
     private Route routeBuilder(Route route, Node warehouse) throws MaxWeightException {
 
         long seed = System.nanoTime();
@@ -259,7 +261,6 @@ public class Helper {
 
 
 
-
     public int getRouteIndexByNode(RouteList routes, Node node) {
         int index = -1;
         for (Route route : routes) {
@@ -268,7 +269,6 @@ public class Helper {
         }
         return index;
     }
-
 
 
 
@@ -293,7 +293,6 @@ public class Helper {
 
 
 
-
     public void relocateScrapped(Route route, RouteList routes) throws Exception {
 
         ArrayList<Node> mNodes = new ArrayList<>(route.nodeList);
@@ -312,7 +311,6 @@ public class Helper {
         }
 
     }
-
 
 
 
@@ -339,7 +337,39 @@ public class Helper {
     }
 
 
+
     public void swapNodes(Node first, Node second) throws SwapFailedException {
+        // if called with nodes of the same route, call the appropriate function
+        if (first.getRoute() == second.getRoute()) {
+            first.getRoute().swap(first,second);
+        } else {
+
+            // check if swapping the nodes (second in place of the first and vice versa) would cause trouble
+            if (first.getRoute().canSwap(first, second) && second.getRoute().canSwap(second, first)) {
+
+                int firstPosition = first.getRoute().nodeList.indexOf(first);
+                int secondPosition = second.getRoute().nodeList.indexOf(second);
+
+                Route firstRoute = first.getRoute();
+                Route secondRoute = second.getRoute();
+
+                firstRoute.removeNode(first);
+                secondRoute.removeNode(second);
+
+                try {
+                    firstRoute.addNode(firstPosition, second);
+                    secondRoute.addNode(secondPosition, first);
+                } catch (MaxWeightException e) {
+                    throw new SwapFailedException("!!! Swap failed! !!!");
+                }
+
+            }
+        }
+    }
+
+
+
+    public void swapNodesIfWorth(Node first, Node second) throws SwapFailedException {
 
         Route firstRoute = first.getRoute();
         Route secondRoute = second.getRoute();
@@ -350,31 +380,10 @@ public class Helper {
 
         if (distanceSum > (swapAndCalculateDistance(first, second) + swapAndCalculateDistance(second, first))) {
 
-            // if called with nodes of the same route, call the appropriate function
-            if (first.getRoute() == second.getRoute()) {
-                first.getRoute().swap(first, second);
-            } else {
+            swapNodes(first, second);
 
-                // check if swapping the nodes (second in place of the first and vice versa) would cause trouble
-                if (first.getRoute().canSwap(first, second) && second.getRoute().canSwap(second, first)) {
-
-                    int firstPosition = first.getRoute().nodeList.indexOf(first);
-                    int secondPosition = second.getRoute().nodeList.indexOf(second);
-
-                    firstRoute.removeNode(first);
-                    secondRoute.removeNode(second);
-
-                    try {
-                        firstRoute.addNode(firstPosition, second);
-                        secondRoute.addNode(secondPosition, first);
-                    } catch (MaxWeightException e) {
-                        throw new SwapFailedException("!!! Swap failed! !!!");
-                    }
-
-                }
-            }
         } else {
-            throw new SwapFailedException("!!! Swap failed! !!!");
+            throw new SwapFailedException("!!! Swapping these nodes would increase the objective function! !!!");
         }
         
     }

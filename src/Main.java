@@ -19,11 +19,10 @@ public class Main {
 
         helper.initTSP(instance1);
 
-        for (Node node: instance1.completeTSP){
-            System.out.println(node.index);
-        }
-
         RouteList routes =  helper.createRoutesFromInstance(instance1);
+
+        printRoutes(routes);
+
 
         RouteList exchangedRoutes = new RouteList();
 
@@ -31,12 +30,32 @@ public class Main {
 
         try {
             exchangedRoutes = exchange.findBestExchange();
+            printRoutes(routes);
             exchangedRoutes.size();
         } catch (MaxWeightException e) {
             e.printStackTrace();
         } catch (NodeNotFoundException e) {
             e.printStackTrace();
         }
+
+
+
+    }
+
+    private static void printRoutes(RouteList routes) {
+
+        for (Route r : routes) {
+            System.out.print(routes.indexOf(r) + "  | ");
+
+            for (Node n : r.nodeList) {
+                System.out.print(n.index + (n.getType().toString().substring(0, 1)) + "\t");
+            }
+            System.out.print("\n");
+
+        }
+
+        System.out.print("\n");
+        System.out.print("\n");
 
     }
 }

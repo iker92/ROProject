@@ -21,7 +21,7 @@ public class DistanceMatrix {
 
     public static DistanceMatrix getInstance() {
         if(instance == null) {
-           return null;
+            return null;
         }
         return instance;
     }
@@ -35,10 +35,24 @@ public class DistanceMatrix {
     private void calculateDistances(){
         int nodesSize = nodes.size();
         distances = new double[nodesSize][nodesSize];
+
+        System.out.printf("\t\t");
+
+        for( int i=0; i<nodesSize; i++) {
+            System.out.printf(i + "\t\t");
+        }
+
+        System.out.printf("\n");
+
+
         for( int i=0; i<nodesSize; i++){
+            System.out.printf(i + "\t");
+
             for( int j=0; j<nodesSize; j++){
                 distances[i][j] = Math.sqrt(abs((nodes.get(i).coordinates.x - nodes.get(j).coordinates.x)) + abs(nodes.get(i).coordinates.y - nodes.get(j).coordinates.y));
+                System.out.printf("%.2f\t",distances[i][j]);
             }
+            System.out.print("\n\n");
         }
     }
 

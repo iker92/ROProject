@@ -20,14 +20,14 @@ public class Exchange {
     public RouteList findBestExchange() throws MaxWeightException, NodeNotFoundException {
 
         //For each route
-        for(Route route : routes){
+        for(Route route : new RouteList(routes)){
 
             ArrayList<Node> currentNodes = route.nodeList;
             int currentRouteSize = currentNodes.size();
             int currentRouteIndex = routes.indexOf(route);
 
             //For each node in current route
-            for(Node node : currentNodes){
+            for(Node node : new ArrayList<>(currentNodes)){
 
                 /** Swaps on the same Route **/
                 //If currentNode is a Warehouse node indeed we skip it
@@ -45,7 +45,7 @@ public class Exchange {
                     if(currentNode.getType().equals(Values.nodeType.WAREHOUSE)) continue;
 
                     try {
-                        helper.swapNodes(node, currentNode);
+                        helper.swapNodesIfWorth(node, currentNode);
                     } catch (SwapFailedException e) {}
                 }
 
@@ -57,11 +57,11 @@ public class Exchange {
                     ArrayList<Node> otherRouteNodes = otherRoute.nodeList;
 
                     //For each node in otherRoute
-                    for(Node otherRouteNode : otherRouteNodes){
+                    for(Node otherRouteNode : new ArrayList<>(otherRouteNodes)){
 
                         if(otherRouteNode.getType().equals(Values.nodeType.WAREHOUSE)) continue;
                         try {
-                            helper.swapNodes(node, otherRouteNode);
+                            helper.swapNodesIfWorth(node, otherRouteNode);
                         } catch (SwapFailedException e) {}
                     }
 
