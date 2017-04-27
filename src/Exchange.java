@@ -17,21 +17,24 @@ public class Exchange {
         this.helper = helper;
     }
 
-    public ArrayList<Route> findBestExchange() throws MaxWeightException, NodeNotFoundException, SwapFailedException {
+    public RouteList findBestExchange() throws MaxWeightException, NodeNotFoundException, SwapFailedException {
 
         //Routes clone
-        ArrayList<Route> routesClone = new ArrayList<>(routes);
+        RouteList fakeRoutes = new RouteList(routes);
 
         //For each route
-        for(Route route : routesClone){
+        for(Route route : fakeRoutes){
 
-            Route routeClone = route.getCopyOfRoute();
-            ArrayList<Node> currentNodes = routeClone.nodeList;
+            Route fakeRoute = route.getCopyOfRoute();
+            ArrayList<Node> currentNodes = fakeRoute.nodeList;
             int currentRouteSize = currentNodes.size();
-            double routeActualWeight = routeClone.getActualDistance();
+            double routeActualWeight = fakeRoute.getActualDistance();
+            int currentRouteIndex = fakeRoutes.indexOf(route);
 
             //For each node in current route
             for(Node node : currentNodes){
+
+                Node fakeNode = new Node(node);
 
                 /** Swaps on the same Route **/
                 //If currentNode is a Warehouse node indeed we skip it
@@ -45,12 +48,15 @@ public class Exchange {
                     //Get next's node index
                     Node currentNode = currentNodes.get(i);
 
+                    //If the next node is a warehouse skip
+                    if(currentNode.getType().equals(Values.nodeType.WAREHOUSE)) continue;
+
                     //If it is possible to swap them
-                    if(routeClone.canSwap(node, currentNode)){
+                    if(fakeRoute.canSwap(node, currentNode)){
                         //Swap them indeed
-                        routeClone.swap(node, currentNode);
+                        fakeRoute.swap(node, currentNode);
                         //Let's check if the exchange is worth
-                        double newActualWeight = routeClone.getActualDistance();
+                        double newActualWeight = fakeRoute.getActualDistance();
                         //If it's worth indeed
                         if(newActualWeight < routeActualWeight){
                            //Let's apply the changes into the real route
@@ -60,24 +66,26 @@ public class Exchange {
                 }
 
                 /** Swaps on Other Routes **/
-                for(Route otherRoute : routesClone){
+                for(int j=currentRouteIndex+1; j<fakeRoutes.size(); j++){
 
-                    //If we get the same route skip
-                    if(otherRoute.equals(route)) continue;
+                    Route otherRoute = fakeRoutes.get(j);
+
                     //Else let's get a clone of otherRoute
-                    Route otherRouteClone = otherRoute.getCopyOfRoute();
-                    ArrayList<Node> otherRouteNodes = otherRouteClone.nodeList;
+                    Route otherFakeRoute = otherRoute.getCopyOfRoute();
+                    ArrayList<Node> otherRouteNodes = otherFakeRoute.nodeList;
 
-                    //For each node in otherRouteClone
+                    //For each node in otherFakeRoute
                     for(Node otherRouteNode : otherRouteNodes){
                         //If we can swap
-                        if(routeClone.canSwap(node, otherRouteNode)){
+                        if(fakeRoute.canSwap(node, otherRouteNode)){
+                            
+                            double oldObjectiveFunction = fakeRoutes.getObjectiveFunction();
+                            
                             //Then lets do the swap between the clones
                             helper.swapNodes(node, otherRouteNode);
-                            //Let's check if it's worth
-                            double new_obj_fun_value = helper.calculateObjectiveFunction(routesClone);
+
                             //If it minimizes the objective function
-                            if( helper.isItMinimized(new_obj_fun_value) ){
+                            if( fakeRoutes.isItMinimized(oldObjectiveFunction) ){
                                //Let's swap also the real one
                                helper.swapNodes(node, otherRouteNode);
                                //Let's overwrite the objective function value

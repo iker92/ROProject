@@ -7,6 +7,11 @@ public class RouteList extends ArrayList<Route> implements Route.RouteListener{
 
     private double objectiveFunction = 0.0;
 
+    public RouteList(ArrayList<Route> routes) {
+        for (Route r  : routes){
+            add(r);
+        }
+    }
 
 
     ///////////////////////////////////////// INITIALIZATION METHODS ///////////////////////////////////////////////////
@@ -36,7 +41,7 @@ public class RouteList extends ArrayList<Route> implements Route.RouteListener{
 
     //You can use this method to check whether a new calculated objective function is minimized.
     public boolean isItMinimized(double objectFun){
-        return objectFun < objectiveFunction;
+        return objectFun > objectiveFunction;
     }
 
 
