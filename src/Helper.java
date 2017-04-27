@@ -15,6 +15,8 @@ import java.util.Random;
  */
 public class Helper {
 
+    DistanceMatrix distances = DistanceMatrix.getInstance();
+
     public Instance fileToInstance(String fileName) {
 
         Instance instance = new Instance();
@@ -119,8 +121,6 @@ public class Helper {
         instance.backHaulTSP=instance.createTSPFromNodes(instance.nodesList,instance.indexesBackHaulTSP);
         instance.lineHaulTSP=instance.createTSPFromNodes(instance.nodesList,instance.indexesLineHaulTSP);
     }
-
-
 
 
     public RouteList createRoutesFromInstance(Instance instance)  {
@@ -341,36 +341,78 @@ public class Helper {
     }
 
 
-
     public void swapNodes(Node first, Node second) throws SwapFailedException {
-        // if called with nodes of the same route, call the appropriate function
-        if (first.getRoute() == second.getRoute()) {
-            first.getRoute().swap(first,second);
-        } else {
 
-            // check if swapping the nodes (second in place of the first and vice versa) would cause trouble
-            if (first.getRoute().canSwap(first, second) && second.getRoute().canSwap(second, first)) {
+        Route firstRoute = first.getRoute();
+        Route secondRoute = second.getRoute();
+        double firstDistance = firstRoute.getActualDistance();
+        double secondDistance = secondRoute.getActualDistance();
 
-                int firstPosition = first.getRoute().nodeList.indexOf(first);
-                int secondPosition = second.getRoute().nodeList.indexOf(second);
+        double distanceSum = firstDistance + secondDistance;
 
-                Route firstRoute = first.getRoute();
-                Route secondRoute = second.getRoute();
+        if (distanceSum > (swapAndCalculateDistance(first, second) + swapAndCalculateDistance(second, first))) {
 
-                firstRoute.removeNode(first);
-                secondRoute.removeNode(second);
+            // if called with nodes of the same route, call the appropriate function
+            if (first.getRoute() == second.getRoute()) {
+                first.getRoute().swap(first, second);
+            } else {
 
-                try {
-                    firstRoute.addNode(firstPosition, second);
-                    secondRoute.addNode(secondPosition, first);
-                } catch (MaxWeightException e) {
-                    throw new SwapFailedException("!!! Swap failed! !!!");
+                // check if swapping the nodes (second in place of the first and vice versa) would cause trouble
+                if (first.getRoute().canSwap(first, second) && second.getRoute().canSwap(second, first)) {
+
+                    int firstPosition = first.getRoute().nodeList.indexOf(first);
+                    int secondPosition = second.getRoute().nodeList.indexOf(second);
+
+                    firstRoute.removeNode(first);
+                    secondRoute.removeNode(second);
+
+                    try {
+                        firstRoute.addNode(firstPosition, second);
+                        secondRoute.addNode(secondPosition, first);
+                    } catch (MaxWeightException e) {
+                        throw new SwapFailedException("!!! Swap failed! !!!");
+                    }
+
                 }
-
             }
+        } else {
+            throw new SwapFailedException("!!! Swap failed! !!!");
         }
+        
     }
 
+
+
+    private double swapAndCalculateDistance(Node first, Node second) {
+
+        Route firstRoute = first.getRoute();
+
+        int firstIndex = firstRoute.nodeList.indexOf(first);
+        double actualDistanceFirst = 0.0;
+
+        Node actual;
+        Node next;
+
+        for (int index = 0; index < firstRoute.nodeList.size() - 1; index++) {
+
+            if (firstIndex == index) {
+                actual = second;
+                next = firstRoute.nodeList.get(index + 1);
+            } else if (firstIndex == index + 1) {
+                actual = firstRoute.nodeList.get(index);
+                next = second;
+            } else {
+                actual = firstRoute.nodeList.get(index);
+                next = firstRoute.nodeList.get(index + 1);
+            }
+
+            actualDistanceFirst += distances.getDistance(actual, next);
+
+        }
+
+        return actualDistanceFirst;
+
+    }
 
 
 }
