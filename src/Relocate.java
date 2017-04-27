@@ -10,8 +10,7 @@ public class Relocate {
 
     DistanceMatrix distances;
     RouteList routes;
-    public double old_cost = 0;
-    public double actual_cost = 0;
+
     Helper helper;
 
     public Relocate(DistanceMatrix distances, RouteList routes, Helper helper){
@@ -22,9 +21,6 @@ public class Relocate {
 
     public RouteList findBestRelocate(ArrayList<Node> completeTSP) throws MaxWeightException, NodeNotFoundException {
 
-        for (int i = 0; i < routes.size(); i++) {
-            old_cost += routes.get(i).getActualDistance();
-        }
 
         /** the external for is useful for analyze all nodes only one time per node ***/
         for (int i = 1; i < completeTSP.size(); i++) {
@@ -73,7 +69,7 @@ public class Relocate {
                                 } else{
                                     currentRoute = moveNodeandCheck(currentNode, currentRoute, currentInternalNode, currentInternalRoute, index, routeIndex);
                                     routeIndex=helper.getRouteIndexByNode(routes, currentNode);
-                                    currentInternalRoute++;
+                                    //currentInternalRoute++;
                                 }
 
                             }
@@ -91,18 +87,18 @@ public class Relocate {
                                 //if don't exceed maximum weight
                                 if (routes.get(currentInternalRoute).canAdd(currentNode)) {
                                     if (routes.get(currentInternalRoute).nodeList.get(currentInternalNode).getType().equals(Values.nodeType.LINEHAUL)) {
-                                        if (currentInternalNode == routes.get(currentInternalRoute).nodeList.size() - 2) {
+                                        if (currentInternalNode == routes.get(currentInternalRoute).nodeList.size() - 2) { //handling warehouses
 
-                                            currentInternalNode = routes.get(currentInternalRoute).nodeList.size() -1;
+                                            currentInternalNode = routes.get(currentInternalRoute).nodeList.size() -1; //handling warehouses
                                             currentRoute = moveNodeandCheck(currentNode, currentRoute, currentInternalNode, currentInternalRoute, index, routeIndex);
                                             routeIndex = helper.getRouteIndexByNode(routes, currentNode);
                                         }
                                     } else {
-                                        if (currentInternalNode == routes.get(currentInternalRoute).nodeList.size() - 2) {
+                                        if (currentInternalNode == routes.get(currentInternalRoute).nodeList.size() - 2) { //handling warehouses
 
                                             currentRoute = moveNodeandCheck(currentNode, currentRoute, currentInternalNode, currentInternalRoute, index, routeIndex);
                                             routeIndex = helper.getRouteIndexByNode(routes, currentNode);
-                                            currentInternalNode = routes.get(currentInternalRoute).nodeList.size() -1;
+                                            currentInternalNode = routes.get(currentInternalRoute).nodeList.size() -1; //handling warehouses
                                             currentRoute = moveNodeandCheck(currentNode, currentRoute, currentInternalNode, currentInternalRoute, index, routeIndex);
                                             routeIndex = helper.getRouteIndexByNode(routes, currentNode);
                                         } else {
@@ -113,17 +109,17 @@ public class Relocate {
                                 }
                             } else {
                                 if (routes.get(currentInternalRoute).nodeList.get(currentInternalNode).getType().equals(Values.nodeType.LINEHAUL)) {
-                                    if (currentInternalNode >= routes.get(currentInternalRoute).nodeList.size() - 2) {
-                                        currentInternalNode = routes.get(currentInternalRoute).nodeList.size() -1;
+                                    if (currentInternalNode >= routes.get(currentInternalRoute).nodeList.size() - 2) { //handling warehouses
+                                        currentInternalNode = routes.get(currentInternalRoute).nodeList.size() -1; //handling warehouses
                                         currentRoute = moveNodeandCheck(currentNode, currentRoute, currentInternalNode, currentInternalRoute, index, routeIndex);
                                         routeIndex = helper.getRouteIndexByNode(routes, currentNode);
                                     }
 
                                 } else {
-                                    if (currentInternalNode == routes.get(currentInternalRoute).nodeList.size() - 2) {
+                                    if (currentInternalNode == routes.get(currentInternalRoute).nodeList.size() - 2) { //handling warehouses
                                         currentRoute = moveNodeandCheck(currentNode, currentRoute, currentInternalNode, currentInternalRoute, index, routeIndex);
                                         routeIndex = helper.getRouteIndexByNode(routes, currentNode);
-                                        currentInternalNode = routes.get(currentInternalRoute).nodeList.size() -1;
+                                        currentInternalNode = routes.get(currentInternalRoute).nodeList.size() -1; //handling warehouses
                                         currentRoute = moveNodeandCheck(currentNode, currentRoute, currentInternalNode, currentInternalRoute, index, routeIndex);
                                         routeIndex = helper.getRouteIndexByNode(routes, currentNode);
                                     }
@@ -140,26 +136,27 @@ public class Relocate {
 
     private Route moveNodeandCheck(Node currentNode, Route currentRoute, int currentInternalNode, int currentInternalRoute,int index,int routeIndex) throws MaxWeightException {
 
-       /* if(currentNode.getRoute().nodeList.size() -2 == currentInternalNode)
-        {
-            //remove examined node from its route
-            //currentNode.getRoute().removeNode(currentNode);
+       double obj=routes.getObjectiveFunction();
+       Node tempNode=routes.get(currentInternalRoute).getNode(currentInternalNode);
 
-            //add the node in new route
-            routes.get(currentInternalRoute).addNode(currentNode);
-        }
-        else{
-            //remove examined node from its route
-            //currentNode.getRoute().removeNode(currentNode);
+       if(routes.get(currentInternalRoute).canSwap(tempNode,currentNode)) {
+           routes.get(currentInternalRoute).addNode(currentInternalNode, currentNode);
 
-            //add the node in new route
-            routes.get(currentInternalRoute).addNode(currentInternalNode, currentNode);
-        }*/
-        routes.get(currentInternalRoute).addNode(currentInternalNode, currentNode);
+           if (routes.isItMinimized(obj)) {
+               currentRoute = currentNode.getRoute().getCopyOfRoute();
+           } else {
+               routes.get(currentInternalRoute).removeNode(currentNode);
+               if (index >= currentRoute.nodeList.size()) {
+                   routes.get(routeIndex).addNode(currentNode);
+               } else {
+                   routes.get(routeIndex).addNode(index, currentNode);
+               }
+           }
+       }
         //calculate new total cost
-        actual_cost = 0;
 
-        for (int j = 0; j < routes.size(); j++) {
+
+       /* for (int j = 0; j < routes.size(); j++) {
             actual_cost += routes.get(j).getActualDistance();
         }
 
@@ -180,7 +177,8 @@ public class Relocate {
         }
 
         return currentRoute;
+    }*/
+        return currentRoute;
     }
-
 }
 
