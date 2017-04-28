@@ -2,6 +2,7 @@ import utils.ImproperUsageException;
 import utils.MaxWeightException;
 import com.sun.istack.internal.Nullable;
 import utils.NodeNotFoundException;
+import utils.RouteSizeException;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -75,7 +76,13 @@ public class Route {
 
         if (node.getType() != Values.nodeType.WAREHOUSE) {
             if (node.getRoute() != null) {
-                node.getRoute().removeNode(node);
+                try {
+                    node.getRoute().removeNode(node);
+                } catch (RouteSizeException e) {
+                    if (node.getType() == Values.nodeType.LINEHAUL)  {weightLinehaul -= node.weight;} else {weightBackhaul -= node.weight;}
+                    nodeList.remove(nodeList.indexOf(node)); // undo the add
+                    e.printStackTrace();
+                }
             }
             node.setRoute(this);
         }
@@ -103,7 +110,13 @@ public class Route {
                 }
 
                 if (node.getRoute() != null) {
-                    node.getRoute().removeNode(node);
+                    try {
+                        node.getRoute().removeNode(node);
+                    } catch (RouteSizeException e) {
+                        if (node.getType() == Values.nodeType.LINEHAUL)  {weightLinehaul -= node.weight;} else {weightBackhaul -= node.weight;}
+                        nodeList.remove(nodeList.indexOf(node)); // undo the add
+                        e.printStackTrace();
+                    }
                 }
                 node.setRoute(this);
 
@@ -137,11 +150,15 @@ public class Route {
     }
 
 
-    public void removeNode(Node node) {
+    public void removeNode(Node node) throws RouteSizeException {
         if (nodeList.contains(node)) {
+            if(nodeList.size() <=3 && nodeList.get(0).getType().equals(Values.nodeType.BACKHAUL) && nodeList.get(nodeList.size()-1).getType().equals(Values.nodeType.BACKHAUL )) {
+
+                throw new RouteSizeException("Cannot remove node,route size is less than 3");
+            }else{
             if (node.getType() == Values.nodeType.LINEHAUL)  {weightLinehaul -= node.weight;} else {weightBackhaul -= node.weight;}
             nodeList.remove(node);
-        } else {
+        } }else {
             System.err.println("!!! Error - Node to remove wasn't found in this route !!!");
         }
         node.setRoute(null);

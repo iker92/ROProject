@@ -1,5 +1,6 @@
 import core.Coordinates;
 import utils.MaxWeightException;
+import utils.RouteSizeException;
 import utils.SwapFailedException;
 
 import java.io.BufferedReader;
@@ -338,7 +339,7 @@ public class Helper {
 
 
 
-    public void swapNodes(Node first, Node second) throws SwapFailedException {
+    public void swapNodes(Node first, Node second) throws SwapFailedException, RouteSizeException {
         // if called with nodes of the same route, call the appropriate function
         if (first.getRoute() == second.getRoute()) {
             first.getRoute().swap(first,second);
@@ -369,7 +370,7 @@ public class Helper {
 
 
 
-    public void swapNodesIfWorth(Node first, Node second) throws SwapFailedException {
+    public void swapNodesIfWorth(Node first, Node second) throws SwapFailedException, RouteSizeException {
 
         Route firstRoute = first.getRoute();
         Route secondRoute = second.getRoute();

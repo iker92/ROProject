@@ -1,5 +1,6 @@
 import utils.MaxWeightException;
 import utils.NodeNotFoundException;
+import utils.RouteSizeException;
 
 import java.util.ArrayList;
 
@@ -19,7 +20,7 @@ public class Relocate {
         this.helper = helper;
     }
 
-    public RouteList findBestRelocate(ArrayList<Node> completeTSP) throws MaxWeightException, NodeNotFoundException {
+    public RouteList findBestRelocate(ArrayList<Node> completeTSP) throws MaxWeightException, NodeNotFoundException, RouteSizeException {
 
 
         /** the external for is useful for analyze all nodes only one time per node ***/
@@ -134,7 +135,7 @@ public class Relocate {
         return routes;
     }
 
-    private Route moveNodeandCheck(Node currentNode, Route currentRoute, int currentInternalNode, int currentInternalRoute,int index,int routeIndex) throws MaxWeightException {
+    private Route moveNodeandCheck(Node currentNode, Route currentRoute, int currentInternalNode, int currentInternalRoute,int index,int routeIndex) throws MaxWeightException, RouteSizeException {
 
        double obj=routes.getObjectiveFunction();
        Node tempNode=routes.get(currentInternalRoute).getNode(currentInternalNode);

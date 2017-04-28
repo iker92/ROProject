@@ -1,5 +1,6 @@
 import utils.MaxWeightException;
 import utils.NodeNotFoundException;
+import utils.RouteSizeException;
 import utils.SwapFailedException;
 
 import java.util.ArrayList;
@@ -46,7 +47,9 @@ public class Exchange {
 
                     try {
                         helper.swapNodesIfWorth(node, currentNode);
-                    } catch (SwapFailedException e) {}
+                    } catch (SwapFailedException e) {} catch (RouteSizeException e) {
+                        e.printStackTrace();
+                    }
                 }
 
                 /** Swaps on Other Routes **/
@@ -62,7 +65,9 @@ public class Exchange {
                         if(otherRouteNode.getType().equals(Values.nodeType.WAREHOUSE)) continue;
                         try {
                             helper.swapNodesIfWorth(node, otherRouteNode);
-                        } catch (SwapFailedException e) {}
+                        } catch (SwapFailedException e) {} catch (RouteSizeException e) {
+                            e.printStackTrace();
+                        }
                     }
 
                 }

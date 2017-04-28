@@ -1,5 +1,6 @@
 import utils.MaxWeightException;
 import utils.NodeNotFoundException;
+import utils.RouteSizeException;
 
 import java.util.ArrayList;
 
@@ -25,6 +26,20 @@ public class Main {
 
 
         RouteList exchangedRoutes = new RouteList();
+        RouteList relocatedRoutes = new RouteList();
+        Relocate relocate = new Relocate(distances,routes,helper);
+
+        try {
+            relocatedRoutes = relocate.findBestRelocate(instance1.completeTSP);
+            printRoutes(routes);
+            relocatedRoutes.size();
+        } catch (MaxWeightException e) {
+            e.printStackTrace();
+        } catch (NodeNotFoundException e) {
+            e.printStackTrace();
+        } catch (RouteSizeException e) {
+            e.printStackTrace();
+        }
 
         Exchange exchange = new Exchange(routes, helper);
 
@@ -37,7 +52,6 @@ public class Main {
         } catch (NodeNotFoundException e) {
             e.printStackTrace();
         }
-
 
 
     }
