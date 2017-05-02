@@ -82,7 +82,7 @@ public class Exchange {
                         if(route.canSwap(node, otherRouteNode) && otherRoute.canSwap(otherRouteNode, node)){
                             double otherRouteWeight = otherRoute.getActualDistance();
                             //Current Route Actual Distance
-                            currentRouteWeight = helper.simulateExchange(node, otherRouteNode) + helper.swapAndCalculateDistance(otherRouteNode, node);
+                            currentRouteWeight = helper.simulateExchange(node, otherRouteNode) + helper.simulateExchange(otherRouteNode, node);
 
                             //Check if it is possible to do such move and also if it is worth to do it
                             if(routeWeight + otherRouteWeight > currentRouteWeight){
