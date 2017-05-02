@@ -21,93 +21,108 @@ public class Exchange {
 
     public RouteList findBestExchange() throws MaxWeightException, NodeNotFoundException {
 
-        //For each route
-        for(Route route : routes){
+        boolean isDone = false;
 
-            //Initializing map to contain the current best move to do.
-            TreeMap<Double, Node> bestMove = new TreeMap(Collections.reverseOrder());
-            double currentRouteWeight;
+        while (!isDone){
 
-            ArrayList<Node> currentNodes = route.nodeList;
-            int currentRouteSize = currentNodes.size();
-            double routeWeight = route.getActualDistance();
+            isDone = true;
+            //For each route
+            for(int routeIndex = 0; routeIndex < routes.size(); routeIndex++){
+                //Initializing map to contain the current best move to do.
+                TreeMap<Double, Node> bestMove = new TreeMap(Collections.reverseOrder());
+                double currentRouteWeight;
 
-            //For each node in current route
-            for(Node node : currentNodes){
+                Route route = routes.get(routeIndex);
+                ArrayList<Node> currentNodes = route.nodeList;
+                int currentRouteSize = currentNodes.size();
+                double routeWeight = route.getActualDistance();
 
-                /** Swaps on the same Route **/
-                //If currentNode is a Warehouse node indeed we skip it
-                if(node.getType().equals(Values.nodeType.WAREHOUSE)) continue;
+                boolean paperino = true;
 
-                //Get current node index
-                int currNodeIndex = currentNodes.indexOf(node);
+                //For each node in current route except first and last (WAREHOUSE)
+                for(int nodeIndex=1; nodeIndex <= currentRouteSize-2; nodeIndex++){
 
-                //Starting from the next node
-                for( int i=currNodeIndex+1; i<currentRouteSize; i++ ){
-                    //Get next's node index
-                    Node currentNode = currentNodes.get(i);
+                    //Get Current Node
+                    Node currentNode = currentNodes.get(nodeIndex);
 
-                    //If the next node is a warehouse skip
-                    if(currentNode.getType().equals(Values.nodeType.WAREHOUSE)) continue;
+                    /** Swaps on the same Route **/
+                    for(int innerNodeIndex=1; innerNodeIndex <= currentRouteSize-2; innerNodeIndex++) {
 
-                    if(route.canSwap(node, currentNode)){
-                        //Current Route Actual Distance
-                        currentRouteWeight = 2 * helper.simulateExchange(node, currentNode);
+                        //Get Current Inner Node
+                        Node currentInnerNode = currentNodes.get(innerNodeIndex);
 
-                        //Check if it is possible to do such move and also if it is worth to do it
-                        if((2 * routeWeight) > currentRouteWeight){
-                            //If so, put currentNode and Its bound value to bestMove map
-                            bestMove.put(currentRouteWeight, currentNode);
+                        //If we are analyzing the same node, or one or both of them are WAREHOUSE nodes, skip
+                        if(currentNode.equals(currentInnerNode) || currentNode.getType().equals(Values.nodeType.WAREHOUSE) || currentInnerNode.getType().equals(Values.nodeType.WAREHOUSE)) continue;
+
+                        if (route.canSwap(currentNode, currentInnerNode)) {
+                            //Current Route Actual Distance
+                            currentRouteWeight = helper.simulateExchange(currentNode, currentInnerNode);
+
+                            //Check if it is possible to do such move and also if it is worth to do it
+                            if (routeWeight > currentRouteWeight) {
+                                //If so, put currentNode and Its bound value to bestMove map
+                                bestMove.put(currentRouteWeight*2, currentInnerNode);
+                            }
                         }
                     }
 
-                }
+                    /** Swaps on Other Routes **/
+                    for(int currentRouteIndex = 0; currentRouteIndex < routes.size(); currentRouteIndex++){
 
-                /** Swaps on Other Routes **/
-                for(Route currentRoute : routes){
+                        //Get Current Route
+                        Route currentRoute = routes.get(currentRouteIndex);
 
-                    //Skip if we are on the very same route
-                    if(currentRoute.equals(route)) continue;
+                        //If we are analyzing same routes, skip
+                        if(currentRoute.equals(route)) continue;
 
-                    int routeIndex = routes.indexOf(currentRoute);
-                    Route otherRoute = routes.get(routeIndex);
+                        //Get currentRoute actual distance
+                        double currentRouteActualDistance = currentRoute.getActualDistance();
 
-                    ArrayList<Node> otherRouteNodes = otherRoute.nodeList;
+                        //Get Route's Actual Distance + Original Route's one
+                        double currentActualDistance = currentRouteActualDistance + routeWeight;
 
-                    //For each node in otherRoute
-                    for(Node otherRouteNode : otherRouteNodes){
+                        //For each node inside currentRoute
+                        for(int currentRouteNodeIndex = 1; currentRouteNodeIndex < currentRoute.nodeList.size()-2; currentRouteNodeIndex++){
 
-                        if(otherRouteNode.getType().equals(Values.nodeType.WAREHOUSE)) continue;
+                            //Get currentRoute node
+                            Node currentRouteNode = currentRoute.nodeList.get(currentRouteNodeIndex);
 
-                        if(route.canSwap(node, otherRouteNode) && otherRoute.canSwap(otherRouteNode, node)){
-                            double otherRouteWeight = otherRoute.getActualDistance();
-                            //Current Route Actual Distance
-                            currentRouteWeight = helper.simulateExchange(node, otherRouteNode) + helper.simulateExchange(otherRouteNode, node);
+                            //If it is possible to swap
+                            if( route.canSwap(currentNode, currentRouteNode) && currentRoute.canSwap(currentRouteNode, currentNode) ){
 
-                            //Check if it is possible to do such move and also if it is worth to do it
-                            if(routeWeight + otherRouteWeight > currentRouteWeight){
-                                //If so, put currentNode and Its bound value to bestMove map
-                                bestMove.put(currentRouteWeight, otherRouteNode);
+                                //If it is worth indeed
+                                if(currentActualDistance > helper.simulateExchange(currentNode, currentRouteNode) + helper.simulateExchange(currentRouteNode, currentNode)){
+                                    //Then add current Node and its weight to the map
+                                    bestMove.put(currentRouteActualDistance, currentRouteNode);
+                                }
+
                             }
                         }
 
                     }
 
-                }
+                    //If the map has at least one candidate
+                    if(!bestMove.isEmpty()){
+                        //Get the best node from it
+                        Double bestNodeToSwap = bestMove.lastKey();
+                        try {
+                            //Swap
+                            helper.swapNodes(currentNode, bestMove.get(bestNodeToSwap));
+                            //Decrease in order to analyze the last exchanged node
+                            //nodeIndex--;
+                            bestMove.clear();
+                            isDone = false;
+                            //System.out.println("routeIndex: " + routeIndex + " nodeIndex: " + nodeIndex);
+                            //helper.printRoutes(routes);
+                        } catch (SwapFailedException e) {}
+                    }
 
-                //If the map has at least one candidate
-                if(!bestMove.isEmpty()){
-                    //Get the best node from it
-                    Double bestNodeToSwap = bestMove.firstKey();
-                    try {
-                        //Swap
-                        helper.swapNodes(node, bestMove.get(bestNodeToSwap));
-                    } catch (SwapFailedException e) {}
                 }
 
             }
-
         }
+
+
 
         return routes;
 

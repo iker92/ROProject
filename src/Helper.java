@@ -412,7 +412,7 @@ public class Helper {
     }*/
 
 
-    private double simulateExchange(Node first, Node second) {
+    public double simulateExchange(Node first, Node second) {
 
         DistanceMatrix distances = DistanceMatrix.getInstance();
         Route firstRoute = first.getRoute();
@@ -441,6 +441,23 @@ public class Helper {
         }
 
         return actualDistanceFirst;
+
+    }
+
+    public static void printRoutes(RouteList routes) {
+
+        for (Route r : routes) {
+            System.out.print(routes.indexOf(r) + "  | ");
+
+            for (Node n : r.nodeList) {
+                System.out.print(n.index + (n.getType().toString().substring(0, 1)) + "\t");
+            }
+            System.out.print("\n");
+
+        }
+
+        System.out.print("\n");
+        System.out.print("\n");
 
     }
 

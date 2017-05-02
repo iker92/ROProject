@@ -24,9 +24,8 @@ public class Main {
 
         printRoutes(routes);
 
-
         RouteList exchangedRoutes = new RouteList();
-        RouteList relocatedRoutes = new RouteList();
+        /*RouteList relocatedRoutes = new RouteList();
         Relocate relocate = new Relocate(distances,routes,helper);
 
         try {
@@ -39,7 +38,7 @@ public class Main {
             e.printStackTrace();
         } catch (RouteSizeException e) {
             e.printStackTrace();
-        }
+        }*/
 
         Exchange exchange = new Exchange(routes, helper);
 
