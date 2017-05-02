@@ -369,7 +369,7 @@ public class Helper {
 
 
 
-    public void swapNodesIfWorth(Node first, Node second) throws SwapFailedException {
+    /*public void swapNodesIfWorth(Node first, Node second) throws SwapFailedException {
 
         Route firstRoute = first.getRoute();
         Route secondRoute = second.getRoute();
@@ -378,7 +378,7 @@ public class Helper {
 
         double distanceSum = firstDistance + secondDistance;
 
-        if (distanceSum > (swapAndCalculateDistance(first, second) + swapAndCalculateDistance(second, first))) {
+        if (distanceSum > (simulateExchange(first, second) + simulateExchange(second, first))) {
 
             swapNodes(first, second);
 
@@ -386,11 +386,10 @@ public class Helper {
             throw new SwapFailedException("!!! Swapping these nodes would increase the objective function! !!!");
         }
         
-    }
+    }*/
 
 
-
-    private double swapAndCalculateDistance(Node first, Node second) {
+    private double simulateExchange(Node first, Node second) {
 
         DistanceMatrix distances = DistanceMatrix.getInstance();
         Route firstRoute = first.getRoute();
