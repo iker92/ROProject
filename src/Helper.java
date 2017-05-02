@@ -236,6 +236,7 @@ public class Helper {
 
 
 
+
     private Route routeBuilder(Route route, Node warehouse) throws MaxWeightException {
 
         long seed = System.nanoTime();
@@ -261,6 +262,7 @@ public class Helper {
 
 
 
+
     public int getRouteIndexByNode(RouteList routes, Node node) {
         int index = -1;
         for (Route route : routes) {
@@ -269,6 +271,7 @@ public class Helper {
         }
         return index;
     }
+
 
 
 
@@ -293,6 +296,7 @@ public class Helper {
 
 
 
+
     public void relocateScrapped(Route route, RouteList routes) throws Exception {
 
         ArrayList<Node> mNodes = new ArrayList<>(route.nodeList);
@@ -311,6 +315,7 @@ public class Helper {
         }
 
     }
+
 
 
 
@@ -382,6 +387,24 @@ public class Helper {
 
             swapNodes(first, second);
 
+                // check if swapping the nodes (second in place of the first and vice versa) would cause trouble
+                if (first.getRoute().canSwap(first, second) && second.getRoute().canSwap(second, first)) {
+
+                    int firstPosition = first.getRoute().nodeList.indexOf(first);
+                    int secondPosition = second.getRoute().nodeList.indexOf(second);
+
+                    firstRoute.removeNode(first);
+                    secondRoute.removeNode(second);
+
+                    try {
+                        firstRoute.addNode(firstPosition, second);
+                        secondRoute.addNode(secondPosition, first);
+                    } catch (MaxWeightException e) {
+                        throw new SwapFailedException("!!! Swap failed! !!!");
+                    }
+
+                }
+            }
         } else {
             throw new SwapFailedException("!!! Swapping these nodes would increase the objective function! !!!");
         }
