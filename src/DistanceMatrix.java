@@ -1,3 +1,4 @@
+import java.math.BigDecimal;
 import java.util.ArrayList;
 
 import static java.lang.Math.abs;
@@ -8,7 +9,7 @@ import static java.lang.Math.abs;
 public class DistanceMatrix {
 
     public ArrayList<Node> nodes;
-    private double[][] distances;
+    private BigDecimal[][] distances;
 
     private static DistanceMatrix instance = null;
 
@@ -34,7 +35,7 @@ public class DistanceMatrix {
 
     private void calculateDistances(){
         int nodesSize = nodes.size();
-        distances = new double[nodesSize][nodesSize];
+        distances = new BigDecimal[nodesSize][nodesSize];
 
         System.out.printf("\t\t");
 
@@ -49,18 +50,18 @@ public class DistanceMatrix {
             System.out.printf(i + "\t");
 
             for( int j=0; j<nodesSize; j++){
-                distances[i][j] = Math.sqrt(abs((nodes.get(i).coordinates.x - nodes.get(j).coordinates.x)) + abs(nodes.get(i).coordinates.y - nodes.get(j).coordinates.y));
+                distances[i][j] = BigDecimal.valueOf(Math.sqrt(abs((nodes.get(i).coordinates.x - nodes.get(j).coordinates.x)) + abs(nodes.get(i).coordinates.y - nodes.get(j).coordinates.y)));
                 System.out.printf("%.2f\t",distances[i][j]);
             }
             System.out.print("\n\n");
         }
     }
 
-    public double getDistance (Node node_1, Node node_2){
+    public BigDecimal getDistance (Node node_1, Node node_2){
         return distances[node_1.index][node_2.index];
     }
 
-    public double[][] getDistances(){
+    public BigDecimal[][] getDistances(){
         return distances;
     }
 

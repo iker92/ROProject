@@ -2,6 +2,7 @@ import utils.MaxWeightException;
 import utils.NodeNotFoundException;
 import utils.RouteSizeException;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 
 /**
@@ -135,9 +136,12 @@ public class Relocate {
         return routes;
     }
 
+    //TODO: due to heavy changes in some core functionalities, this method was commented. isItMinimized must be correctly reimplemented and canSwap must be replaced with canRelocate (to be implemented)
+
     private Route moveNodeandCheck(Node currentNode, Route currentRoute, int currentInternalNode, int currentInternalRoute,int index,int routeIndex) throws MaxWeightException, RouteSizeException {
 
-       double obj=routes.getObjectiveFunction();
+     /*
+     BigDecimal obj=routes.getObjectiveFunction();
        Node tempNode=routes.get(currentInternalRoute).getNode(currentInternalNode);
 
        if(routes.get(currentInternalRoute).canSwap(tempNode,currentNode)) {
@@ -153,7 +157,14 @@ public class Relocate {
                    routes.get(routeIndex).addNode(index, currentNode);
                }
            }
+
+
        }
+       */
+
+     //TODO: from here to the bottom was already commented
+
+
         //calculate new total cost
 
 

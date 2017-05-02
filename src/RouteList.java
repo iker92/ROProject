@@ -1,3 +1,4 @@
+import java.math.BigDecimal;
 import java.util.ArrayList;
 
 /**
@@ -5,12 +6,10 @@ import java.util.ArrayList;
  */
 public class RouteList extends ArrayList<Route> implements Route.RouteListener{
 
-    private double objectiveFunction = 0.0;
+    private BigDecimal objectiveFunction = new BigDecimal(0);
 
     public RouteList(ArrayList<Route> routes) {
-        for (Route r  : routes){
-            add(r);
-        }
+        this.addAll(routes);
     }
 
     public RouteList() {
@@ -23,14 +22,14 @@ public class RouteList extends ArrayList<Route> implements Route.RouteListener{
     @Override
     public boolean add(Route route) {
         route.setOnRouteChangeListener(this);
-        objectiveFunction += route.getActualDistance();
+        objectiveFunction = objectiveFunction.add(route.getActualDistance());
         return super.add(route);
     }
 
     @Override
     public boolean remove(Object o) {
         ((Route) o).setOnRouteChangeListener(null);
-        objectiveFunction -= ((Route) o).getActualDistance();
+        objectiveFunction = objectiveFunction.subtract(((Route) o).getActualDistance());
         return super.remove(o);
     }
 
@@ -38,19 +37,16 @@ public class RouteList extends ArrayList<Route> implements Route.RouteListener{
 
     ////////////////////////////////////////////////// METHODS /////////////////////////////////////////////////////////
 
-    public double getObjectiveFunction(){
+    public BigDecimal getObjectiveFunction(){
         return objectiveFunction;
     }
 
 
-    //You can use this method to check whether a new calculated objective function is minimized.
-    public boolean isItMinimized(double objectFun){
-        return objectFun > objectiveFunction;
-    }
-
-
     @Override
-    public void OnRouteChange(Route route, double oldDistance) {
-        objectiveFunction = (objectiveFunction - oldDistance) + route.getActualDistance();
+    public void OnRouteChange(Route route, BigDecimal oldDistance) {
+        objectiveFunction = objectiveFunction.subtract(oldDistance).add(route.getActualDistance());
+
+        boolean fasullo = false;
+
     }
 }

@@ -2,6 +2,7 @@ import utils.MaxWeightException;
 import utils.NodeNotFoundException;
 import utils.RouteSizeException;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 
 /**
@@ -22,10 +23,12 @@ public class Main {
 
         RouteList routes =  helper.createRoutesFromInstance(instance1);
 
-        printRoutes(routes);
+        helper.printRoutes(routes);
+
 
         RouteList exchangedRoutes = new RouteList();
-        /*RouteList relocatedRoutes = new RouteList();
+/*
+        RouteList relocatedRoutes = new RouteList();
         Relocate relocate = new Relocate(distances,routes,helper);
 
         try {
@@ -38,13 +41,19 @@ public class Main {
             e.printStackTrace();
         } catch (RouteSizeException e) {
             e.printStackTrace();
-        }*/
+        }
+*/
+
+        BigDecimal oldOF = routes.getObjectiveFunction();
 
         Exchange exchange = new Exchange(routes, helper);
 
         try {
             exchangedRoutes = exchange.findBestExchange();
-            printRoutes(routes);
+
+            System.out.println("Before the Exchange, the Objective function was: " + oldOF.toString());
+
+
             exchangedRoutes.size();
         } catch (MaxWeightException e) {
             e.printStackTrace();
@@ -55,20 +64,4 @@ public class Main {
 
     }
 
-    private static void printRoutes(RouteList routes) {
-
-        for (Route r : routes) {
-            System.out.print(routes.indexOf(r) + "  | ");
-
-            for (Node n : r.nodeList) {
-                System.out.print(n.index + (n.getType().toString().substring(0, 1)) + "\t");
-            }
-            System.out.print("\n");
-
-        }
-
-        System.out.print("\n");
-        System.out.print("\n");
-
-    }
 }

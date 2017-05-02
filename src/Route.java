@@ -3,8 +3,10 @@ import utils.MaxWeightException;
 import com.sun.istack.internal.Nullable;
 import utils.NodeNotFoundException;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Created by loriz on 4/13/17.
@@ -17,8 +19,9 @@ public class Route {
     public int weightLinehaul = 0;
     public int weightBackhaul = 0;
     public ArrayList<Node> nodeList = new ArrayList<>();
+//  public CopyOnWriteArrayList<Node> nodeList = new CopyOnWriteArrayList<>();
     private DistanceMatrix distances = null;
-    private double actualDistance = 0.0;
+    private BigDecimal actualDistance;
     private Helper helper;
     Route newRoute = null;
 
@@ -160,7 +163,7 @@ public class Route {
         try {
             if (first.getType() != Values.nodeType.WAREHOUSE && second.getType() != Values.nodeType.WAREHOUSE) {
 
-                if (first.getRoute() == second.getRoute() && first.getRoute() == this && canSwap(first, second)){
+                if (first.getRoute() == second.getRoute() && first.getRoute() == this){
                     Collections.swap(nodeList, nodeList.indexOf(first), nodeList.indexOf(second));
                     //Update ObjectiveFunction with new distance
                     updateRouteDistance();
@@ -187,18 +190,17 @@ public class Route {
 
     private void updateRouteDistance() {
 
-        double oldDistance = actualDistance;
+        BigDecimal oldDistance = actualDistance;
 
         if (nodeList.size() > 1 && distances != null) {
 
-            actualDistance = 0.0;
+            actualDistance = new BigDecimal(0);
 
-            //TODO: skip last check (distance between warehouse and warehouse)
-            for (int i = 0; i < nodeList.size(); i++) {
-                actualDistance += distances.getDistance(nodeList.get(i), nodeList.get((i + 1) % nodeList.size()));
+            for (int i = 0; i < nodeList.size() -1; i++) {
+                actualDistance = actualDistance.add(distances.getDistance(nodeList.get(i), nodeList.get(i + 1)));
             }
 
-        } else actualDistance = 0.0;
+        } else actualDistance = new BigDecimal(0);
 
         if (mRouteListener != null) {
             mRouteListener.OnRouteChange(this, oldDistance);
@@ -206,7 +208,7 @@ public class Route {
 
     }
 
-    public double getActualDistance() {
+    public BigDecimal getActualDistance() {
         return actualDistance;
     }
 
@@ -235,9 +237,10 @@ public class Route {
         return ((node.getType() == Values.nodeType.LINEHAUL ? node.weight + weightLinehaul : node.weight + weightBackhaul) <= MAX_WEIGHT);
     }
 
-    // TODO: Highly experimental! To be deeply tested (all tests succeded so far).
-    // canSwap MUST BE CALLED with the node of the calling route as first parameter
-    public boolean canSwap(Node internal, Node external) {
+
+
+
+    public boolean canRelocate(Node internal, Node external) {
 
         Values.nodeType inType = internal.getType();
         Values.nodeType exType = external.getType();
@@ -292,8 +295,6 @@ public class Route {
     }
 
 
-
-
     public boolean validate() {
 
         boolean valid = true;
@@ -312,7 +313,7 @@ public class Route {
 
 
     public interface RouteListener {
-         void OnRouteChange(Route route, double oldDistance);
+         void OnRouteChange(Route route, BigDecimal oldDistance);
     }
 
 }
