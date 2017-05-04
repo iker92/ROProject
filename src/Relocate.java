@@ -116,7 +116,7 @@ public class Relocate {
                             Route currentInnerRoute;
 
                             if (currentRouteNode.getType() == Values.nodeType.WAREHOUSE) {
-                                currentInnerRoute = currentNodes.get(currentRouteNodeIndex - 1).getRoute();
+                                currentInnerRoute = currentRoute.nodeList.get(currentRouteNodeIndex - 1).getRoute();
                             } else {
                                 currentInnerRoute =  currentRouteNode.getRoute();
                             }
@@ -142,7 +142,8 @@ public class Relocate {
                                             newObjFun = newObjFun.add(simulateRelocate(currentNode, currentInnerRoute, currentRouteNodeIndex));
                                         }
                                     }
-                                    else
+
+                                    if (inner == currentInnerRoute)
                                     {
                                         newObjFun = newObjFun.add(simulateRelocate(currentNode, currentInnerRoute, currentRouteNodeIndex));
                                     }
@@ -268,16 +269,21 @@ public class Relocate {
     public boolean canRelocate(Node node, Route route, int position) {
 
         //if trying to relocate in place of the first warehouse
-        if (position == 0) {
+        if (position == 0 || node.getType() == Values.nodeType.WAREHOUSE) {
             return false;
         }
-
         Values.nodeType nodeType = node.getType();
+
+        Values.nodeType previousTypeExtRoute = node.getRoute().nodeList.get(node.getRoute().nodeList.indexOf(node) - 1).getType();
+        Values.nodeType nextTypeExtRoute = node.getRoute().nodeList.get(node.getRoute().nodeList.indexOf(node) + 1).getType();
+
         Values.nodeType previousType = route.nodeList.get(position - 1).getType();
         Values.nodeType nextType = route.nodeList.get(position).getType();
 
+        //System.out.println("Node Type: " + nodeType.toString() + " | Previous Type: " + previousType.toString() + " | Next Type: " + nextType.toString());
+
         //if trying to relocate the only node in a route
-        if (node.getRoute().nodeList.size() == 3 || (nodeType == Values.nodeType.LINEHAUL && nextType != Values.nodeType.LINEHAUL && previousType == Values.nodeType.WAREHOUSE)) {
+        if (node.getRoute().nodeList.size() == 3 || (nodeType == Values.nodeType.LINEHAUL && nextTypeExtRoute != Values.nodeType.LINEHAUL && previousTypeExtRoute == Values.nodeType.WAREHOUSE)) {
             return false;
         }
 
