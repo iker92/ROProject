@@ -61,6 +61,17 @@ public class Main {
             e.printStackTrace();
         }
 
+        System.out.println("\nStarting Validation . . .");
+        int ind = 0;
+        for(Route r : exchangedRoutes){
+            if(r.validate() == false ){
+                System.out.println("route " + ind + " is not valid!");
+            } else {
+                System.out.println("route " + ind + " is valid!");
+            }
+            ind++;
+        }
+
 
     }
 

@@ -33,14 +33,11 @@ public class Exchange {
             for(int routeIndex = 0; routeIndex < routes.size(); routeIndex++){
                 //Initializing map to contain the current best move to do.
                 TreeMap<BigDecimal, Node> bestMove = new TreeMap(Collections.reverseOrder());
-                double currentRouteWeight;
 
                 Route route = routes.get(routeIndex);
                 ArrayList<Node> currentNodes = route.nodeList;
                 int currentRouteSize = currentNodes.size();
                 BigDecimal routeWeight = route.getActualDistance();
-
-                boolean paperino = true;
 
                 //For each node in current route except first and last (WAREHOUSE)
                 for(int nodeIndex=1; nodeIndex <= currentRouteSize-2; nodeIndex++){
@@ -64,7 +61,7 @@ public class Exchange {
                             BigDecimal newObjFun = new BigDecimal(0);
 
                             for (Route inner : routes) {
-                                if (inner != currentNode.getRoute() && inner != currentInnerNode.getRoute()) {
+                                if (!inner.equals(route) && inner != currentInnerNode.getRoute()) {
                                     newObjFun = newObjFun.add(inner.getActualDistance());
 
                                 } else if (inner == currentNode.getRoute()){
@@ -150,9 +147,8 @@ public class Exchange {
                         BigDecimal bestNodeToSwap = bestMove.lastKey();
                         try {
                             swapNodes(currentNode, bestMove.get(bestNodeToSwap));
-
                             steps++;
-                            System.out.println("Exchanged node " + currentNode.index + " with note  " + bestMove.get(bestNodeToSwap).index);
+                            System.out.println("Exchanged node " + currentNode.index + " with node  " + bestMove.get(bestNodeToSwap).index);
                             bestMove.clear();
                             isDone = false;
                             helper.printRoutes(routes);
