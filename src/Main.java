@@ -35,7 +35,7 @@ public class Main {
 
 
 
-        System.out.println("Before the Exchange, the Objective function was: " + oldOF.toString());
+        System.out.println("Before the Optimization, the Objective function was: " + oldOF.toString());
 
     }
 

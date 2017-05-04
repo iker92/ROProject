@@ -206,22 +206,32 @@ public class Relocate {
 
         Node actual;
         Node next;
+        int offset = 0;
+        int nodeListSize = route.nodeList.size();
 
-        for (int innerIndex = 0; innerIndex < route.nodeList.size() - 1; innerIndex++) {
+        for (int innerIndex = 0; innerIndex < nodeListSize - 1 ; innerIndex++) {
 
-            actual = route.nodeList.get(innerIndex);
-            next = route.nodeList.get(innerIndex + 1);
+            actual = route.nodeList.get(innerIndex + offset);
+            next = route.nodeList.get(innerIndex + 1 + offset);
 
             if (node.getRoute() == route) {
 
                 // simulate skip of node
-                if (nodeIndex == innerIndex + 1) next = route.nodeList.get(innerIndex + 2);
-                if (nodeIndex == innerIndex) actual = route.nodeList.get(innerIndex - 1);
+                if (nodeIndex == innerIndex + 1) {
+                    next = route.nodeList.get(innerIndex + 2);
+                    nodeListSize--;
+                    offset = 1;
+                }
+                //if (nodeIndex == innerIndex) actual = route.nodeList.get(innerIndex - 1);
 
             } else {
 
                 // simulate insertion of node
-                if (index == innerIndex + 1) next = node;
+                if (index == innerIndex + 1) {
+                    next = node;
+                    offset = -1;
+                    nodeListSize++;
+                }
                 if (index == innerIndex) actual = node;
 
             }
@@ -250,6 +260,8 @@ public class Relocate {
             actual = route.nodeList.get(innerIndex);
             next = route.nodeList.get(innerIndex + 1);
 
+            //TODO probably all wrong, check!
+
             // simulate skip of node
             if (nodeIndex == innerIndex + 1) next = route.nodeList.get(innerIndex + 2);
             if (nodeIndex == innerIndex) actual = route.nodeList.get(innerIndex - 1);
@@ -268,10 +280,17 @@ public class Relocate {
 
     public boolean canRelocate(Node node, Route route, int position) {
 
+        //if trying to relocate a node with itself
+        if (node.getRoute() == route && route.nodeList.indexOf(node) == position) {
+            return false;
+        }
+
         //if trying to relocate in place of the first warehouse
         if (position == 0 || node.getType() == Values.nodeType.WAREHOUSE) {
             return false;
         }
+
+
         Values.nodeType nodeType = node.getType();
 
         Values.nodeType previousTypeExtRoute = node.getRoute().nodeList.get(node.getRoute().nodeList.indexOf(node) - 1).getType();
