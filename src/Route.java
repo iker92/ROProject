@@ -182,7 +182,6 @@ public class Route {
         }
     }
 
-
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
@@ -237,62 +236,6 @@ public class Route {
         return ((node.getType() == Values.nodeType.LINEHAUL ? node.weight + weightLinehaul : node.weight + weightBackhaul) <= MAX_WEIGHT);
     }
 
-
-
-
-    public boolean canRelocate(Node internal, Node external) {
-
-        Values.nodeType inType = internal.getType();
-        Values.nodeType exType = external.getType();
-
-        // if at least one is WAREHOUSE, cannot swap
-        if (inType == Values.nodeType.WAREHOUSE || exType == Values.nodeType.WAREHOUSE) {
-            return false;
-        } else {
-
-            // if the first node passed is part of this route...
-            if (internal.getRoute() == this && external.getRoute() != this) {
-
-                Node nextIntNode = internal.getRoute().nodeList.get(internal.getRoute().nodeList.indexOf(internal) + 1);
-                Node prevIntNode = internal.getRoute().nodeList.get(internal.getRoute().nodeList.indexOf(internal) - 1);
-
-                // if BACKHAUL -> LINEHAUL, the current internal prev cannot be BACKHAUL
-                // if LINEHAUL -> BACKHAUL, the current internal next cannot be LINEHAUL
-                if (inType != exType) {
-
-                    if ((inType == Values.nodeType.BACKHAUL && prevIntNode.getType() == Values.nodeType.BACKHAUL
-                            || inType == Values.nodeType.LINEHAUL && nextIntNode.getType() == Values.nodeType.LINEHAUL)) {
-                        return false;
-                    }
-
-                    int actualInTypeWeight = (inType == Values.nodeType.LINEHAUL ? weightLinehaul : weightBackhaul) - internal.weight;
-                    int actualExTypeWeight = (exType == Values.nodeType.LINEHAUL ? weightLinehaul : weightBackhaul) + external.weight;
-                    return (actualInTypeWeight <= MAX_WEIGHT && actualExTypeWeight <= MAX_WEIGHT);
-
-                } else {
-
-                    int actualWeight = (inType == Values.nodeType.LINEHAUL ? weightLinehaul : weightBackhaul) - internal.weight + external.weight;
-                    return actualWeight <= MAX_WEIGHT;
-                }
-
-
-            } else if (internal.getRoute() == external.getRoute() && internal.getRoute() == this){
-                return inType == exType;
-
-            } else {
-                try {
-                    throw new ImproperUsageException();
-                } catch (ImproperUsageException e) {
-                    System.err.println("!!! Wrong usage of canSwap method! At least the first parameter's node must be part of this route! !!!");
-                }
-                return false;
-            }
-
-
-        }
-
-
-    }
 
 
     public boolean validate() {

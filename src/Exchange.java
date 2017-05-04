@@ -103,7 +103,7 @@ public class Exchange {
                         BigDecimal currentActualDistance = currentRouteActualDistance.add(routeWeight);
 
                         //For each node inside currentRoute
-                        for(int currentRouteNodeIndex = 1; currentRouteNodeIndex < currentRoute.nodeList.size()-2; currentRouteNodeIndex++){
+                        for(int currentRouteNodeIndex = 1; currentRouteNodeIndex <= currentRoute.nodeList.size()-2; currentRouteNodeIndex++){
 
                             //Get currentRoute node
                             Node currentRouteNode = currentRoute.nodeList.get(currentRouteNodeIndex);

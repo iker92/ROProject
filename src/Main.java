@@ -25,16 +25,26 @@ public class Main {
 
         helper.printRoutes(routes);
 
+        BigDecimal oldOF = routes.getObjectiveFunction();
 
-        RouteList exchangedRoutes = new RouteList();
-/*
-        RouteList relocatedRoutes = new RouteList();
+
+
+        doBestRelocate(distances, routes, helper);
+
+//        doBestExchange(routes, helper);
+
+
+
+        System.out.println("Before the Exchange, the Objective function was: " + oldOF.toString());
+
+    }
+
+    private static void doBestRelocate(DistanceMatrix distances, RouteList routes, Helper helper) {
+
         Relocate relocate = new Relocate(distances,routes,helper);
 
         try {
-            relocatedRoutes = relocate.findBestRelocate(instance1.completeTSP);
-            printRoutes(routes);
-            relocatedRoutes.size();
+            relocate.findBestRelocate();
         } catch (MaxWeightException e) {
             e.printStackTrace();
         } catch (NodeNotFoundException e) {
@@ -42,34 +52,19 @@ public class Main {
         } catch (RouteSizeException e) {
             e.printStackTrace();
         }
-*/
 
-        BigDecimal oldOF = routes.getObjectiveFunction();
+    }
+
+    private static  void doBestExchange(RouteList routes, Helper helper) {
 
         Exchange exchange = new Exchange(routes, helper);
 
         try {
-            exchangedRoutes = exchange.findBestExchange();
-
-            System.out.println("Before the Exchange, the Objective function was: " + oldOF.toString());
-
-
-            exchangedRoutes.size();
+            exchange.findBestExchange();
         } catch (MaxWeightException e) {
             e.printStackTrace();
         } catch (NodeNotFoundException e) {
             e.printStackTrace();
-        }
-
-        System.out.println("\nStarting Validation . . .");
-        int ind = 0;
-        for(Route r : exchangedRoutes){
-            if(r.validate() == false ){
-                System.out.println("route " + ind + " is not valid!");
-            } else {
-                System.out.println("route " + ind + " is valid!");
-            }
-            ind++;
         }
 
 

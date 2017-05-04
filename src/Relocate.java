@@ -1,9 +1,9 @@
-import utils.MaxWeightException;
-import utils.NodeNotFoundException;
-import utils.RouteSizeException;
+import utils.*;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.TreeMap;
 
 /**
  * Created by pippo on 13/04/17.
@@ -15,182 +15,287 @@ public class Relocate {
 
     Helper helper;
 
-    public Relocate(DistanceMatrix distances, RouteList routes, Helper helper){
+    public Relocate(DistanceMatrix distances, RouteList routes, Helper helper) {
         this.distances = distances;
         this.routes = routes;
         this.helper = helper;
     }
 
-    public RouteList findBestRelocate(ArrayList<Node> completeTSP) throws MaxWeightException, NodeNotFoundException, RouteSizeException {
+    public RouteList findBestRelocate() throws MaxWeightException, NodeNotFoundException, RouteSizeException {
+        boolean isOptimized = false;
+        int steps = 0;
 
+        while (isOptimized == false)
+        {
+            isOptimized = true;
+            //For each route
+            for (int routeIndex = 0; routeIndex < routes.size(); routeIndex++) {
+                //Initializing map to contain the current best move to do.
+                TreeMap<BigDecimal, Node> bestMove = new TreeMap(Collections.reverseOrder());
 
-        /** the external for is useful for analyze all nodes only one time per node ***/
-        for (int i = 1; i < completeTSP.size(); i++) {
+                Route route = routes.get(routeIndex);
+                ArrayList<Node> currentNodes = route.nodeList;
 
-            Node currentNode = completeTSP.get(i);
-            Route currentRoute = currentNode.getRoute().getCopyOfRoute();
-            int routeIndex = helper.getRouteIndexByNode(routes, currentNode);
-
-            //For every route
-            for (int currentInternalRoute = 0; currentInternalRoute < routes.size(); currentInternalRoute++)
-            {
-                //For every node
-                for (int currentInternalNode = 1; currentInternalNode < routes.get(currentInternalRoute).nodeList.size() -1; currentInternalNode++)
+                //For each node in current route except first and last (WAREHOUSE)
+                for (int nodeIndex = 1; nodeIndex <= currentNodes.size() - 1; nodeIndex++)
                 {
-                    //control node type
-                    if(currentNode.getType().equals(Values.nodeType.LINEHAUL))
+                    //Get Current Node
+                    Node currentNode = currentNodes.get(nodeIndex);
+
+                    /** Relocate on the same Route **/
+                    for (int innerNodeIndex = 1; innerNodeIndex <= currentNodes.size() - 1; innerNodeIndex++)
                     {
-                        //control if current_node is different from the passed node
-                        if (currentNode != routes.get(currentInternalRoute).getNode(currentInternalNode))
-                        {
-                            //index of the current node in original position
-                            int index = currentNode.getRoute().nodeList.indexOf(currentNode);
+                        //Get Current Inner Node
+                        Node currentInnerNode = currentNodes.get(innerNodeIndex);
 
-                            //if the route of examined node is different from the actual route
-                            if (currentNode.getRoute() != routes.get(currentInternalRoute))
-                            {
-                                //if don't exceed maximum weight
-                                if (routes.get(currentInternalRoute).canAdd(currentNode))
+                        //If we are analyzing the same node, or one or both of them are WAREHOUSE nodes, skip
+                        if (currentNode.equals(currentInnerNode) || currentNode.getType().equals(Values.nodeType.WAREHOUSE))
+                            continue;
+
+                        Route currentInnerRoute;
+
+                        if (currentInnerNode.getType() == Values.nodeType.WAREHOUSE) {
+                            currentInnerRoute = currentNodes.get(innerNodeIndex - 1).getRoute();
+                        } else {
+                            currentInnerRoute =  currentInnerNode.getRoute();
+                        }
+
+                        if (canRelocate(currentNode, currentInnerRoute, currentInnerRoute.nodeList.indexOf(currentInnerNode))) {
+                            //Current Route Actual Distance
+                            BigDecimal oldObjFun = routes.getObjectiveFunction();
+
+                            BigDecimal newObjFun = new BigDecimal(0);
+
+                            for (Route inner : routes) {
+                                if (inner != currentNode.getRoute() && inner != currentInnerRoute)
                                 {
-                                    if(routes.get(currentInternalRoute).nodeList.get(currentInternalNode).getType().equals(Values.nodeType.LINEHAUL))
+                                    newObjFun = newObjFun.add(inner.getActualDistance());
+                                }
+                                if (inner == currentNode.getRoute())
+                                {
+                                    if(currentNode.getRoute() == currentInnerRoute){
+                                        newObjFun = newObjFun.add(simulateRelocateSiblings(currentNode, currentInnerRoute, currentInnerRoute.nodeList.indexOf(currentInnerNode)));
+                                    }
+                                    else{
+                                        newObjFun = newObjFun.add(simulateRelocate(currentNode, currentInnerRoute, currentInnerRoute.nodeList.indexOf(currentInnerNode)));
+                                    }
+                                }
+                                else
+                                {
+                                    newObjFun = newObjFun.add(simulateRelocate(currentNode, currentInnerRoute, currentInnerRoute.nodeList.indexOf(currentInnerNode)));
+                                }
+                            }
+
+                            // ex1.compareTo(ex2)
+                            // returns -1 if ex2 > ex1
+                            // returns 1 if ex1 > ex2
+                            // returns 0 if equal
+                            if (oldObjFun.compareTo(newObjFun) == 1) {
+                                //If so, put currentNode and Its bound value to bestMove map
+                                bestMove.put(newObjFun, currentInnerNode);
+
+                            }
+                        }
+                    }
+
+                    /** Relocate on Other Routes **/
+                    for(int currentRouteIndex = 0; currentRouteIndex < routes.size(); currentRouteIndex++){
+
+                        //Get Current Route
+                        Route currentRoute = routes.get(currentRouteIndex);
+
+                        //If we are analyzing same routes, skip
+                        if(currentRoute.equals(route)) continue;
+
+                        //For each node inside currentRoute
+                        for(int currentRouteNodeIndex = 1; currentRouteNodeIndex <= currentRoute.nodeList.size() - 1; currentRouteNodeIndex++){
+
+                            //Get currentRoute node
+                            Node currentRouteNode = currentRoute.nodeList.get(currentRouteNodeIndex);
+
+                            Route currentInnerRoute;
+
+                            if (currentRouteNode.getType() == Values.nodeType.WAREHOUSE) {
+                                currentInnerRoute = currentNodes.get(currentRouteNodeIndex - 1).getRoute();
+                            } else {
+                                currentInnerRoute =  currentRouteNode.getRoute();
+                            }
+
+                            //If it is possible to relocate
+                            if(canRelocate(currentNode, currentInnerRoute, currentInnerRoute.nodeList.indexOf(currentRouteNode))){
+
+                                BigDecimal oldObjFun = routes.getObjectiveFunction();
+
+                                BigDecimal newObjFun = new BigDecimal(0);
+
+                                for (Route inner : routes) {
+                                    if (inner != currentNode.getRoute() && inner != currentInnerRoute)
                                     {
-                                        //remove examined node from its route
-                                        currentRoute = moveNodeandCheck(currentNode, currentRoute, currentInternalNode, currentInternalRoute, index, routeIndex);
-                                        routeIndex=helper.getRouteIndexByNode(routes, currentNode);
-                                    } else{
-                                        currentRoute = moveNodeandCheck(currentNode, currentRoute, currentInternalNode, currentInternalRoute, index, routeIndex);
-                                        routeIndex=helper.getRouteIndexByNode(routes, currentNode);
-                                        currentInternalNode++;
+                                        newObjFun = newObjFun.add(inner.getActualDistance());
+                                    }
+                                    if (inner == currentNode.getRoute())
+                                    {
+                                        if(currentNode.getRoute() == currentInnerRoute){
+                                            newObjFun = newObjFun.add(simulateRelocateSiblings(currentNode, currentInnerRoute, currentRouteNodeIndex));
+                                        }
+                                        else{
+                                            newObjFun = newObjFun.add(simulateRelocate(currentNode, currentInnerRoute, currentRouteNodeIndex));
+                                        }
+                                    }
+                                    else
+                                    {
+                                        newObjFun = newObjFun.add(simulateRelocate(currentNode, currentInnerRoute, currentRouteNodeIndex));
                                     }
                                 }
-                            } else {
-                                if(routes.get(currentInternalRoute).nodeList.get(currentInternalNode).getType().equals(Values.nodeType.LINEHAUL)){
-                                    //remove examined node from its route
-                                    currentRoute = moveNodeandCheck(currentNode, currentRoute, currentInternalNode, currentInternalRoute, index, routeIndex);
-                                    routeIndex=helper.getRouteIndexByNode(routes, currentNode);
-                                } else{
-                                    currentRoute = moveNodeandCheck(currentNode, currentRoute, currentInternalNode, currentInternalRoute, index, routeIndex);
-                                    routeIndex=helper.getRouteIndexByNode(routes, currentNode);
-                                    //currentInternalRoute++;
+
+                                //If it is worth indeed
+                                if(oldObjFun.compareTo(newObjFun) == 1){
+                                    //Then add current Node and its weight to the map
+                                    bestMove.put(newObjFun, currentRouteNode);
                                 }
 
                             }
                         }
-                    } else if(currentNode.getType().equals(Values.nodeType.BACKHAUL)) {
-                        //control if current_node is different from the passed node
-                        if (currentNode != routes.get(currentInternalRoute).getNode(currentInternalNode))
-                        {
 
-                            //index of the current node in original position
-                            int index = currentNode.getRoute().nodeList.indexOf(currentNode);
-
-                            //if the route of examined node is different from the actual route
-                            if (currentNode.getRoute() != routes.get(currentInternalRoute)) {
-                                //if don't exceed maximum weight
-                                if (routes.get(currentInternalRoute).canAdd(currentNode)) {
-                                    if (routes.get(currentInternalRoute).nodeList.get(currentInternalNode).getType().equals(Values.nodeType.LINEHAUL)) {
-                                        if (currentInternalNode == routes.get(currentInternalRoute).nodeList.size() - 2) { //handling warehouses
-
-                                            currentInternalNode = routes.get(currentInternalRoute).nodeList.size() -1; //handling warehouses
-                                            currentRoute = moveNodeandCheck(currentNode, currentRoute, currentInternalNode, currentInternalRoute, index, routeIndex);
-                                            routeIndex = helper.getRouteIndexByNode(routes, currentNode);
-                                        }
-                                    } else {
-                                        if (currentInternalNode == routes.get(currentInternalRoute).nodeList.size() - 2) { //handling warehouses
-
-                                            currentRoute = moveNodeandCheck(currentNode, currentRoute, currentInternalNode, currentInternalRoute, index, routeIndex);
-                                            routeIndex = helper.getRouteIndexByNode(routes, currentNode);
-                                            currentInternalNode = routes.get(currentInternalRoute).nodeList.size() -1; //handling warehouses
-                                            currentRoute = moveNodeandCheck(currentNode, currentRoute, currentInternalNode, currentInternalRoute, index, routeIndex);
-                                            routeIndex = helper.getRouteIndexByNode(routes, currentNode);
-                                        } else {
-                                            currentRoute = moveNodeandCheck(currentNode, currentRoute, currentInternalNode, currentInternalRoute, index, routeIndex);
-                                            routeIndex = helper.getRouteIndexByNode(routes, currentNode);
-                                        }
-                                    }
-                                }
-                            } else {
-                                if (routes.get(currentInternalRoute).nodeList.get(currentInternalNode).getType().equals(Values.nodeType.LINEHAUL)) {
-                                    if (currentInternalNode >= routes.get(currentInternalRoute).nodeList.size() - 2) { //handling warehouses
-                                        currentInternalNode = routes.get(currentInternalRoute).nodeList.size() -1; //handling warehouses
-                                        currentRoute = moveNodeandCheck(currentNode, currentRoute, currentInternalNode, currentInternalRoute, index, routeIndex);
-                                        routeIndex = helper.getRouteIndexByNode(routes, currentNode);
-                                    }
-
-                                } else {
-                                    if (currentInternalNode == routes.get(currentInternalRoute).nodeList.size() - 2) { //handling warehouses
-                                        currentRoute = moveNodeandCheck(currentNode, currentRoute, currentInternalNode, currentInternalRoute, index, routeIndex);
-                                        routeIndex = helper.getRouteIndexByNode(routes, currentNode);
-                                        currentInternalNode = routes.get(currentInternalRoute).nodeList.size() -1; //handling warehouses
-                                        currentRoute = moveNodeandCheck(currentNode, currentRoute, currentInternalNode, currentInternalRoute, index, routeIndex);
-                                        routeIndex = helper.getRouteIndexByNode(routes, currentNode);
-                                    }
-                                }
-                            }
-                        }
+                    }
+                    if(!bestMove.isEmpty()){
+                        //Get the best node from it
+                        BigDecimal bestMapResult = bestMove.lastKey();
+                        try {
+                            relocateNode(currentNode, bestMove.get(bestMapResult).getRoute(),bestMove.get(bestMapResult).getRoute().getIndexByNode(bestMove.get(bestMapResult)));
+                            steps++;
+                            System.out.println("Relocated node " + currentNode.index + " inside route of node  " + bestMove.get(bestMapResult).index);
+                            bestMove.clear();
+                            isOptimized = false;
+                            helper.printRoutes(routes);
+                        } catch (SwapFailedException e) { }
                     }
                 }
             }
         }
 
+        System.out.println("\nRelocate successfully terminated!\nRelocate moves done: " + steps + "\nObjective Function: " + routes.getObjectiveFunction().toString());
+
         return routes;
     }
 
-    //TODO: due to heavy changes in some core functionalities, this method was commented. isItMinimized must be correctly reimplemented and canSwap must be replaced with canRelocate (to be implemented)
 
-    private Route moveNodeandCheck(Node currentNode, Route currentRoute, int currentInternalNode, int currentInternalRoute,int index,int routeIndex) throws MaxWeightException, RouteSizeException {
+    public void relocateNode(Node node, Route route, int index) throws SwapFailedException
+    {
 
-     /*
-     BigDecimal obj=routes.getObjectiveFunction();
-       Node tempNode=routes.get(currentInternalRoute).getNode(currentInternalNode);
+        try {
+            node.getRoute().removeNode(node);
+            route.addNode(index, node);
+        } catch (MaxWeightException e) {
 
-       if(routes.get(currentInternalRoute).canSwap(tempNode,currentNode)) {
-           routes.get(currentInternalRoute).addNode(currentInternalNode, currentNode);
+            System.err.println("!!! SOMETHING HAS GONE HORRIBLY WRONG !!!");
 
-           if (routes.isItMinimized(obj)) {
-               currentRoute = currentNode.getRoute().getCopyOfRoute();
-           } else {
-               routes.get(currentInternalRoute).removeNode(currentNode);
-               if (index >= currentRoute.nodeList.size()) {
-                   routes.get(routeIndex).addNode(currentNode);
-               } else {
-                   routes.get(routeIndex).addNode(index, currentNode);
-               }
-           }
-
-
-       }
-       */
-
-     //TODO: from here to the bottom was already commented
-
-
-        //calculate new total cost
-
-
-       /* for (int j = 0; j < routes.size(); j++) {
-            actual_cost += routes.get(j).getActualDistance();
         }
 
-        //if the new total cost is greater than the old, undo the swap
-        if (actual_cost >= old_cost)
-        {
-            routes.get(currentInternalRoute).removeNode(currentNode);
-            if (index >= currentRoute.nodeList.size())
-            {
-                routes.get(routeIndex).addNode(currentNode);
-            } else {
-                routes.get(routeIndex).addNode(index, currentNode);
-            }
-        } //otherwise old cost became actual cost (in order to store best result) and update the current node route
-        else {
-            old_cost = actual_cost;
-            currentRoute = currentNode.getRoute().getCopyOfRoute();
-        }
-
-        return currentRoute;
-    }*/
-        return currentRoute;
     }
-}
 
+    private BigDecimal simulateRelocate(Node node, Route route, int index) {
+
+
+        DistanceMatrix distances = DistanceMatrix.getInstance();
+        Route firstRoute = node.getRoute();
+
+        int nodeIndex = firstRoute.nodeList.indexOf(node);
+        BigDecimal actualDistanceFirst = new BigDecimal(0);
+
+        Node actual;
+        Node next;
+
+        for (int innerIndex = 0; innerIndex < route.nodeList.size() - 1; innerIndex++) {
+
+            actual = route.nodeList.get(innerIndex);
+            next = route.nodeList.get(innerIndex + 1);
+
+            if (node.getRoute() == route) {
+
+                // simulate skip of node
+                if (nodeIndex == innerIndex + 1) next = route.nodeList.get(innerIndex + 2);
+                if (nodeIndex == innerIndex) actual = route.nodeList.get(innerIndex - 1);
+
+            } else {
+
+                // simulate insertion of node
+                if (index == innerIndex + 1) next = node;
+                if (index == innerIndex) actual = node;
+
+            }
+
+            actualDistanceFirst = actualDistanceFirst.add(distances.getDistance(actual, next));
+
+        }
+
+        return actualDistanceFirst;
+
+    }
+
+    private BigDecimal simulateRelocateSiblings(Node node, Route route, int index) {
+
+        DistanceMatrix distances = DistanceMatrix.getInstance();
+        Route firstRoute = node.getRoute();
+
+        int nodeIndex = firstRoute.nodeList.indexOf(node);
+        BigDecimal actualDistanceFirst = new BigDecimal(0);
+
+        Node actual;
+        Node next;
+
+        for (int innerIndex = 0; innerIndex < route.nodeList.size() - 1; innerIndex++) {
+
+            actual = route.nodeList.get(innerIndex);
+            next = route.nodeList.get(innerIndex + 1);
+
+            // simulate skip of node
+            if (nodeIndex == innerIndex + 1) next = route.nodeList.get(innerIndex + 2);
+            if (nodeIndex == innerIndex) actual = route.nodeList.get(innerIndex - 1);
+
+            // simulate insertion of node
+            if (index == innerIndex + 1) next = node;
+            if (index == innerIndex) actual = node;
+
+            actualDistanceFirst = actualDistanceFirst.add(distances.getDistance(actual, next));
+
+        }
+        return actualDistanceFirst;
+
+    }
+
+
+    public boolean canRelocate(Node node, Route route, int position) {
+
+        //if trying to relocate in place of the first warehouse
+        if (position == 0) {
+            return false;
+        }
+
+        Values.nodeType nodeType = node.getType();
+        Values.nodeType previousType = route.nodeList.get(position - 1).getType();
+        Values.nodeType nextType = route.nodeList.get(position).getType();
+
+        //if trying to relocate the only node in a route
+        if (node.getRoute().nodeList.size() == 3 || (nodeType == Values.nodeType.LINEHAUL && nextType != Values.nodeType.LINEHAUL && previousType == Values.nodeType.WAREHOUSE)) {
+            return false;
+        }
+
+        //if nodes have different types
+        if (nodeType != route.nodeList.get(position).getType()) {
+            if (nodeType == Values.nodeType.LINEHAUL && previousType == Values.nodeType.BACKHAUL && nextType != Values.nodeType.LINEHAUL) {
+                return false;
+            }
+            if (nodeType == Values.nodeType.BACKHAUL && previousType != Values.nodeType.BACKHAUL && nextType == Values.nodeType.LINEHAUL) {
+                return false;
+            }
+        }
+
+        int actualTypeWeight = (nodeType == Values.nodeType.LINEHAUL ? route.weightLinehaul : route.weightBackhaul) + node.weight;
+
+        return actualTypeWeight <= route.MAX_WEIGHT;
+
+    }
+
+
+}
