@@ -73,13 +73,13 @@ public class Relocate {
                                 }
                                 if (inner == currentNode.getRoute())
                                 {
-                                    if(currentNode.getRoute() == currentInnerRoute){
+                                    /*if(currentNode.getRoute() == currentInnerRoute){
                                         newObjFun = newObjFun.add(simulateRelocateSiblings(currentNode, currentInnerRoute, currentInnerRoute.nodeList.indexOf(currentInnerNode)));
                                     }
-                                    else{
+                                    else{*/
                                         newObjFun = newObjFun.add(simulateRelocate(currentNode, currentInnerRoute, currentInnerRoute.nodeList.indexOf(currentInnerNode)));
                                     }
-                                }
+                                //}
                                 else
                                 {
                                     newObjFun = newObjFun.add(simulateRelocate(currentNode, currentInnerRoute, currentInnerRoute.nodeList.indexOf(currentInnerNode)));
@@ -115,7 +115,7 @@ public class Relocate {
 
                             Route currentInnerRoute;
 
-                            if (currentRouteNode.getType() == Values.nodeType.WAREHOUSE) {
+                             if (currentRouteNode.getType() == Values.nodeType.WAREHOUSE) {
                                 currentInnerRoute = currentRoute.nodeList.get(currentRouteNodeIndex - 1).getRoute();
                             } else {
                                 currentInnerRoute =  currentRouteNode.getRoute();
@@ -135,12 +135,12 @@ public class Relocate {
                                     }
                                     if (inner == currentNode.getRoute())
                                     {
-                                        if(currentNode.getRoute() == currentInnerRoute){
+                                       /* if(currentNode.getRoute() == currentInnerRoute){
                                             newObjFun = newObjFun.add(simulateRelocateSiblings(currentNode, currentInnerRoute, currentRouteNodeIndex));
                                         }
-                                        else{
+                                        else{*/
                                             newObjFun = newObjFun.add(simulateRelocate(currentNode, currentInnerRoute, currentRouteNodeIndex));
-                                        }
+                                        //}
                                     }
 
                                     if (inner == currentInnerRoute)
@@ -199,7 +199,51 @@ public class Relocate {
 
 
         DistanceMatrix distances = DistanceMatrix.getInstance();
-        Route firstRoute = node.getRoute();
+
+        Route temp=route.getCopyOfRoute();
+        boolean flagSameRoute=false;
+        boolean flagOtherRoute=false;
+        Route nodeRoute=node.getRoute();
+        int nodeIndex=nodeRoute.nodeList.indexOf(node);
+        if(!temp.nodeList.contains(node)) {
+            flagOtherRoute=true;
+            try {
+                temp.addNode(index, node);
+            } catch (MaxWeightException e) {
+                flagOtherRoute=false;
+                e.printStackTrace();
+            }
+        }
+        else{
+            temp.removeNode(node);
+            route.removeNode(node);
+            flagSameRoute=true;
+            try {
+                temp.addNode(index, node);
+            } catch (MaxWeightException e) {
+                flagSameRoute=false;
+                e.printStackTrace();
+            }
+
+        }
+        BigDecimal actualDistanceFirst = new BigDecimal(0);
+        actualDistanceFirst=temp.getActualDistance();
+        if(flagOtherRoute) {
+            try {
+                nodeRoute.addNode(nodeIndex, node);
+            } catch (MaxWeightException e) {
+                e.printStackTrace();
+            }
+        }
+        if(flagSameRoute) {
+            try {
+                route.addNode(nodeIndex, node);
+            } catch (MaxWeightException e) {
+                e.printStackTrace();
+            }
+        }
+
+       /* Route firstRoute = node.getRoute();
 
         int nodeIndex = firstRoute.nodeList.indexOf(node);
         BigDecimal actualDistanceFirst = new BigDecimal(0);
@@ -214,7 +258,7 @@ public class Relocate {
             actual = route.nodeList.get(innerIndex + offset);
             next = route.nodeList.get(innerIndex + 1 + offset);
 
-            if (node.getRoute() == route) {
+            if (node.getRoute() != route) {
 
                 // simulate skip of node
                 if (nodeIndex == innerIndex + 1) {
@@ -238,12 +282,12 @@ public class Relocate {
 
             actualDistanceFirst = actualDistanceFirst.add(distances.getDistance(actual, next));
 
-        }
+        }*/
 
         return actualDistanceFirst;
 
     }
-
+/* commented for now, all is handled in simulaterelocate
     private BigDecimal simulateRelocateSiblings(Node node, Route route, int index) {
 
         DistanceMatrix distances = DistanceMatrix.getInstance();
@@ -276,7 +320,7 @@ public class Relocate {
         return actualDistanceFirst;
 
     }
-
+*/
 
     public boolean canRelocate(Node node, Route route, int position) {
 
