@@ -14,7 +14,7 @@ public class Main {
 
         Helper helper = new Helper();
 
-        String fileName = "Instances/A1.txt";
+        String fileName = "Instances/B3.txt";
         Instance instance1 = helper.fileToInstance(fileName);
 
         DistanceMatrix distances = DistanceMatrix.initialize(instance1.nodesList);
@@ -36,6 +36,8 @@ public class Main {
 
 
         System.out.println("Before the Optimization, the Objective function was: " + oldOF.toString());
+
+        helper.printRoutes(routes);
 
     }
 

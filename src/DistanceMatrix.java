@@ -57,8 +57,12 @@ public class DistanceMatrix {
         }
     }
 
+    public BigDecimal getDistance (int node_1, int node_2){
+        return distances[node_1][node_2];
+    }
+
     public BigDecimal getDistance (Node node_1, Node node_2){
-        return distances[node_1.index][node_2.index];
+        return getDistance(node_1.index, node_2.index);
     }
 
     public BigDecimal[][] getDistances(){
