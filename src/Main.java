@@ -15,7 +15,7 @@ public class Main {
         long startTime = System.nanoTime();
         Helper helper = new Helper();
 
-        String fileName = "Instances/B3.txt";
+        String fileName = "Instances/F3.txt";
         Instance instance1 = helper.fileToInstance(fileName);
 
         DistanceMatrix distances = DistanceMatrix.initialize(instance1.nodesList);
