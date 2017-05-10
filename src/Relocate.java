@@ -1,6 +1,5 @@
 import javafx.util.Pair;
 import utils.*;
-
 import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -193,7 +192,17 @@ public class Relocate {
 
     public void relocateNode(Node node, Route route, int index) throws SwapFailedException
     {
+if(node.getRoute()==route && (node.getType() == route.nodeList.get(index).getType() || (node.getType()!=route.nodeList.get(index).getType() && index > route.nodeList.indexOf(node)))){
+    try {
+        node.getRoute().removeNode(node);
+        route.addNode(index, node);
+    } catch (MaxWeightException e) {
 
+        System.err.println("!!! SOMETHING HAS GONE HORRIBLY WRONG !!!");
+
+    }
+    }
+    else{
         try {
             node.getRoute().removeNode(node);
             route.addNode(index, node);
@@ -202,7 +211,7 @@ public class Relocate {
             System.err.println("!!! SOMETHING HAS GONE HORRIBLY WRONG !!!");
 
         }
-
+    }
     }
 
     private BigDecimal simulateAdditionOfNode(Node node, Route route, int index) {
@@ -253,7 +262,8 @@ public class Relocate {
             listOfNodes.add(inNode);
         }
 
-        listOfNodes.add(index, node);
+            listOfNodes.add(index, node);
+
 
         BigDecimal distance = new BigDecimal(0);
         for (int routeIndex = 0; routeIndex < listOfNodes.size()-1; routeIndex++) {
@@ -306,21 +316,27 @@ public class Relocate {
 
         //if trying to relocate a node with itself
         if (node.getRoute() == route && route.nodeList.get(position).index == node.index) {
-            System.out.println("Relocate is impossible! Trying to relocate itself!\n");
+           // System.out.println("Relocate is impossible! Trying to relocate itself!\n");
             return false;
         }
+        if(node.getRoute() == route && node.getType() != route.nodeList.get(position).getType()){
+             {
+
+                    System.out.println("Relocate is impossible! Trying to relocate node of different types on same route!\n");
+                    return false;
+             }
+            }
 
         //if trying to relocate in place of the first warehouse
         if (position == 0) {
-            System.out.println("Relocate is impossible! Trying to put something before first WAREHOUSE\n");
+           // System.out.println("Relocate is impossible! Trying to put something before first WAREHOUSE\n");
             return false;
         }
 
         if (node.getType() == Values.nodeType.WAREHOUSE) {
-            System.out.println("Relocate is impossible! Node to relocate is WAREHOUSE\n");
+            //System.out.println("Relocate is impossible! Node to relocate is WAREHOUSE\n");
             return false;
         }
-
 
         Values.nodeType nodeType = node.getType();
 
