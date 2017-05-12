@@ -1,7 +1,6 @@
 import core.Coordinates;
 import org.apache.commons.io.FileUtils;
 import utils.MaxWeightException;
-import utils.SwapFailedException;
 
 import java.io.*;
 import java.text.DecimalFormat;

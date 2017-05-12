@@ -13,7 +13,7 @@ import java.util.ArrayList;
  */
 public class Main {
 
-    private static final String FILE = "A1";
+    private static final String FILE = "I1";
     private static final String SUFFIX = ".txt";
 
     public static void main(String [] args) {
@@ -21,7 +21,7 @@ public class Main {
         long startTime = System.nanoTime();
         Helper helper = new Helper();
 
-        String fileName = "Instances/" + FILE;
+        String fileName = "Instances/" + FILE+SUFFIX;
         Instance instance1 = helper.fileToInstance(fileName);
 
         DistanceMatrix distances = DistanceMatrix.initialize(instance1.nodesList);
