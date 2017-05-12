@@ -18,16 +18,21 @@ public class Relocate {
     RouteList routes;
 
     Helper helper;
+    ArrayList<Node> tsp;
 
-    public Relocate(DistanceMatrix distances, RouteList routes, Helper helper) {
+    public Relocate(DistanceMatrix distances, RouteList routes, Helper helper, ArrayList<Node> tsp) {
         this.distances = distances;
         this.routes = routes;
         this.helper = helper;
+        this.tsp = tsp;
     }
 
     public RouteList findBestRelocate() throws MaxWeightException, NodeNotFoundException, RouteSizeException {
         boolean isOptimized = false;
         int steps = 0;
+
+        //ALWAYS take the warehouse
+        tsp.get(0).take();
 
         while (isOptimized == false)
         {
@@ -177,17 +182,39 @@ public class Relocate {
                         try {
                             relocateNode(currentNode, bestMove.get(bestMapResult).getKey(),bestMove.get(bestMapResult).getValue());
                             steps++;
-                            System.out.println("Relocated node " + currentNode.index + " inside route " + routes.indexOf(bestMove.get(bestMapResult).getKey()) + " in position " + bestMove.get(bestMapResult).getValue());
+                            System.out.println("Relocated node " + currentNode.index + " inside route " + routes.indexOf(bestMove.get(bestMapResult).getKey()));
                             bestMove.clear();
                             isOptimized = false;
                             helper.printRoutes(routes);
+
+                            for (Node node : tsp) {
+                                if (node.getType() == Values.nodeType.WAREHOUSE) continue;
+                                node.release();
+                            }
+
                         } catch (SwapFailedException e) { }
+                    } else {
+                        tsp.get(tsp.indexOf(currentNode)).take();
+
+                        for (Node node : tsp) {
+                            if (node.taken == false) {
+                                isOptimized = false;
+                                break;
+                            }
+                        }
+
+
                     }
                 }
             }
         }
 
         System.out.println("\nRelocate successfully terminated!\nRelocate moves done: " + steps + "\nObjective Function: " + routes.getObjectiveFunction().toString());
+
+        for (Node node : tsp) {
+            if (node.getType() == Values.nodeType.WAREHOUSE) continue;
+            node.release();
+        }
 
         return routes;
     }
@@ -257,6 +284,7 @@ public class Relocate {
 
     private BigDecimal simulateInternalRelocation(Node node, int index) {
 
+        int oldIndex = node.getRoute().nodeList.indexOf(node);
 
         Route routeNode = node.getRoute();
 
@@ -267,7 +295,7 @@ public class Relocate {
             listOfNodes.add(inNode);
         }
 
-        listOfNodes.add(index, node);
+        listOfNodes.add(oldIndex < index ? index - 1 : index, node);
 
 
         BigDecimal distance = new BigDecimal(0);

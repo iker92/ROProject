@@ -13,17 +13,22 @@ import java.util.TreeMap;
  */
 public class Exchange {
 
+    private final ArrayList<Node> tsp;
     private Boolean isDebug = Values.isDebug();
 
     RouteList routes;
     Helper helper;
 
-    public Exchange(RouteList routes, Helper helper){
+    public Exchange(RouteList routes, Helper helper, ArrayList<Node> completeTSP){
         this.routes = routes;
         this.helper = helper;
+        this.tsp = completeTSP;
     }
 
     public RouteList findBestExchange() throws MaxWeightException, NodeNotFoundException {
+
+        //ALWAYS take the warehouse
+        tsp.get(0).take();
 
         boolean isDone = false;
         int steps = 0;
@@ -150,11 +155,29 @@ public class Exchange {
                         try {
                             swapNodes(currentNode, bestMove.get(bestNodeToSwap));
                             steps++;
-                            if (isDebug) System.out.println("Exchanged node " + currentNode.index + " with node  " + bestMove.get(bestNodeToSwap).index);
+                            System.out.println("Exchanged node " + currentNode.index + " with node  " + bestMove.get(bestNodeToSwap).index);
                             bestMove.clear();
                             isDone = false;
                             helper.printRoutes(routes);
+
+                            for (Node node : tsp) {
+                                if (node.getType() == Values.nodeType.WAREHOUSE) continue;
+                                node.release();
+                            }
+
+
                         } catch (SwapFailedException e) {}
+                    } else {
+
+                        tsp.get(tsp.indexOf(currentNode)).take();
+
+                        for (Node node : tsp) {
+                            if (node.taken == false) {
+                                isDone = false;
+                                break;
+                            }
+                        }
+
                     }
 
              
@@ -163,7 +186,12 @@ public class Exchange {
             }
         }
 
-        if (isDebug) System.out.println("\nExchange successfully terminated!\nExchange moves done: " + steps + "\nObjective Function: " + routes.getObjectiveFunction().toString());
+        System.out.println("\nExchange successfully terminated!\nExchange moves done: " + steps + "\nObjective Function: " + routes.getObjectiveFunction().toString());
+
+        for (Node node : tsp) {
+            if (node.getType() == Values.nodeType.WAREHOUSE) continue;
+            node.release();
+        }
 
         return routes;
 
