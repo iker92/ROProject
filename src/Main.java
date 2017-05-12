@@ -13,7 +13,8 @@ import java.util.ArrayList;
  */
 public class Main {
 
-    private static final String FILE = "A1.txt";
+    private static final String FILE = "A1";
+    private static final String SUFFIX = ".txt";
 
     public static void main(String [] args) {
 
@@ -58,7 +59,7 @@ public class Main {
 
         helper.printRoutes(routes);
 
-        helper.writeToFile(routes, executionTime, FILE);
+        helper.writeToFile(routes, executionTime, FILE + SUFFIX);
     }
 
     private static RouteList doBestRelocate(DistanceMatrix distances, RouteList routes, Helper helper, ArrayList<Node> tsp) {

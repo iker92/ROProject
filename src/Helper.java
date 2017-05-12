@@ -390,6 +390,9 @@ public class Helper {
 
     public void printRoutes(RouteList routes) {
 
+        System.out.print("\n");
+
+
         for (Route r : routes) {
             System.out.print(routes.indexOf(r) + "  | ");
 
