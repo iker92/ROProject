@@ -15,6 +15,8 @@ import java.util.Random;
  */
 public class Helper {
 
+    private static final String PATH = "/home/loriz/IdeaProject/ROProject/";
+
     public Instance fileToInstance(String fileName) {
 
         Instance instance = new Instance();
@@ -411,8 +413,8 @@ public class Helper {
         System.out.print("\n");
 
     }
-    public void writeToFile(RouteList routes,long time){
-        File file = new File("/home/pippo/Documents/ROProject/test.txt");
+    public void writeToFile(RouteList routes,long time, String fileName){
+        File file = new File(PATH + fileName);
         ArrayList<String> data=new ArrayList<>();
         ArrayList<String> routeNodes=new ArrayList<>();
 

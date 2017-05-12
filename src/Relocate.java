@@ -38,7 +38,7 @@ public class Relocate {
                 ArrayList<Node> currentNodes = route.nodeList;
 
                 //For each node in current route except first and last (WAREHOUSE)
-                for (int nodeIndex = 1; nodeIndex <= currentNodes.size() - 1; nodeIndex++)
+                for (int nodeIndex = 1; nodeIndex < currentNodes.size() - 1; nodeIndex++)
                 {
                     //Get Current Node
                     Node currentNode = currentNodes.get(nodeIndex);
@@ -110,7 +110,7 @@ public class Relocate {
                         if(currentRoute.equals(route)) continue;
 
                         //For each node inside currentRoute
-                        for(int currentRouteNodeIndex = 1; currentRouteNodeIndex <= currentRoute.nodeList.size() - 1; currentRouteNodeIndex++){
+                        for(int currentRouteNodeIndex = 1; currentRouteNodeIndex < currentRoute.nodeList.size() - 1; currentRouteNodeIndex++){
 
                             //Get currentRoute node
                             Node currentRouteNode = currentRoute.nodeList.get(currentRouteNodeIndex);
@@ -192,26 +192,28 @@ public class Relocate {
 
     public void relocateNode(Node node, Route route, int index) throws SwapFailedException
     {
-if(node.getRoute()==route && (node.getType() == route.nodeList.get(index).getType() || (node.getType()!=route.nodeList.get(index).getType() && index > route.nodeList.indexOf(node)))){
-    try {
-        node.getRoute().removeNode(node);
-        route.addNode(index, node);
-    } catch (MaxWeightException e) {
 
-        System.err.println("!!! SOMETHING HAS GONE HORRIBLY WRONG !!!");
+        // if the nodes are on the same route, use the arraylist directly and force update the obj function
+        if (node.getRoute() == route) {
+            int oldIndex = route.nodeList.indexOf(node);
 
-    }
-    }
-    else{
-        try {
-            node.getRoute().removeNode(node);
-            route.addNode(index, node);
-        } catch (MaxWeightException e) {
 
-            System.err.println("!!! SOMETHING HAS GONE HORRIBLY WRONG !!!");
+            route.nodeList.add(index, node);
+            route.nodeList.remove(index < oldIndex ? oldIndex + 1 : oldIndex );
+
+            route.forceUpdate();
+
+        } else {
+
+            //if the nodes are on different routes, just call addNodes
+            try {
+                route.addNode(index, node);
+            } catch (MaxWeightException e) {
+                System.err.println("!!! SOMETHING HAS GONE HORRIBLY WRONG !!!");
+            }
 
         }
-    }
+
     }
 
     private BigDecimal simulateAdditionOfNode(Node node, Route route, int index) {
@@ -262,7 +264,7 @@ if(node.getRoute()==route && (node.getType() == route.nodeList.get(index).getTyp
             listOfNodes.add(inNode);
         }
 
-            listOfNodes.add(index, node);
+        listOfNodes.add(index, node);
 
 
         BigDecimal distance = new BigDecimal(0);
@@ -315,21 +317,22 @@ if(node.getRoute()==route && (node.getType() == route.nodeList.get(index).getTyp
         System.out.println("\nTrying to relocate " + node.index + " from Route" + routes.indexOf(node.getRoute()) + " to Route " + routes.indexOf(route) + " in position " + position);
 
         //if trying to relocate a node with itself
-        if (node.getRoute() == route && route.nodeList.get(position).index == node.index) {
-           // System.out.println("Relocate is impossible! Trying to relocate itself!\n");
+        if (node.getRoute() == route &&  (route.nodeList.get(position).index == node.index || position == (route.nodeList.indexOf(node)+1))) {
+            System.out.println("Relocate is impossible! Trying to relocate in the same position (position or position+1)!\n");
             return false;
         }
-        if(node.getRoute() == route && node.getType() != route.nodeList.get(position).getType()){
-             {
 
-                    System.out.println("Relocate is impossible! Trying to relocate node of different types on same route!\n");
-                    return false;
-             }
-            }
+
+        if(node.getRoute() == route && node.getType() != route.nodeList.get(position).getType()){
+
+            System.out.println("Relocate is impossible! Trying to relocate node of different types on same route!\n");
+            return false;
+
+        }
 
         //if trying to relocate in place of the first warehouse
         if (position == 0) {
-           // System.out.println("Relocate is impossible! Trying to put something before first WAREHOUSE\n");
+            // System.out.println("Relocate is impossible! Trying to put something before first WAREHOUSE\n");
             return false;
         }
 
@@ -343,48 +346,9 @@ if(node.getRoute()==route && (node.getType() == route.nodeList.get(index).getTyp
         Values.nodeType previousTypeExtRoute = Values.nodeType.LINEHAUL;
         Values.nodeType nextTypeExtRoute = Values.nodeType.LINEHAUL;
 
-        try {
-            previousTypeExtRoute = node.getRoute().nodeList.get(node.getRoute().nodeList.indexOf(node) - 1).getType();
-            nextTypeExtRoute = node.getRoute().nodeList.get(node.getRoute().nodeList.indexOf(node) + 1).getType();
-        } catch (IndexOutOfBoundsException e) {
-            System.out.println("__________████████_____██████\n" +
-                    "_________█░░░░░░░░██_██░░░░░░█\n" +
-                    "________█░░░░░░░░░░░█░░░░░░░░░█\n" +
-                    "_______█░░░░░░░███░░░█░░░░░░░░░█\n" +
-                    "_______█░░░░███░░░███░█░░░████░█\n" +
-                    "______█░░░██░░░░░░░░███░██░░░░██\n" +
-                    "_____█░░░░░░░░░░░░░░░░░█░░░░░░░░███\n" +
-                    "____█░░░░░░░░░░░░░██████░░░░░████░░█\n" +
-                    "____█░░░░░░░░░█████░░░████░░██░░██░░█\n" +
-                    "___██░░░░░░░███░░░░░░░░░░█░░░░░░░░███\n" +
-                    "__█░░░░░░░░░░░░░░█████████░░█████████\n" +
-                    "_█░░░░░░░░░░█████_████___████_█████___█\n" +
-                    "_█░░░░░░░░░░█______█_███__█_____███_█___█\n" +
-                    "█░░░░░░░░░░░░█___████_████____██_██████\n" +
-                    "░░░░░░░░░░░░░█████████░░░████████░░░█\n" +
-                    "░░░░░░░░░░░░░░░░█░░░░░█░░░░░░░░░░░░█\n" +
-                    "░░░░░░░░░░░░░░░░░░░░██░░░░█░░░░░░██\n" +
-                    "░░░░░░░░░░░░░░░░░░██░░░░░░░███████\n" +
-                    "░░░░░░░░░░░░░░░░██░░░░░░░░░░█░░░░░█\n" +
-                    "░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░█\n" +
-                    "░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░█\n" +
-                    "░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░█\n" +
-                    "░░░░░░░░░░░█████████░░░░░░░░░░░░░░██\n" +
-                    "░░░░░░░░░░█▒▒▒▒▒▒▒▒███████████████▒▒█\n" +
-                    "░░░░░░░░░█▒▒███████▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒█\n" +
-                    "░░░░░░░░░█▒▒▒▒▒▒▒▒▒█████████████████\n" +
-                    "░░░░░░░░░░████████▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒█\n" +
-                    "░░░░░░░░░░░░░░░░░░██████████████████\n" +
-                    "░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░█\n" +
-                    "██░░░░░░░░░░░░░░░░░░░░░░░░░░░██\n" +
-                    "▓██░░░░░░░░░░░░░░░░░░░░░░░░██\n" +
-                    "▓▓▓███░░░░░░░░░░░░░░░░░░░░█\n" +
-                    "▓▓▓▓▓▓███░░░░░░░░░░░░░░░██\n" +
-                    "▓▓▓▓▓▓▓▓▓███████████████▓▓█\n" +
-                    "▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓██\n" +
-                    "▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓█\n" +
-                    "▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓█");
-        }
+        previousTypeExtRoute = node.getRoute().nodeList.get(node.getRoute().nodeList.indexOf(node) - 1).getType();
+        nextTypeExtRoute = node.getRoute().nodeList.get(node.getRoute().nodeList.indexOf(node) + 1).getType();
+
 
         Values.nodeType previousType = route.nodeList.get(position - 1).getType();
         Values.nodeType nextType = route.nodeList.get(position).getType();
@@ -408,6 +372,8 @@ if(node.getRoute()==route && (node.getType() == route.nodeList.get(index).getTyp
                 return false;
             }
         }
+
+
 
         int actualTypeWeight = (nodeType == Values.nodeType.LINEHAUL ? route.weightLinehaul : route.weightBackhaul) + node.weight;
 

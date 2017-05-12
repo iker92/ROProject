@@ -207,6 +207,10 @@ public class Route {
 
     }
 
+    public void forceUpdate() {
+        updateRouteDistance();
+    }
+
     public BigDecimal getActualDistance() {
         return actualDistance;
     }

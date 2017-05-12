@@ -10,12 +10,14 @@ import java.math.BigDecimal;
  */
 public class Main {
 
+    private static final String FILE = "C2.txt";
+
     public static void main(String [] args) {
 
         long startTime = System.nanoTime();
         Helper helper = new Helper();
 
-        String fileName = "Instances/F3.txt";
+        String fileName = "Instances/" + FILE;
         Instance instance1 = helper.fileToInstance(fileName);
 
         DistanceMatrix distances = DistanceMatrix.initialize(instance1.nodesList);
@@ -42,7 +44,7 @@ public class Main {
 
         helper.printRoutes(routes);
 
-        helper.writeToFile(routes,executiontime);
+        helper.writeToFile(routes,executiontime, FILE);
     }
 
     private static void doBestRelocate(DistanceMatrix distances, RouteList routes, Helper helper) {
