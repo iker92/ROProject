@@ -7,4 +7,12 @@ public class Values {
         BACKHAUL, LINEHAUL, WAREHOUSE
     }
 
+    public static Boolean isDebug() {
+
+        return java.lang.management.ManagementFactory.getRuntimeMXBean().
+                getInputArguments().toString().contains("jdwp");
+
+    }
+
+    
 }

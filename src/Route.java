@@ -19,7 +19,6 @@ public class Route {
     public int weightLinehaul = 0;
     public int weightBackhaul = 0;
     public ArrayList<Node> nodeList = new ArrayList<>();
-//  public CopyOnWriteArrayList<Node> nodeList = new CopyOnWriteArrayList<>();
     private DistanceMatrix distances = null;
     private BigDecimal actualDistance;
     private Helper helper;

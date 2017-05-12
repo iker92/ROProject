@@ -17,6 +17,8 @@ public class Helper {
 
     private static final String PATH = "/home/loriz/IdeaProject/ROProject/";
 
+    private Boolean isDebug = Values.isDebug();
+
     public Instance fileToInstance(String fileName) {
 
         Instance instance = new Instance();

@@ -13,6 +13,8 @@ import java.util.TreeMap;
  */
 public class Exchange {
 
+    private Boolean isDebug = Values.isDebug();
+
     RouteList routes;
     Helper helper;
 
@@ -148,7 +150,7 @@ public class Exchange {
                         try {
                             swapNodes(currentNode, bestMove.get(bestNodeToSwap));
                             steps++;
-                            System.out.println("Exchanged node " + currentNode.index + " with node  " + bestMove.get(bestNodeToSwap).index);
+                            if (isDebug) System.out.println("Exchanged node " + currentNode.index + " with node  " + bestMove.get(bestNodeToSwap).index);
                             bestMove.clear();
                             isDone = false;
                             helper.printRoutes(routes);
@@ -161,7 +163,7 @@ public class Exchange {
             }
         }
 
-        System.out.println("\nExchange successfully terminated!\nExchange moves done: " + steps + "\nObjective Function: " + routes.getObjectiveFunction().toString());
+        if (isDebug) System.out.println("\nExchange successfully terminated!\nExchange moves done: " + steps + "\nObjective Function: " + routes.getObjectiveFunction().toString());
 
         return routes;
 

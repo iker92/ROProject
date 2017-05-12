@@ -11,6 +11,9 @@ import java.util.TreeMap;
  */
 public class Relocate {
 
+    private static Boolean isDebug = Values.isDebug();
+
+
     DistanceMatrix distances;
     RouteList routes;
 
@@ -75,13 +78,13 @@ public class Relocate {
                                 }
 
                                 if (inner == currentNode.getRoute() && inner == currentInnerRoute) {
-                                    System.out.println("Simulate internal relocation of " + currentNode.index + " in position " + innerNodeIndex + " inside " + routes.indexOf(currentNode.getRoute()));
+                                    if (isDebug) System.out.println("Simulate internal relocation of " + currentNode.index + " in position " + innerNodeIndex + " inside " + routes.indexOf(currentNode.getRoute()));
                                     newObjFun = newObjFun.add(simulateInternalRelocation(currentNode, innerNodeIndex));
                                 } else if (inner == currentNode.getRoute()) {
-                                    System.out.println("Simulate removal of " + currentNode.index + " from route " + routes.indexOf(currentNode.getRoute()));
+                                    if (isDebug) if (isDebug) System.out.println("Simulate removal of " + currentNode.index + " from route " + routes.indexOf(currentNode.getRoute()));
                                     newObjFun = newObjFun.add(simulateRemovalOfNode(currentNode));
                                 } else {
-                                    System.out.println("Simulate addition of " + currentNode.index + " in route " + routes.indexOf(currentInnerRoute)+ " with position " + innerNodeIndex/*currentInnerRoute.nodeList.indexOf(currentInnerNode)*/);
+                                    if (isDebug) System.out.println("Simulate addition of " + currentNode.index + " in route " + routes.indexOf(currentInnerRoute)+ " with position " + innerNodeIndex/*currentInnerRoute.nodeList.indexOf(currentInnerNode)*/);
 
                                     newObjFun = newObjFun.add(simulateAdditionOfNode(currentNode, currentInnerRoute, innerNodeIndex/*currentInnerRoute.nodeList.indexOf(currentInnerNode)*/));
                                     // newObjFun = newObjFun.add(simulateAdditionOfNode(currentNode, inner, innerNodeIndex));
@@ -140,14 +143,14 @@ public class Relocate {
                                     }
 
                                     if (inner == currentNode.getRoute() && inner == currentInnerRoute) {
-                                        System.out.println("Simulate internal relocation of " + currentNode.index + " in position " + currentRouteNodeIndex + " inside " + routes.indexOf(currentNode.getRoute()));
+                                        if (isDebug) System.out.println("Simulate internal relocation of " + currentNode.index + " in position " + currentRouteNodeIndex + " inside " + routes.indexOf(currentNode.getRoute()));
 
                                         newObjFun = newObjFun.add(simulateInternalRelocation(currentNode, currentRouteNodeIndex));
                                     } else if (inner == currentNode.getRoute()) {
-                                        System.out.println("Simulate removal of " + currentNode.index + " from route " + routes.indexOf(currentNode.getRoute()));
+                                        if (isDebug) System.out.println("Simulate removal of " + currentNode.index + " from route " + routes.indexOf(currentNode.getRoute()));
                                         newObjFun = newObjFun.add(simulateRemovalOfNode(currentNode));
                                     } else {
-                                        System.out.println("Simulate addition of " + currentNode.index + " in route " + routes.indexOf(currentInnerRoute) + " with position " + currentRouteNodeIndex/*currentInnerRoute.nodeList.indexOf(currentRouteNode)*/);
+                                        if (isDebug) System.out.println("Simulate addition of " + currentNode.index + " in route " + routes.indexOf(currentInnerRoute) + " with position " + currentRouteNodeIndex/*currentInnerRoute.nodeList.indexOf(currentRouteNode)*/);
                                         newObjFun = newObjFun.add(simulateAdditionOfNode(currentNode, currentInnerRoute, currentRouteNodeIndex/*currentInnerRoute.nodeList.indexOf(currentRouteNode)*/));
                                     }
 
@@ -156,11 +159,11 @@ public class Relocate {
                                 //If it is worth indeed
                                 if(oldObjFun.compareTo(newObjFun) == 1){
                                     //Then add current Node and its weight to the map
-                                    System.out.println("Simulated situation reduces the objective function! Adding to the candidate map...\n");
+                                    if (isDebug) System.out.println("Simulated situation reduces the objective function! Adding to the candidate map...\n");
 
                                     bestMove.put(newObjFun,  new Pair<>(currentInnerRoute, currentRouteNodeIndex));
                                 } else {
-                                    System.out.println("Simulated situation increases the objective function! Skip...\n");
+                                    if (isDebug) System.out.println("Simulated situation increases the objective function! Skip...\n");
 
                                 }
 
@@ -314,30 +317,30 @@ public class Relocate {
 
     public boolean canRelocate(Node node, Route route, int position) {
 
-        System.out.println("\nTrying to relocate " + node.index + " from Route" + routes.indexOf(node.getRoute()) + " to Route " + routes.indexOf(route) + " in position " + position);
+        if (isDebug) System.out.println("\nTrying to relocate " + node.index + " from Route" + routes.indexOf(node.getRoute()) + " to Route " + routes.indexOf(route) + " in position " + position);
 
         //if trying to relocate a node with itself
         if (node.getRoute() == route &&  (route.nodeList.get(position).index == node.index || position == (route.nodeList.indexOf(node)+1))) {
-            System.out.println("Relocate is impossible! Trying to relocate in the same position (position or position+1)!\n");
+            if (isDebug) System.out.println("Relocate is impossible! Trying to relocate in the same position (position or position+1)!\n");
             return false;
         }
 
 
         if(node.getRoute() == route && node.getType() != route.nodeList.get(position).getType()){
 
-            System.out.println("Relocate is impossible! Trying to relocate node of different types on same route!\n");
+            if (isDebug) System.out.println("Relocate is impossible! Trying to relocate node of different types on same route!\n");
             return false;
 
         }
 
         //if trying to relocate in place of the first warehouse
         if (position == 0) {
-            // System.out.println("Relocate is impossible! Trying to put something before first WAREHOUSE\n");
+            // if (isDebug) System.out.println("Relocate is impossible! Trying to put something before first WAREHOUSE\n");
             return false;
         }
 
         if (node.getType() == Values.nodeType.WAREHOUSE) {
-            //System.out.println("Relocate is impossible! Node to relocate is WAREHOUSE\n");
+            //if (isDebug) System.out.println("Relocate is impossible! Node to relocate is WAREHOUSE\n");
             return false;
         }
 
@@ -353,22 +356,22 @@ public class Relocate {
         Values.nodeType previousType = route.nodeList.get(position - 1).getType();
         Values.nodeType nextType = route.nodeList.get(position).getType();
 
-        //System.out.println("Node Type: " + nodeType.toString() + " | Previous Type: " + previousType.toString() + " | Next Type: " + nextType.toString());
+        //if (isDebug) System.out.println("Node Type: " + nodeType.toString() + " | Previous Type: " + previousType.toString() + " | Next Type: " + nextType.toString());
 
         //if trying to relocate the only node in a route
         if (node.getRoute().nodeList.size() == 3 || (nodeType == Values.nodeType.LINEHAUL && nextTypeExtRoute != Values.nodeType.LINEHAUL && previousTypeExtRoute == Values.nodeType.WAREHOUSE)) {
-            System.out.println("Relocate is impossible! Trying to relocate the only node in the route (or the only LINEHAUL)\n");
+            if (isDebug) System.out.println("Relocate is impossible! Trying to relocate the only node in the route (or the only LINEHAUL)\n");
             return false;
         }
 
         //if nodes have different types
         if (nodeType != route.nodeList.get(position).getType()) {
             if (nodeType == Values.nodeType.LINEHAUL && previousType == Values.nodeType.BACKHAUL /*&& nextType != Values.nodeType.LINEHAUL*/) {
-                System.out.println("Relocate is impossible! Trying to put a LINEHAUL in an invalid position\n");
+                if (isDebug) System.out.println("Relocate is impossible! Trying to put a LINEHAUL in an invalid position\n");
                 return false;
             }
             if (nodeType == Values.nodeType.BACKHAUL && /*previousType != Values.nodeType.BACKHAUL &&*/ nextType == Values.nodeType.LINEHAUL) {
-                System.out.println("Relocate is impossible! Trying to put a BACKHAUL in an invalid position\n");
+                if (isDebug) System.out.println("Relocate is impossible! Trying to put a BACKHAUL in an invalid position\n");
                 return false;
             }
         }
@@ -378,9 +381,9 @@ public class Relocate {
         int actualTypeWeight = (nodeType == Values.nodeType.LINEHAUL ? route.weightLinehaul : route.weightBackhaul) + node.weight;
 
         if (actualTypeWeight <= route.MAX_WEIGHT) {
-            System.out.println("Relocate is possible! Checking if it's worth...\n");
+            if (isDebug) System.out.println("Relocate is possible! Checking if it's worth...\n");
         } else {
-            System.out.println("Relocate is impossible!\n");
+            if (isDebug) System.out.println("Relocate is impossible!\n");
         }
 
         return actualTypeWeight <= route.MAX_WEIGHT;

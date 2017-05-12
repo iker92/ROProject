@@ -10,7 +10,7 @@ import java.math.BigDecimal;
  */
 public class Main {
 
-    private static final String FILE = "C2.txt";
+    private static final String FILE = "A1.txt";
 
     public static void main(String [] args) {
 
@@ -29,6 +29,9 @@ public class Main {
         helper.printRoutes(routes);
 
         BigDecimal oldOF = routes.getObjectiveFunction();
+
+
+        System.out.println("Debug mode: " + Values.isDebug().toString());
 
 
 
