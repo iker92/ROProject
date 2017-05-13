@@ -9,20 +9,20 @@ import javafx.util.Pair;
 public class Algorithm {
 
     Distances distances;
-    RouteList routes;
+    core.RouteList routes;
 
-    public Algorithm(Distances distances, RouteList routes){
+    public Algorithm(Distances distances, core.RouteList routes){
         this.routes = routes;
         this.distances = distances;
     }
 
-    public Pair<RouteList, RouteList> findBestRelocateAndExchange(Distances distances, RouteList routes){
+    public Pair<core.RouteList, core.RouteList> findBestRelocateAndExchange(Distances distances, core.RouteList routes){
 
-        RouteList exchange_then_relocate;
-        RouteList relocate_then_exchange;
+        core.RouteList exchange_then_relocate;
+        core.RouteList relocate_then_exchange;
 
-        Exchange _exchange = new Exchange(distances, routes);
-        Relocate _relocate = new Relocate(distances, routes);
+        functions.Exchange _exchange = new functions.Exchange(distances, routes);
+        functions.Relocate _relocate = new functions.Relocate(distances, routes);
 
         exchange_then_relocate = _exchange.exchange(routes);
         exchange_then_relocate = _relocate.relocate(exchange_then_relocate);
@@ -30,7 +30,7 @@ public class Algorithm {
         relocate_then_exchange = _relocate.relocate(routes);
         relocate_then_exchange = _exchange.exchange(relocate_then_exchange);
 
-        Pair<RouteList, RouteList> best_exchanges_and_relocations = new Pair<>(exchange_then_relocate, relocate_then_exchange);
+        Pair<core.RouteList, core.RouteList> best_exchanges_and_relocations = new Pair<>(exchange_then_relocate, relocate_then_exchange);
 
         return best_exchanges_and_relocations;
 

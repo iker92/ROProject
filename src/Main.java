@@ -1,6 +1,11 @@
-import utils.MaxWeightException;
-import utils.NodeNotFoundException;
-import utils.RouteSizeException;
+import core.*;
+import functions.Exchange;
+import functions.Relocate;
+import utils.DistanceMatrix;
+import utils.Helper;
+import exceptions.MaxWeightException;
+import exceptions.NodeNotFoundException;
+import exceptions.RouteSizeException;
 
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
@@ -13,7 +18,7 @@ import java.util.ArrayList;
  */
 public class Main {
 
-    private static final String FILE = "I1";
+    private static final String FILE = "A1";
     private static final String SUFFIX = ".txt";
 
     public static void main(String [] args) {
