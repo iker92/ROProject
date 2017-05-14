@@ -21,6 +21,7 @@ import java.util.TreeMap;
 public class Relocate {
 
     private static Boolean isDebug = Values.isDebug();
+    private static Boolean printRoutesInDebug = Values.printRoutesInDebug();
 
 
     DistanceMatrix distances;
@@ -39,6 +40,8 @@ public class Relocate {
     public RouteList findBestRelocate() throws MaxWeightException, NodeNotFoundException, RouteSizeException {
         boolean isOptimized = false;
         int steps = 0;
+
+        System.out.println("//////////////////////////////////////////////////////////////////\nStarting Relocate...\n");
 
         //ALWAYS take the warehouse
         tsp.get(0).take();
@@ -61,49 +64,10 @@ public class Relocate {
                     //Get Current Node
                     Node currentNode = currentNodes.get(nodeIndex);
 
-                    /** Relocate on the same Route **/
-                    for (int innerNodeIndex = 1; innerNodeIndex <= currentNodes.size() - 1; innerNodeIndex++)
-                    {
-                        //Get Current Inner Node
-                        Node currentInnerNode = currentNodes.get(innerNodeIndex);
-
-                        //If we are analyzing the same node, or one or both of them are WAREHOUSE nodes, skip
-                        if (currentNode.equals(currentInnerNode) || currentNode.getType().equals(Values.nodeType.WAREHOUSE))
-                            continue;
-
-                        Route currentInnerRoute;
-
-                        //can't get the route from the WAREHOUSE, so if the currentInnerNode is a WAREHOUSE get the route of the previous
-                        if (currentInnerNode.getType() == Values.nodeType.WAREHOUSE) {
-                            currentInnerRoute = currentNodes.get(innerNodeIndex - 1).getRoute();
-                        } else {
-                            currentInnerRoute =  currentInnerNode.getRoute();
-                        }
-
-                        BigDecimal oldObjFun = routes.getObjectiveFunction();
-                        BigDecimal newObjFun = testRelocate(currentNode, currentInnerRoute, innerNodeIndex);
-
-                        // ex1.compareTo(ex2)
-                        // returns -1 if ex2 > ex1
-                        // returns 1 if ex1 > ex2
-                        // returns 0 if equal
-                        if (newObjFun != null && oldObjFun.compareTo(newObjFun) == 1) {
-                            if (isDebug) System.out.println("Simulated situation reduces the objective function! Adding to the candidate map...\n");
-                            bestMove.put(newObjFun,  new Pair<>(currentInnerRoute, innerNodeIndex));
-                        } else {
-                            if (isDebug) System.out.println("Simulated situation increases the objective function! Skip...\n");
-
-                        }
-                    }
-
-                    /** Relocate on Other Routes **/
                     for(int currentRouteIndex = 0; currentRouteIndex < routes.size(); currentRouteIndex++){
 
                         //Get Current Route
                         Route currentRoute = routes.get(currentRouteIndex);
-
-                        //If we are analyzing same routes, skip
-                        if(currentRoute.equals(route)) continue;
 
                         //For each node inside currentRoute
                         for(int currentRouteNodeIndex = 1; currentRouteNodeIndex < currentRoute.nodeList.size() - 1; currentRouteNodeIndex++){
@@ -136,8 +100,7 @@ public class Relocate {
 
                                 bestMove.put(newObjFun,  new Pair<>(currentInnerRoute, currentRouteNodeIndex));
                             } else {
-                                if (isDebug) System.out.println("Simulated situation increases the objective function! Skip...\n");
-
+                                if (isDebug) System.out.println("Simulated situation does not reduce the objective function! Skip...\n");
                             }
                         }
 
@@ -148,10 +111,10 @@ public class Relocate {
                         try {
                             relocateNode(currentNode, bestMove.get(bestMapResult).getKey(),bestMove.get(bestMapResult).getValue());
                             steps++;
-                            System.out.println("Relocated node " + currentNode.index + " inside route " + routes.indexOf(bestMove.get(bestMapResult).getKey()));
+                            System.out.println("Best move chosen! Relocated node " + currentNode.index + " inside route " + routes.indexOf(bestMove.get(bestMapResult).getKey()));
                             bestMove.clear();
                             isOptimized = false;
-                            helper.printRoutes(routes);
+                            if (printRoutesInDebug) helper.printRoutes(routes);
 
                             for (Node node : tsp) {
                                 if (node.getType() == Values.nodeType.WAREHOUSE) continue;
@@ -175,7 +138,7 @@ public class Relocate {
             }
         }
 
-        System.out.println("\nRelocate successfully terminated!\nRelocate moves done: " + steps + "\nObjective Function: " + routes.getObjectiveFunction().toString());
+        System.out.println("\nRelocate successfully terminated!\nRelocate moves done: " + steps + "\nObjective Function: " + routes.getObjectiveFunction().toString() + "\n");
 
         for (Node node : tsp) {
             if (node.getType() == Values.nodeType.WAREHOUSE) continue;

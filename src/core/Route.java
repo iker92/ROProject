@@ -43,7 +43,7 @@ public class Route {
         mRouteListener = listener;
     }
 
-    public Route getCopyOfRoute(){
+    public Route getCopy(){
         newRoute = new Route(MAX_WEIGHT);
         newRoute.nodeList = new ArrayList<>(this.nodeList);
         newRoute.actualDistance = this.actualDistance;
@@ -158,7 +158,6 @@ public class Route {
 
     ////////////////////////////////////////////// MOVEMENT METHODS //////////////////////////////////////////////////
 
-    //TODO: requires testing! Highly experimental!
     public void swap(Node first, Node second) {
         //swap inside the same route
 

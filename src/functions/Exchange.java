@@ -1,5 +1,6 @@
 package functions;
 
+import com.sun.istack.internal.Nullable;
 import core.*;
 import utils.DistanceMatrix;
 import utils.Helper;
@@ -19,6 +20,7 @@ public class Exchange {
 
     private final ArrayList<Node> tsp;
     private Boolean isDebug = Values.isDebug();
+    private static Boolean printRoutesInDebug = Values.printRoutesInDebug();
 
     RouteList routes;
     Helper helper;
@@ -31,15 +33,17 @@ public class Exchange {
 
     public RouteList findBestExchange() throws MaxWeightException, NodeNotFoundException {
 
-        //ALWAYS take the warehouse
+        System.out.println("//////////////////////////////////////////////////////////////////\nStarting Exchange...\n");
+
+        // /ALWAYS take the warehouse
         tsp.get(0).take();
 
-        boolean isDone = false;
+        boolean isOptimized = false;
         int steps = 0;
 
-        while (!isDone){
+        while (!isOptimized){
 
-            isDone = true;
+            isOptimized = true;
             //For each route
             for(int routeIndex = 0; routeIndex < routes.size(); routeIndex++){
                 //Initializing map to contain the current best move to do.
@@ -56,56 +60,10 @@ public class Exchange {
                     //Get Current Node
                     Node currentNode = currentNodes.get(nodeIndex);
 
-                    /** Swaps on the same Route **/
-                    for(int innerNodeIndex=1; innerNodeIndex <= currentRouteSize-2; innerNodeIndex++) {
-
-                        //Get Current Inner Node
-                        Node currentInnerNode = currentNodes.get(innerNodeIndex);
-
-                        //If we are analyzing the same node, or one or both of them are WAREHOUSE nodes, skip
-                        if(currentNode.equals(currentInnerNode) || currentNode.getType().equals(Values.nodeType.WAREHOUSE) || currentInnerNode.getType().equals(Values.nodeType.WAREHOUSE)) continue;
-
-                        if (canSwap(currentNode, currentInnerNode)) {
-                            //Current Route Actual Distance
-                            BigDecimal oldObjFun = routes.getObjectiveFunction();
-
-                            BigDecimal newObjFun = new BigDecimal(0);
-
-                            for (Route inner : routes) {
-                                if (!inner.equals(route) && inner != currentInnerNode.getRoute()) {
-                                    newObjFun = newObjFun.add(inner.getActualDistance());
-
-                                } else if (inner == currentNode.getRoute()){
-
-                                    newObjFun = newObjFun.add(simulateExchange(currentNode, currentInnerNode));
-
-                                } else {
-
-                                    newObjFun = newObjFun.add(simulateExchange(currentInnerNode, currentNode));
-
-                                }
-                            }
-
-
-                            // ex1.compareTo(ex2)
-                            // returns -1 if ex2 > ex1
-                            // returns 1 if ex1 > ex2
-                            // returns 0 if equal
-                            if(oldObjFun.compareTo(newObjFun) == 1){
-                                //If so, put currentNode and Its bound value to bestMove map
-                                bestMove.put(newObjFun, currentInnerNode);
-                            }
-                        }
-                    }
-
-                    /** Swaps on Other Routes **/
                     for(int currentRouteIndex = 0; currentRouteIndex < routes.size(); currentRouteIndex++){
 
                         //Get Current Route
                         Route currentRoute = routes.get(currentRouteIndex);
-
-                        //If we are analyzing same routes, skip
-                        if(currentRoute.equals(route)) continue;
 
                         //Get currentRoute actual distance
                         BigDecimal currentRouteActualDistance = currentRoute.getActualDistance();
@@ -119,34 +77,24 @@ public class Exchange {
                             //Get currentRoute node
                             Node currentRouteNode = currentRoute.nodeList.get(currentRouteNodeIndex);
 
-                            //If it is possible to swap
-                            if( canSwap(currentNode, currentRouteNode) && canSwap(currentRouteNode, currentNode) ){
 
-                                BigDecimal oldObjFun = routes.getObjectiveFunction();
+                            BigDecimal oldObjFun = routes.getObjectiveFunction();
 
-                                BigDecimal newObjFun = new BigDecimal(0);
+                            if (isDebug) System.out.println("Simulating exchange of node " + currentNode.index + "(" +currentNode.getType() + ") from route " + routes.indexOf(currentNode.getRoute())
+                                    + " with node" + currentRouteNode.index + "(" +currentRouteNode.getType() + ") from route " + routes.indexOf(currentRouteNode.getRoute()));
+                            BigDecimal newObjFun = testSwap(currentNode, currentRouteNode);
 
-                                for (Route inner : routes) {
-                                    if (inner != currentNode.getRoute() && inner != currentRouteNode.getRoute()) {
-                                        newObjFun = newObjFun.add(inner.getActualDistance());
 
-                                    } else if (inner == currentNode.getRoute()){
-
-                                        newObjFun = newObjFun.add(simulateExchange(currentNode, currentRouteNode));
-
-                                    } else {
-
-                                        newObjFun = newObjFun.add(simulateExchange(currentRouteNode, currentNode));
-
-                                    }
-                                }
-
-                                //If it is worth indeed
-                                if(oldObjFun.compareTo(newObjFun) == 1){
-                                    //Then add current Node and its weight to the map
-                                    bestMove.put(newObjFun, currentRouteNode);
-                                }
-
+                            // ex1.compareTo(ex2)
+                            // returns -1 if ex2 > ex1
+                            // returns 1 if ex1 > ex2
+                            // returns 0 if equal
+                            if(newObjFun != null && oldObjFun.compareTo(newObjFun) == 1){
+                                //Then add current Node and its weight to the map
+                                if (isDebug) System.out.println("Simulated situation reduces the objective function! Adding to the candidate map...\n");
+                                bestMove.put(newObjFun, currentRouteNode);
+                            } else {
+                                if (isDebug) System.out.println("Simulated situation does not reduce the objective function! Skip...\n");
                             }
                         }
 
@@ -159,10 +107,10 @@ public class Exchange {
                         try {
                             swapNodes(currentNode, bestMove.get(bestNodeToSwap));
                             steps++;
-                            System.out.println("Exchanged node " + currentNode.index + " with node  " + bestMove.get(bestNodeToSwap).index);
+                            System.out.println("Best move chosen! Exchanged node " + currentNode.index + " with node  " + bestMove.get(bestNodeToSwap).index);
                             bestMove.clear();
-                            isDone = false;
-                            helper.printRoutes(routes);
+                            isOptimized = false;
+                            if (printRoutesInDebug) helper.printRoutes(routes);
 
                             for (Node node : tsp) {
                                 if (node.getType() == Values.nodeType.WAREHOUSE) continue;
@@ -177,7 +125,7 @@ public class Exchange {
 
                         for (Node node : tsp) {
                             if (node.taken == false) {
-                                isDone = false;
+                                isOptimized = false;
                                 break;
                             }
                         }
@@ -190,7 +138,7 @@ public class Exchange {
             }
         }
 
-        System.out.println("\nExchange successfully terminated!\nExchange moves done: " + steps + "\nObjective Function: " + routes.getObjectiveFunction().toString());
+        System.out.println("\nExchange successfully terminated!\nExchange moves done: " + steps + "\nObjective Function: " + routes.getObjectiveFunction().toString() + "\n");
 
         for (Node node : tsp) {
             if (node.getType() == Values.nodeType.WAREHOUSE) continue;
@@ -201,6 +149,32 @@ public class Exchange {
 
     }
 
+    @Nullable
+    private BigDecimal testSwap(Node currentNode, Node currentRouteNode) {
+        BigDecimal newObjFun = null;
+
+        if( canSwap(currentNode, currentRouteNode) && canSwap(currentRouteNode, currentNode) ){
+
+            newObjFun = new BigDecimal(0);
+
+            for (Route inner : routes) {
+                if (inner != currentNode.getRoute() && inner != currentRouteNode.getRoute()) {
+                    newObjFun = newObjFun.add(inner.getActualDistance());
+
+                } else if (inner == currentNode.getRoute()){
+
+                    newObjFun = newObjFun.add(simulateExchange(currentNode, currentRouteNode));
+
+                } else {
+
+                    newObjFun = newObjFun.add(simulateExchange(currentRouteNode, currentNode));
+
+                }
+            }
+
+        }
+        return newObjFun;
+    }
 
     // TODO: Highly experimental! To be deeply tested (all tests succeded so far).
     // canSwap MUST BE CALLED with the node of the calling route as first parameter

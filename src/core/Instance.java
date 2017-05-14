@@ -10,6 +10,7 @@ public class Instance {
     public int nodeCount;
     public int routeCount;
     public int maxWeight;
+    public String fileName;
     public ArrayList<Node> nodesList = new ArrayList<>();
     public ArrayList<Node> completeTSP = new ArrayList<>();
     public ArrayList<Node> backHaulTSP = new ArrayList<>();

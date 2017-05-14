@@ -5,6 +5,8 @@ package core;
  */
 public class Values {
 
+    private static final Boolean ROUTES_IN_DEBUG = true;
+
     public enum nodeType {
         BACKHAUL, LINEHAUL, WAREHOUSE
     }
@@ -13,6 +15,10 @@ public class Values {
         return java.lang.management.ManagementFactory.getRuntimeMXBean().
                 getInputArguments().toString().contains("jdwp");
 
+    }
+
+    public static Boolean printRoutesInDebug() {
+        return ROUTES_IN_DEBUG && isDebug();
     }
 
 

@@ -24,6 +24,10 @@ public class Helper {
 
         Instance instance = new Instance();
 
+        instance.fileName = fileName;
+
+        fileName = "Instances/" + fileName;
+
         String line = null;
         try {
             // FileReader reads text files in the default encoding.
@@ -346,48 +350,29 @@ public class Helper {
 
     }
 
+    public String createSnapshot(RouteList routes){
+
+        StringBuilder sb = new StringBuilder();
+
+        sb.append("\n");
 
 
+        for (Route r : routes) {
+            sb.append(routes.indexOf(r) + "  | ");
 
-
-
-    /*public void swapNodesIfWorth(core.Node first, core.Node second) throws SwapFailedException {
-
-        core.Route firstRoute = first.getRoute();
-        core.Route secondRoute = second.getRoute();
-        double firstDistance = firstRoute.getActualDistance();
-        double secondDistance = secondRoute.getActualDistance();
-
-        double distanceSum = firstDistance + secondDistance;
-
-        if (distanceSum > (simulateExchange(first, second) + simulateExchange(second, first))) {
-
-            swapNodes(first, second);
-
-                // check if swapping the nodes (second in place of the first and vice versa) would cause trouble
-                if (first.getRoute().canSwap(first, second) && second.getRoute().canSwap(second, first)) {
-
-                    int firstPosition = first.getRoute().nodeList.indexOf(first);
-                    int secondPosition = second.getRoute().nodeList.indexOf(second);
-
-                    firstRoute.removeNode(first);
-                    secondRoute.removeNode(second);
-
-                    try {
-                        firstRoute.addNode(firstPosition, second);
-                        secondRoute.addNode(secondPosition, first);
-                    } catch (MaxWeightException e) {
-                        throw new SwapFailedException("!!! Swap failed! !!!");
-                    }
-
-                }
+            for (Node n : r.nodeList) {
+                sb.append(n.index + (n.getType().toString().substring(0, 1)) + "\t");
             }
-        } else {
-            throw new SwapFailedException("!!! Swapping these nodes would increase the objective function! !!!");
-        }
-        
-    }*/
+            sb.append("\n");
 
+        }
+
+        sb.append("\n");
+        sb.append("\n");
+
+
+        return sb.toString();
+    }
 
     public void printRoutes(RouteList routes) {
 
@@ -419,6 +404,8 @@ public class Helper {
         System.out.print("\n");
 
     }
+
+
     public void writeToFile(RouteList routes, long time, String fileName){
         File file = new File(PATH + fileName);
         ArrayList<String> data=new ArrayList<>();
@@ -440,7 +427,7 @@ public class Helper {
             String nodes= (String.join("", routeNodes));
 
 
-            data.add("core.Route "+i+" cost: "+routes.get(i).getActualDistance()+" \nweigth LINEHAUL :"+routes.get(i).weightLinehaul+" \nweigth BACKHAUL: "+routes.get(i).weightBackhaul+"\ncore.Route: "+nodes+"\n\n");
+            data.add("core.Route "+i+" cost: "+routes.get(i).getActualDistance()+" \nweight LINEHAUL :"+routes.get(i).weightLinehaul+" \nweight BACKHAUL: "+routes.get(i).weightBackhaul+"\nRoute: "+nodes+"\n\n");
 
         }
         data.add("Objective function: "+routes.getObjectiveFunction()+"\n");

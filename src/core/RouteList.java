@@ -2,6 +2,7 @@ package core;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Collection;
 
 /**
  * Created by loriz on 4/27/17.
@@ -20,6 +21,16 @@ public class RouteList extends ArrayList<Route> implements Route.RouteListener{
 
 
     ///////////////////////////////////////// INITIALIZATION METHODS ///////////////////////////////////////////////////
+
+
+    @Override
+    public boolean addAll(Collection<? extends Route> collection) {
+
+        for (Route route : collection) {
+            this.add(route);
+        }
+        return true;
+    }
 
     @Override
     public boolean add(Route route) {
@@ -47,8 +58,6 @@ public class RouteList extends ArrayList<Route> implements Route.RouteListener{
     @Override
     public void OnRouteChange(Route route, BigDecimal oldDistance) {
         objectiveFunction = objectiveFunction.subtract(oldDistance).add(route.getActualDistance());
-
-        boolean fasullo = false;
 
     }
 }
