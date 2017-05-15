@@ -5,11 +5,14 @@ import org.apache.commons.io.FileUtils;
 import exceptions.MaxWeightException;
 
 import java.io.*;
+import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Random;
+import javafx.util.Pair;
+
 
 /**
  * Created by loriz on 4/13/17.
@@ -374,6 +377,21 @@ public class Helper {
         return sb.toString();
     }
 
+    public String createSnapshot(Route route) {
+
+        StringBuilder sb = new StringBuilder();
+
+        for (Node n : route.nodeList) {
+            sb.append(n.index + (n.getType().toString().substring(0, 1)) + "\t");
+        }
+
+        sb.append("\n");
+        sb.append("\n");
+
+        return sb.toString();
+
+    }
+
     public void printRoutes(RouteList routes) {
 
         System.out.print("\n");
@@ -406,31 +424,23 @@ public class Helper {
     }
 
 
-    public void writeToFile(RouteList routes, long time, String fileName){
+    public void writeToFile(ArrayList<ResultData> routesData, long time, String fileName){
         File file = new File(PATH + fileName);
         ArrayList<String> data=new ArrayList<>();
         ArrayList<String> routeNodes=new ArrayList<>();
 
-        for (int i = 0; i <routes.size() ; i++) {
+
+
+
+
+        for (int i = 0; i <routesData.size() ; i++) {
             routeNodes.clear();
-            for (Node n: routes.get(i).nodeList) {
 
-                if(routeNodes.size()!=0){
-
-                    routeNodes.add(String.join(routeNodes.get(0),String.valueOf(n.index+" ")));}
-                else{
-                    routeNodes.add(String.valueOf(n.index+" "));
-                }
-
-
-            }
-            String nodes= (String.join("", routeNodes));
-
-
-            data.add("core.Route "+i+" cost: "+routes.get(i).getActualDistance()+" \nweight LINEHAUL :"+routes.get(i).weightLinehaul+" \nweight BACKHAUL: "+routes.get(i).weightBackhaul+"\nRoute: "+nodes+"\n\n");
+            data.add("Route "+i+" cost: "+routesData.get(i).cost+" \nweight LINEHAUL :"+routesData.get(i).weightLinehaul+" \nweight BACKHAUL: "+routesData.get(i).weightBackhaul+"\nRoute: "+routesData.get(i).route+"\n\n");
 
         }
-        data.add("Objective function: "+routes.getObjectiveFunction()+"\n");
+
+        data.add("Objective function: "+routesData.get(0).totalOF+"\n");
         NumberFormat formatter = new DecimalFormat("#0.00000");
         data.add("Execution time is " + formatter.format((time) / 1000000000d) + " seconds");
 

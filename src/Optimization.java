@@ -1,7 +1,4 @@
-import core.Instance;
-import core.Node;
-import core.RouteList;
-import core.Values;
+import core.*;
 import exceptions.MaxWeightException;
 import exceptions.NodeNotFoundException;
 import exceptions.RouteSizeException;
@@ -14,6 +11,8 @@ import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
+
 import javafx.util.Pair;
 
 
@@ -41,8 +40,12 @@ public class Optimization {
 
             long startTime = System.nanoTime();
 
+            ArrayList<ResultData> finalSnap = new ArrayList<>();
+
+            //initial route
             RouteList routes = helper.createRoutesFromInstance(instance);
             Pair initialSnap = new Pair(helper.createSnapshot(routes), routes.getObjectiveFunction());
+
 
             BigDecimal oldOF = routes.getObjectiveFunction();
 
@@ -55,12 +58,22 @@ public class Optimization {
             doBestExchange(routes, helper, instance.completeTSP);
             Pair exchangeSnap = new Pair(helper.createSnapshot(routes), routes.getObjectiveFunction());
 
-
             long endTime = System.nanoTime();
 
             long executionTime = endTime - startTime;
 
-            resultList.add(new OptimizationResult(oldOF, initialSnap, relocateSnap, exchangeSnap, routes, executionTime));
+            for (Route route : routes) {
+                finalSnap.add(new ResultData(route.getActualDistance(), route.weightLinehaul, route.weightBackhaul, helper.createSnapshot(route), routes.getObjectiveFunction(), executionTime));
+            }
+
+            HashMap routeMap = new HashMap();
+
+            for (int pair = 0; pair < finalSnap.size(); pair++) {
+                routeMap.put(finalSnap, routes.get(0).getActualDistance());
+            }
+
+
+            resultList.add(new OptimizationResult(oldOF, initialSnap, relocateSnap, exchangeSnap, finalSnap, executionTime));
 
         }
 
@@ -97,10 +110,11 @@ public class Optimization {
         System.out.println("\nExecution time is " + formatter.format((best.executionTime) / 1000000000d) + " seconds");
 
 
-        helper.writeToFile(best.finalRoutes, best.executionTime, instance.fileName);
+        helper.writeToFile(best.data, best.executionTime, instance.fileName);
 
     }
 
+    
     private RouteList doBestRelocate(DistanceMatrix distances, RouteList routes, Helper helper, ArrayList<Node> tsp) {
 
         Relocate relocate = new Relocate(distances,routes,helper, tsp);
@@ -117,6 +131,7 @@ public class Optimization {
         return optRoutes;
 
     }
+
 
     private RouteList doBestExchange(RouteList routes, Helper helper, ArrayList<Node> completeTSP) {
 
@@ -135,6 +150,7 @@ public class Optimization {
 
     }
 
+
     private class OptimizationResult {
 
 
@@ -143,20 +159,22 @@ public class Optimization {
         public final Pair<String, BigDecimal> initial;
         public final Pair<String, BigDecimal> relocate;
         public final Pair<String, BigDecimal> exchange;
-        public final RouteList finalRoutes;
         public final long executionTime;
+        public final ArrayList<ResultData> data;
 
-        public OptimizationResult(BigDecimal oldOF, Pair<String, BigDecimal> initial, Pair<String, BigDecimal> relocate, Pair<String, BigDecimal> exchange, RouteList finalRoutes, long executionTime) {
+        public OptimizationResult(BigDecimal oldOF, Pair<String, BigDecimal> initial, Pair<String, BigDecimal> relocate, Pair<String, BigDecimal> exchange, ArrayList<ResultData> data, long executionTime) {
 
 
             this.oldOF = oldOF;
             this.initial = initial;
             this.relocate = relocate;
             this.exchange = exchange;
-            this.finalRoutes = finalRoutes;
+            this.data = data;
 
             this.executionTime = executionTime;
         }
     }
+
+
 
 }
