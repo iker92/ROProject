@@ -18,7 +18,7 @@ import java.util.ArrayList;
  */
 public class Main {
 
-    private static final String FILE = "A1";
+    private static final String FILE = "B1";
     private static final String SUFFIX = ".txt";
 
     public static void main(String [] args) {
@@ -31,6 +31,7 @@ public class Main {
         Optimization opt = new Optimization(instance1);
 
         opt.doRelocateExchange();
+        boolean sborr = false;
     }
 
 }

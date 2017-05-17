@@ -19,7 +19,7 @@ import java.util.Random;
  */
 public class Helper {
 
-    private static final String PATH = "/home/loriz/RO/ROProject/";
+    private static final String PATH = "/home/andream16/Documents/devStuff/ROProject/Results/";
 
     private Boolean isDebug = Values.isDebug();
 
@@ -199,30 +199,34 @@ public class Helper {
             for (Node node : route.nodeList) remainingNodes.add(node);
         }
 
-        route = new Route(instance.maxWeight);
-
         while (tsp.size()-1 >= 0) {
             remainingNodes.add(tsp.get(0));
             tsp.remove(0);
         }
 
-        while (remainingNodes.size() > 0) {
+        int steps = remainingNodes.size();
+
+        while (steps > 0) {
             nodesToCheckInOrder = distances.getClosestNodes(remainingNodes.get(0), instance.completeTSP);
 
             for (Node node : nodesToCheckInOrder) {
                 if (remainingNodes.contains(node)) continue;
                 try {
-                   if (canRelocate(remainingNodes.get(0), node.getRoute(), node.getRoute().getIndexByNode(node))) {
+                   if (canPositionate(remainingNodes.get(0), node.getRoute(), node.getRoute().getIndexByNode(node))) {
 
                        node.getRoute().nodeList.add(node.getRoute().getIndexByNode(node), remainingNodes.get(0));
+                       remainingNodes.get(0).setRoute(node.getRoute());
+                       remainingNodes.get(0).getRoute().forceUpdate();
+                       remainingNodes.remove(0);
+                       break;
 
                    }
-                } catch (NodeNotFoundException e) {
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
-                remainingNodes.remove(0);
-                nodesToCheckInOrder = new ArrayList<>();
             }
+
+            steps--;
 
         }
 
@@ -230,18 +234,18 @@ public class Helper {
 
         ///////////////////////////////////// SCRAPPED NODES MANAGEMENT //////////////////////////////////////////////
 
-        Route scrapped = route;
-
-        if (scrapped.nodeList.size() != 0 && routes.size() == instance.routeCount) {
+        if (remainingNodes.size() > 0 && routes.size() == instance.routeCount) {
             System.out.println("Now starting the management for the nodes that wouldn't fit the nodes on the first pass... \n");
             System.out.println("//////////////////////////////////////////////////////////////////////////////////////////////////////\n");
 
 
-            while (scrapped.nodeList.size() != 0) {
+            while (remainingNodes.size() > 0) {
 
                 try {
-                    relocateScrapped(scrapped, routes);
+                    relocateScrapped(remainingNodes.get(0), routes);
                     System.out.println("Relocation of misplaced nodes successful! \n");
+
+                    remainingNodes.remove(0);
 
                 } catch (Exception e) {
 
@@ -285,32 +289,18 @@ public class Helper {
     }
 
 
-    public boolean canRelocate(Node node, Route route, int position) {
+    public boolean canPositionate(Node node, Route route, int position) {
 
-        if (isDebug) System.out.println("\nTrying to relocate " + node.index );
-
-        //if trying to relocate a node with itself
-        if (node.getRoute() == route &&  (route.nodeList.get(position).index == node.index || position == (route.nodeList.indexOf(node)+1))) {
-            if (isDebug) System.out.println("Relocate is impossible! Trying to relocate in the same position (position or position+1)!\n");
-            return false;
-        }
-
-
-        if(node.getRoute() == route && node.getType() != route.nodeList.get(position).getType()){
-
-            if (isDebug) System.out.println("Relocate is impossible! Trying to relocate node of different types on same route!\n");
-            return false;
-
-        }
+        if (isDebug) System.out.println("\nTrying to positionate " + node.index );
 
         //if trying to relocate in place of the first warehouse
         if (position == 0) {
-            // if (isDebug) System.out.println("Relocate is impossible! Trying to put something before first WAREHOUSE\n");
+            if (isDebug) System.out.println("Positionate is impossible! Trying to put something before first WAREHOUSE\n");
             return false;
         }
 
         if (node.getType() == Values.nodeType.WAREHOUSE) {
-            //if (isDebug) System.out.println("Relocate is impossible! Node to relocate is WAREHOUSE\n");
+            if (isDebug) System.out.println("Positionate is impossible! Node to relocate is WAREHOUSE\n");
             return false;
         }
 

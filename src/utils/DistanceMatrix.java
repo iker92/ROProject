@@ -1,12 +1,14 @@
 package utils;
 
 import core.Node;
+import core.Values;
 
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.function.Predicate;
 
 import static java.lang.Math.abs;
+import static java.lang.Math.pow;
 
 /**
  * Created by andream16 on 13.04.17.
@@ -55,7 +57,7 @@ public class DistanceMatrix {
             System.out.printf(i + "\t");
 
             for( int j=0; j<nodesSize; j++){
-                distances[i][j] = BigDecimal.valueOf(Math.sqrt(abs((nodes.get(i).coordinates.x - nodes.get(j).coordinates.x)) + abs(nodes.get(i).coordinates.y - nodes.get(j).coordinates.y)));
+                distances[i][j] = BigDecimal.valueOf(Math.sqrt(abs(pow((nodes.get(i).coordinates.x - nodes.get(j).coordinates.x), 2) + abs(pow((nodes.get(i).coordinates.y - nodes.get(j).coordinates.y), 2)))));
                 System.out.printf("%.2f\t",distances[i][j]);
             }
             System.out.print("\n\n");
@@ -83,7 +85,9 @@ public class DistanceMatrix {
         for (int i=0; i<distanceRow.length; i++) {
             int finalI = i;
             Predicate<Node> predicate = c-> c.index == finalI;
-            map.put(distanceRow[i], tsp.stream().filter(predicate).findFirst().get());
+            Node n = tsp.stream().filter(predicate).findFirst().get();
+            if(n.getType().equals(Values.nodeType.WAREHOUSE)) continue;
+            map.put(distanceRow[i], n);
         }
 
         return new ArrayList<Node>(map.values());
