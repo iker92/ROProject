@@ -30,15 +30,17 @@ public class Optimization {
         this.helper = new Helper();
     }
 
-    public void doRelocateExchange() {
+    public OptimizationResult doRelocateExchange() {
+
+        System.out.println("********************************************************");
+        System.out.println("********************************************************");
+        System.out.println("*************RELOCATE EXCHANGE*********************");
 
         ArrayList<OptimizationResult> resultList = new ArrayList<>();
         DistanceMatrix distances = DistanceMatrix.initialize(instance.nodesList);
         helper.initTSP(instance);
 
         for (int i=0; i < NUMBER_OF_TIMES; i++) {
-
-            long startTime = System.nanoTime();
 
             ArrayList<ResultData> finalSnap = new ArrayList<>();
 
@@ -58,12 +60,8 @@ public class Optimization {
             doBestExchange(routes, helper, instance.completeTSP);
             Pair exchangeSnap = new Pair(helper.createSnapshot(routes), routes.getObjectiveFunction());
 
-            long endTime = System.nanoTime();
-
-            long executionTime = endTime - startTime;
-
             for (Route route : routes) {
-                finalSnap.add(new ResultData(route.getActualDistance(), route.weightLinehaul, route.weightBackhaul, helper.createSnapshot(route), routes.getObjectiveFunction(), executionTime));
+                finalSnap.add(new ResultData(route.getActualDistance(), route.weightLinehaul, route.weightBackhaul, helper.createSnapshot(route), routes.getObjectiveFunction()));
             }
 
             HashMap routeMap = new HashMap();
@@ -73,8 +71,7 @@ public class Optimization {
             }
 
 
-            resultList.add(new OptimizationResult(oldOF, initialSnap, relocateSnap, exchangeSnap, finalSnap, executionTime));
-
+            resultList.add(new OptimizationResult(oldOF, initialSnap, relocateSnap, exchangeSnap, finalSnap));
         }
 
 
@@ -87,9 +84,7 @@ public class Optimization {
             if (result.exchange.getValue().compareTo(best.exchange.getValue()) == -1) {
                 best = result;
             }
-
         }
-
 
         System.out.print("//////////////////////////////////////////////////////////////////////////////\n");
         System.out.print("//////////////////////////////////////////////////////////////////////////////\n");
@@ -105,13 +100,78 @@ public class Optimization {
         System.out.println("Exchanged Routes (Objective Function = " + best.exchange.getValue() + ")");
         System.out.print(best.exchange.getKey());
 
-        NumberFormat formatter = new DecimalFormat("#0.00000");
+        return best;
+    }
 
-        System.out.println("\nExecution time is " + formatter.format((best.executionTime) / 1000000000d) + " seconds");
+    public OptimizationResult doExchangeRelocate() {
+
+        System.out.println("********************************************************");
+        System.out.println("********************************************************");
+        System.out.println("************* EXCHANGE RELOCATE *********************");
+
+        ArrayList<OptimizationResult> resultList = new ArrayList<>();
+        DistanceMatrix distances = DistanceMatrix.initialize(instance.nodesList);
+        helper.initTSP(instance);
+
+        for (int i=0; i < NUMBER_OF_TIMES; i++) {
+
+            ArrayList<ResultData> finalSnap = new ArrayList<>();
+
+            //initial route
+            RouteList routes = helper.createRoutesFromInstance(instance);
+            Pair initialSnap = new Pair(helper.createSnapshot(routes), routes.getObjectiveFunction());
 
 
-        helper.writeToFile(best.data, best.executionTime, instance.fileName);
+            BigDecimal oldOF = routes.getObjectiveFunction();
 
+            System.out.println("Debug mode: " + Values.isDebug().toString());
+
+            doBestExchange(routes, helper, instance.completeTSP);
+            Pair exchangeSnap = new Pair(helper.createSnapshot(routes), routes.getObjectiveFunction());
+
+            doBestRelocate(distances, routes, helper, instance.completeTSP);
+            Pair relocateSnap = new Pair(helper.createSnapshot(routes), routes.getObjectiveFunction());
+
+            for (Route route : routes) {
+                finalSnap.add(new ResultData(route.getActualDistance(), route.weightLinehaul, route.weightBackhaul, helper.createSnapshot(route), routes.getObjectiveFunction()));
+            }
+
+            HashMap routeMap = new HashMap();
+
+            for (int pair = 0; pair < finalSnap.size(); pair++) {
+                routeMap.put(finalSnap, routes.get(0).getActualDistance());
+            }
+
+            resultList.add(new OptimizationResult(oldOF, initialSnap, relocateSnap, exchangeSnap, finalSnap));
+        }
+
+
+        OptimizationResult best = resultList.get(0);
+
+        for (OptimizationResult result : resultList) {
+
+            if (best == null) best = result;
+
+            if (result.relocate.getValue().compareTo(best.relocate.getValue()) == -1) {
+                best = result;
+            }
+        }
+
+        System.out.print("//////////////////////////////////////////////////////////////////////////////\n");
+        System.out.print("//////////////////////////////////////////////////////////////////////////////\n");
+        System.out.print("//////////////////////////////////////////////////////////////////////////////\n\n");
+        System.out.println("ExchangeRelocate cycle finished! Presenting results...\n");
+
+        System.out.println("Initial Routes (Objective Function = " + best.initial.getValue() + ")");
+        System.out.print(best.initial.getKey());
+
+        System.out.println("Exchanged Routes (Objective Function = " + best.exchange.getValue() + ")");
+        System.out.print(best.exchange.getKey());
+
+        System.out.println("Relocated Routes (Objective Function = " + best.relocate.getValue() + ")");
+        System.out.print(best.relocate.getKey());
+
+        return best;
     }
 
     
@@ -151,27 +211,22 @@ public class Optimization {
     }
 
 
-    private class OptimizationResult {
+    public class OptimizationResult {
 
 
         public final BigDecimal oldOF;
-
         public final Pair<String, BigDecimal> initial;
         public final Pair<String, BigDecimal> relocate;
         public final Pair<String, BigDecimal> exchange;
-        public final long executionTime;
         public final ArrayList<ResultData> data;
 
-        public OptimizationResult(BigDecimal oldOF, Pair<String, BigDecimal> initial, Pair<String, BigDecimal> relocate, Pair<String, BigDecimal> exchange, ArrayList<ResultData> data, long executionTime) {
-
+        public OptimizationResult(BigDecimal oldOF, Pair<String, BigDecimal> initial, Pair<String, BigDecimal> relocate, Pair<String, BigDecimal> exchange, ArrayList<ResultData> data) {
 
             this.oldOF = oldOF;
             this.initial = initial;
             this.relocate = relocate;
             this.exchange = exchange;
             this.data = data;
-
-            this.executionTime = executionTime;
         }
     }
 
