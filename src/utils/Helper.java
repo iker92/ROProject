@@ -216,7 +216,12 @@ public class Helper {
 
                        node.getRoute().nodeList.add(node.getRoute().getIndexByNode(node), remainingNodes.get(0));
                        remainingNodes.get(0).setRoute(node.getRoute());
-                       remainingNodes.get(0).getRoute().forceUpdate();
+                       if(remainingNodes.get(0).getType() == Values.nodeType.LINEHAUL) {
+                           node.getRoute().weightLinehaul += remainingNodes.get(0).weight;
+                       } else {
+                           node.getRoute().weightBackhaul += remainingNodes.get(0).weight;
+                       }
+                       node.getRoute().forceUpdate();
                        remainingNodes.remove(0);
                        break;
 
@@ -453,7 +458,7 @@ public class Helper {
             sb.append(routes.indexOf(r) + "  | ");
 
             for (Node n : r.nodeList) {
-                sb.append(n.index + (n.getType().toString().substring(0, 1)) + "\t");
+                sb.append(n.index + (n.getType().toString().substring(0, 1)) + "\t  ");
             }
             sb.append("\n");
 

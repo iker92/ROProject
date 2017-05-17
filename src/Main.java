@@ -18,7 +18,7 @@ import java.util.ArrayList;
  */
 public class Main {
 
-    private static final String FILE = "B1";
+    private static final String FILE = "N6";
 
     private static final String SUFFIX = ".txt";
 
