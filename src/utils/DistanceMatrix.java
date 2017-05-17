@@ -57,7 +57,7 @@ public class DistanceMatrix {
             System.out.printf(i + "\t");
 
             for( int j=0; j<nodesSize; j++){
-                distances[i][j] = BigDecimal.valueOf(Math.sqrt(abs(pow((nodes.get(i).coordinates.x - nodes.get(j).coordinates.x), 2) + abs(pow((nodes.get(i).coordinates.y - nodes.get(j).coordinates.y), 2)))));
+                distances[i][j] = BigDecimal.valueOf(Math.sqrt(abs(pow((nodes.get(i).getCoordinates().x - nodes.get(j).getCoordinates().x), 2) + abs(pow((nodes.get(i).getCoordinates().y - nodes.get(j).getCoordinates().y), 2)))));
                 System.out.printf("%.2f\t",distances[i][j]);
             }
             System.out.print("\n\n");
@@ -69,7 +69,7 @@ public class DistanceMatrix {
     }
 
     public BigDecimal getDistance (Node node_1, Node node_2){
-        return getDistance(node_1.index, node_2.index);
+        return getDistance(node_1.getIndex(), node_2.getIndex());
     }
 
     public BigDecimal[][] getDistances(){
@@ -77,14 +77,14 @@ public class DistanceMatrix {
     }
 
     public ArrayList<Node> getClosestNodes(Node node, ArrayList<Node> tsp) {
-        BigDecimal[] distanceRow = distances[node.index];
+        BigDecimal[] distanceRow = distances[node.getIndex()];
 
         TreeMap<BigDecimal, Node> map = new TreeMap<>();
 
 
         for (int i=0; i<distanceRow.length; i++) {
             int finalI = i;
-            Predicate<Node> predicate = c-> c.index == finalI;
+            Predicate<Node> predicate = c-> c.getIndex() == finalI;
             Node n = tsp.stream().filter(predicate).findFirst().get();
             if(n.getType().equals(Values.nodeType.WAREHOUSE)) continue;
             map.put(distanceRow[i], n);

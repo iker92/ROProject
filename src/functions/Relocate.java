@@ -111,7 +111,7 @@ public class Relocate {
                         try {
                             relocateNode(currentNode, bestMove.get(bestMapResult).getKey(),bestMove.get(bestMapResult).getValue());
                             steps++;
-                            System.out.println("Best move chosen! Relocated node " + currentNode.index + " inside route " + routes.indexOf(bestMove.get(bestMapResult).getKey()));
+                            System.out.println("Best move chosen! Relocated node " + currentNode.getIndex() + " inside route " + routes.indexOf(bestMove.get(bestMapResult).getKey()));
                             bestMove.clear();
                             isOptimized = false;
                             if (printRoutesInDebug) helper.printRoutes(routes);
@@ -126,7 +126,7 @@ public class Relocate {
                         tsp.get(tsp.indexOf(currentNode)).take();
 
                         for (Node node : tsp) {
-                            if (node.taken == false) {
+                            if (node.isTaken() == false) {
                                 isOptimized = false;
                                 break;
                             }
@@ -167,13 +167,13 @@ public class Relocate {
                 }
 
                 if (inner == currentNode.getRoute() && inner == currentInnerRoute) {
-                    if (isDebug) System.out.println("Simulate internal relocation of " + currentNode.index + " in position " + innerNodeIndex + " inside " + routes.indexOf(currentNode.getRoute()));
+                    if (isDebug) System.out.println("Simulate internal relocation of " + currentNode.getIndex() + " in position " + innerNodeIndex + " inside " + routes.indexOf(currentNode.getRoute()));
                     newObjFun = newObjFun.add(simulateInternalRelocation(currentNode, innerNodeIndex));
                 } else if (inner == currentNode.getRoute()) {
-                    if (isDebug) if (isDebug) System.out.println("Simulate removal of " + currentNode.index + " from route " + routes.indexOf(currentNode.getRoute()));
+                    if (isDebug) if (isDebug) System.out.println("Simulate removal of " + currentNode.getIndex() + " from route " + routes.indexOf(currentNode.getRoute()));
                     newObjFun = newObjFun.add(simulateRemovalOfNode(currentNode));
                 } else {
-                    if (isDebug) System.out.println("Simulate addition of " + currentNode.index + " in route " + routes.indexOf(currentInnerRoute)+ " with position " + innerNodeIndex/*currentInnerRoute.nodeList.indexOf(currentInnerNode)*/);
+                    if (isDebug) System.out.println("Simulate addition of " + currentNode.getIndex() + " in route " + routes.indexOf(currentInnerRoute)+ " with position " + innerNodeIndex/*currentInnerRoute.nodeList.indexOf(currentInnerNode)*/);
 
                     newObjFun = newObjFun.add(simulateAdditionOfNode(currentNode, currentInnerRoute, innerNodeIndex/*currentInnerRoute.nodeList.indexOf(currentInnerNode)*/));
                     // newObjFun = newObjFun.add(simulatremainingNodeseAdditionOfNode(currentNode, inner, innerNodeIndex));
@@ -234,9 +234,9 @@ public class Relocate {
 
         for (int nodeIndex = 0; nodeIndex <= node.getRoute().nodeList.size()-1; nodeIndex++) {
 
-            if (node.getRoute().nodeList.get(nodeIndex).index == node.index) continue;
+            if (node.getRoute().nodeList.get(nodeIndex).getIndex() == node.getIndex()) continue;
 
-            listOfNodes.add(node.getRoute().nodeList.get(nodeIndex).index);
+            listOfNodes.add(node.getRoute().nodeList.get(nodeIndex).getIndex());
         }
 
         BigDecimal distance = new BigDecimal(0);
@@ -310,10 +310,10 @@ public class Relocate {
 
     public boolean canRelocate(Node node, Route route, int position) {
 
-        if (isDebug) System.out.println("\nTrying to relocate " + node.index + " from Route" + routes.indexOf(node.getRoute()) + " to Route " + routes.indexOf(route) + " in position " + position);
+        if (isDebug) System.out.println("\nTrying to relocate " + node.getIndex() + " from Route" + routes.indexOf(node.getRoute()) + " to Route " + routes.indexOf(route) + " in position " + position);
 
         //if trying to relocate a node with itself
-        if (node.getRoute() == route &&  (route.nodeList.get(position).index == node.index || position == (route.nodeList.indexOf(node)+1))) {
+        if (node.getRoute() == route &&  (route.nodeList.get(position).getIndex() == node.getIndex() || position == (route.nodeList.indexOf(node)+1))) {
             if (isDebug) System.out.println("Relocate is impossible! Trying to relocate in the same position (position or position+1)!\n");
             return false;
         }
@@ -371,7 +371,7 @@ public class Relocate {
 
 
 
-        int actualTypeWeight = (nodeType == Values.nodeType.LINEHAUL ? route.weightLinehaul : route.weightBackhaul) + node.weight;
+        int actualTypeWeight = (nodeType == Values.nodeType.LINEHAUL ? route.weightLinehaul : route.weightBackhaul) + node.getWeight();
 
         if (actualTypeWeight <= route.MAX_WEIGHT) {
             if (isDebug) System.out.println("Relocate is possible! Checking if it's worth...\n");

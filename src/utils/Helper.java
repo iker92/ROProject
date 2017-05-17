@@ -217,9 +217,9 @@ public class Helper {
                        node.getRoute().nodeList.add(node.getRoute().getIndexByNode(node), remainingNodes.get(0));
                        remainingNodes.get(0).setRoute(node.getRoute());
                        if(remainingNodes.get(0).getType() == Values.nodeType.LINEHAUL) {
-                           node.getRoute().weightLinehaul += remainingNodes.get(0).weight;
+                           node.getRoute().weightLinehaul += remainingNodes.get(0).getWeight();
                        } else {
-                           node.getRoute().weightBackhaul += remainingNodes.get(0).weight;
+                           node.getRoute().weightBackhaul += remainingNodes.get(0).getWeight();
                        }
                        node.getRoute().forceUpdate();
                        remainingNodes.remove(0);
@@ -296,7 +296,7 @@ public class Helper {
 
     public boolean canPositionate(Node node, Route route, int position) {
 
-        if (isDebug) System.out.println("\nTrying to positionate " + node.index );
+        if (isDebug) System.out.println("\nTrying to positionate " + node.getIndex() );
 
         //if trying to relocate in place of the first warehouse
         if (position == 0) {
@@ -331,7 +331,7 @@ public class Helper {
 
 
 
-        int actualTypeWeight = (nodeType == Values.nodeType.LINEHAUL ? route.weightLinehaul : route.weightBackhaul) + node.weight;
+        int actualTypeWeight = (nodeType == Values.nodeType.LINEHAUL ? route.weightLinehaul : route.weightBackhaul) + node.getWeight();
 
         if (actualTypeWeight <= route.MAX_WEIGHT) {
             if (isDebug) System.out.println("Relocate is possible! Checking if it's worth...\n");
@@ -350,7 +350,7 @@ public class Helper {
         Collections.shuffle(route.nodeList, new Random(seed));
 
         for (int nodeIndex = 0; nodeIndex < route.nodeList.size(); nodeIndex++) {
-            if (route.getNode(nodeIndex).getType() == Values.nodeType.BACKHAUL && route.getNode(nodeIndex).taken == false) {
+            if (route.getNode(nodeIndex).getType() == Values.nodeType.BACKHAUL && route.getNode(nodeIndex).isTaken() == false) {
 
                 route.getNode(nodeIndex).take();
                 route.addNode(route.getNode(nodeIndex));
@@ -458,7 +458,7 @@ public class Helper {
             sb.append(routes.indexOf(r) + "  | ");
 
             for (Node n : r.nodeList) {
-                sb.append(n.index + (n.getType().toString().substring(0, 1)) + "\t  ");
+                sb.append(n.getIndex() + (n.getType().toString().substring(0, 1)) + "\t  ");
             }
             sb.append("\n");
 
@@ -476,7 +476,7 @@ public class Helper {
         StringBuilder sb = new StringBuilder();
 
         for (Node n : route.nodeList) {
-            sb.append(n.index + (n.getType().toString().substring(0, 1)) + "\t");
+            sb.append(n.getIndex() + (n.getType().toString().substring(0, 1)) + "\t");
         }
 
         sb.append("\n");
@@ -495,7 +495,7 @@ public class Helper {
             System.out.print(routes.indexOf(r) + "  | ");
 
             for (Node n : r.nodeList) {
-                System.out.print(n.index + (n.getType().toString().substring(0, 1)) + "\t");
+                System.out.print(n.getIndex() + (n.getType().toString().substring(0, 1)) + "\t");
             }
             System.out.print("\n");
 
@@ -509,7 +509,7 @@ public class Helper {
     public void printRoute(Route route) {
 
         for (Node n : route.nodeList) {
-            System.out.print(n.index + (n.getType().toString().substring(0, 1)) + "\t");
+            System.out.print(n.getIndex() + (n.getType().toString().substring(0, 1)) + "\t");
         }
 
         System.out.print("\n");
@@ -530,11 +530,11 @@ public class Helper {
         for (int i = 0; i <routesData.size() ; i++) {
             routeNodes.clear();
 
-            data.add("Route "+i+" cost: "+routesData.get(i).cost+" \nweight LINEHAUL :"+routesData.get(i).weightLinehaul+" \nweight BACKHAUL: "+routesData.get(i).weightBackhaul+"\nRoute: "+routesData.get(i).route+"\n\n");
+            data.add("Route "+i+" cost: "+routesData.get(i).getRouteCost()+" \nweight LINEHAUL :"+routesData.get(i).getWeightLH()+" \nweight BACKHAUL: "+routesData.get(i).getWeightBH()+"\nRoute: "+routesData.get(i).getRouteAsString()+"\n\n");
 
         }
 
-        data.add("Objective function: "+routesData.get(0).totalOF+"\n");
+        data.add("Objective function: "+routesData.get(0).getTotalObjectiveFunction()+"\n");
         NumberFormat formatter = new DecimalFormat("#0.00000");
         data.add("Execution time is " + formatter.format((time) / 1000000000d) + " seconds");
 

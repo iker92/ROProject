@@ -80,8 +80,8 @@ public class Exchange {
 
                             BigDecimal oldObjFun = routes.getObjectiveFunction();
 
-                            if (isDebug) System.out.println("Simulating exchange of node " + currentNode.index + "(" +currentNode.getType() + ") from route " + routes.indexOf(currentNode.getRoute())
-                                    + " with node" + currentRouteNode.index + "(" +currentRouteNode.getType() + ") from route " + routes.indexOf(currentRouteNode.getRoute()));
+                            if (isDebug) System.out.println("Simulating exchange of node " + currentNode.getIndex() + "(" +currentNode.getType() + ") from route " + routes.indexOf(currentNode.getRoute())
+                                    + " with node" + currentRouteNode.getIndex() + "(" +currentRouteNode.getType() + ") from route " + routes.indexOf(currentRouteNode.getRoute()));
                             BigDecimal newObjFun = testSwap(currentNode, currentRouteNode);
 
 
@@ -107,7 +107,7 @@ public class Exchange {
                         try {
                             swapNodes(currentNode, bestMove.get(bestNodeToSwap));
                             steps++;
-                            System.out.println("Best move chosen! Exchanged node " + currentNode.index + " with node  " + bestMove.get(bestNodeToSwap).index);
+                            System.out.println("Best move chosen! Exchanged node " + currentNode.getIndex() + " with node  " + bestMove.get(bestNodeToSwap).getIndex());
                             bestMove.clear();
                             isOptimized = false;
                             if (printRoutesInDebug) helper.printRoutes(routes);
@@ -124,7 +124,7 @@ public class Exchange {
                         tsp.get(tsp.indexOf(currentNode)).take();
 
                         for (Node node : tsp) {
-                            if (node.taken == false) {
+                            if (node.isTaken() == false) {
                                 isOptimized = false;
                                 break;
                             }
@@ -202,13 +202,13 @@ public class Exchange {
                         return false;
                     }
 
-                    int actualInTypeWeight = (inType == Values.nodeType.LINEHAUL ? internal.getRoute().weightLinehaul : internal.getRoute().weightBackhaul) - internal.weight;
-                    int actualExTypeWeight = (exType == Values.nodeType.LINEHAUL ? internal.getRoute().weightLinehaul : internal.getRoute().weightBackhaul) + external.weight;
+                    int actualInTypeWeight = (inType == Values.nodeType.LINEHAUL ? internal.getRoute().weightLinehaul : internal.getRoute().weightBackhaul) - internal.getWeight();
+                    int actualExTypeWeight = (exType == Values.nodeType.LINEHAUL ? internal.getRoute().weightLinehaul : internal.getRoute().weightBackhaul) + external.getWeight();
                     return (actualInTypeWeight <= internal.getRoute().MAX_WEIGHT && actualExTypeWeight <= internal.getRoute().MAX_WEIGHT);
 
                 } else {
 
-                    int actualWeight = (inType == Values.nodeType.LINEHAUL ? internal.getRoute().weightLinehaul : internal.getRoute().weightBackhaul) - internal.weight + external.weight;
+                    int actualWeight = (inType == Values.nodeType.LINEHAUL ? internal.getRoute().weightLinehaul : internal.getRoute().weightBackhaul) - internal.getWeight() + external.getWeight();
                     return actualWeight <= internal.getRoute().MAX_WEIGHT;
                 }
 

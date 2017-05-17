@@ -3,7 +3,8 @@ package core;
 import java.util.ArrayList;
 
 /**
- * Created by loriz on 4/13/17.
+ * Instance is the class which holds all the information bond to a single Instance of the problem to optimize.
+ * These informations are usually retrieved from a .txt file given as a Linehaul/Backhaul transportation problem.
  */
 public class Instance {
 
@@ -24,8 +25,8 @@ public class Instance {
     /**
      * createTSPFromNodes creates a TSP (as an ArrayList<Node>) given a specified array of indexes by getting the nodes
      *                    corresponding to the indexes
-     * @param nodes
-     * @param indexes
+     * @param nodes is the ArrayList containing the nods that must be placed into the tsp
+     * @param indexes is the ArrayList containing the indexes of the nodes to retrieve from the other input ArrayList
      * @return the corresponding TSP
      */
     public  ArrayList<Node> createTSPFromNodes(ArrayList<Node> nodes, ArrayList<Integer> indexes){

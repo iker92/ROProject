@@ -3,15 +3,16 @@ package core;
 import java.math.BigDecimal;
 
 /**
- * Created by loriz on 5/15/17.
+ * ResultData is essentially the POJO which helps to model the data calculated for each iteration into the final result.
+ * In fact, this class holds all the information to be shown for each route inside the result output file
  */
 public class ResultData {
 
-    public final BigDecimal cost;
-    public final int weightLinehaul;
-    public final int weightBackhaul;
-    public final String route;
-    public final BigDecimal totalOF;
+    private final BigDecimal cost;
+    private final int weightLinehaul;
+    private final int weightBackhaul;
+    private final String route;
+    private final BigDecimal totalOF;
 
     public ResultData(BigDecimal cost, int weightLinehaul, int weightBackhaul, String route, BigDecimal totalOF) {
 
@@ -22,4 +23,13 @@ public class ResultData {
         this.totalOF = totalOF;
     }
 
+    public BigDecimal getRouteCost() { return cost; }
+
+    public int getWeightLH() { return weightLinehaul; }
+
+    public int getWeightBH() { return weightBackhaul; }
+
+    public String getRouteAsString() { return route; }
+
+    public BigDecimal getTotalObjectiveFunction() { return totalOF; }
 }

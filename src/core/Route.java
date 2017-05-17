@@ -71,11 +71,11 @@ public class Route {
     ///////////////////////////////////////////// METHODS TO ADD NODES ///////////////////////////////////////////////
 
     public void addNode(int position, Node node) throws MaxWeightException{
-        if ( (node.getType() == Values.nodeType.LINEHAUL ? weightLinehaul : weightBackhaul) + node.weight > MAX_WEIGHT && !this.nodeList.contains(node)) {
+        if ( (node.getType() == Values.nodeType.LINEHAUL ? weightLinehaul : weightBackhaul) + node.getWeight() > MAX_WEIGHT && !this.nodeList.contains(node)) {
             throw new MaxWeightException("Cannot add node to route! Weight would exceed the maximum weight!");
         } else {
             nodeList.add(position, node);
-            if (node.getType() == Values.nodeType.LINEHAUL)  {weightLinehaul += node.weight;} else {weightBackhaul += node.weight;}
+            if (node.getType() == Values.nodeType.LINEHAUL)  {weightLinehaul += node.getWeight();} else {weightBackhaul += node.getWeight();}
         }
 
         if (node.getType() != Values.nodeType.WAREHOUSE) {
@@ -89,7 +89,7 @@ public class Route {
     }
 
     public void addNode(Node node) throws MaxWeightException{
-        if ( node.getRoute() != this && (node.getType() == Values.nodeType.LINEHAUL ? weightLinehaul : weightBackhaul) + node.weight > MAX_WEIGHT ) {
+        if ( node.getRoute() != this && (node.getType() == Values.nodeType.LINEHAUL ? weightLinehaul : weightBackhaul) + node.getWeight() > MAX_WEIGHT ) {
             throw new MaxWeightException("Cannot add node to route! Weight would exceed the maximum weight!");
         } else {
 
@@ -102,9 +102,9 @@ public class Route {
                 }
 
                 if (node.getType() == Values.nodeType.LINEHAUL) {
-                    weightLinehaul += node.weight;
+                    weightLinehaul += node.getWeight();
                 } else {
-                    weightBackhaul += node.weight;
+                    weightBackhaul += node.getWeight();
                 }
 
                 if (node.getRoute() != null) {
@@ -132,7 +132,7 @@ public class Route {
 
 
         if (nodeList.size() > position) {
-            if (nodeList.get(position).getType() == Values.nodeType.LINEHAUL)  {weightLinehaul -= nodeList.get(position).weight;} else {weightBackhaul -= nodeList.get(position).weight;}
+            if (nodeList.get(position).getType() == Values.nodeType.LINEHAUL)  {weightLinehaul -= nodeList.get(position).getWeight();} else {weightBackhaul -= nodeList.get(position).getWeight();}
             nodeList.get(position).setRoute(null);
             nodeList.remove(position);
         } else {
@@ -144,7 +144,7 @@ public class Route {
 
     public void removeNode(Node node) {
         if (nodeList.contains(node)) {
-            if (node.getType() == Values.nodeType.LINEHAUL)  {weightLinehaul -= node.weight;} else {weightBackhaul -= node.weight;}
+            if (node.getType() == Values.nodeType.LINEHAUL)  {weightLinehaul -= node.getWeight();} else {weightBackhaul -= node.getWeight();}
             nodeList.remove(node);
         } else {
             System.err.println("!!! Error - Node to remove wasn't found in this route !!!");
@@ -238,7 +238,7 @@ public class Route {
     }
 
     public boolean canAdd(Node node) {
-        return ((node.getType() == Values.nodeType.LINEHAUL ? node.weight + weightLinehaul : node.weight + weightBackhaul) <= MAX_WEIGHT);
+        return ((node.getType() == Values.nodeType.LINEHAUL ? node.getWeight() + weightLinehaul : node.getWeight() + weightBackhaul) <= MAX_WEIGHT);
     }
 
 
