@@ -12,16 +12,14 @@ public class ResultData {
     public final int weightBackhaul;
     public final String route;
     public final BigDecimal totalOF;
-    public final long executionTime;
 
-    public ResultData(BigDecimal cost, int weightLinehaul, int weightBackhaul, String route, BigDecimal totalOF, long executionTime) {
+    public ResultData(BigDecimal cost, int weightLinehaul, int weightBackhaul, String route, BigDecimal totalOF) {
 
         this.cost = cost;
         this.weightLinehaul = weightLinehaul;
         this.weightBackhaul = weightBackhaul;
         this.route = route;
         this.totalOF = totalOF;
-        this.executionTime = executionTime;
     }
 
 }

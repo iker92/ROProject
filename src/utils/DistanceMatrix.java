@@ -6,6 +6,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 
 import static java.lang.Math.abs;
+import static java.lang.Math.pow;
 
 /**
  * Created by andream16 on 13.04.17.
@@ -54,7 +55,7 @@ public class DistanceMatrix {
             System.out.printf(i + "\t");
 
             for( int j=0; j<nodesSize; j++){
-                distances[i][j] = BigDecimal.valueOf(Math.sqrt(abs((nodes.get(i).coordinates.x - nodes.get(j).coordinates.x)) + abs(nodes.get(i).coordinates.y - nodes.get(j).coordinates.y)));
+                distances[i][j] = BigDecimal.valueOf(Math.sqrt(abs(pow((nodes.get(i).coordinates.x - nodes.get(j).coordinates.x), 2) + abs(pow((nodes.get(i).coordinates.y - nodes.get(j).coordinates.y), 2)))));
                 System.out.printf("%.2f\t",distances[i][j]);
             }
             System.out.print("\n\n");
