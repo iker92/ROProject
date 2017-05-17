@@ -176,7 +176,7 @@ public class Relocate {
                     if (isDebug) System.out.println("Simulate addition of " + currentNode.index + " in route " + routes.indexOf(currentInnerRoute)+ " with position " + innerNodeIndex/*currentInnerRoute.nodeList.indexOf(currentInnerNode)*/);
 
                     newObjFun = newObjFun.add(simulateAdditionOfNode(currentNode, currentInnerRoute, innerNodeIndex/*currentInnerRoute.nodeList.indexOf(currentInnerNode)*/));
-                    // newObjFun = newObjFun.add(simulateAdditionOfNode(currentNode, inner, innerNodeIndex));
+                    // newObjFun = newObjFun.add(simulatremainingNodeseAdditionOfNode(currentNode, inner, innerNodeIndex));
                 }
             }
         }

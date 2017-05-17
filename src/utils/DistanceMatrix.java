@@ -3,7 +3,8 @@ package utils;
 import core.Node;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
+import java.util.*;
+import java.util.function.Predicate;
 
 import static java.lang.Math.abs;
 
@@ -72,5 +73,21 @@ public class DistanceMatrix {
     public BigDecimal[][] getDistances(){
         return distances;
     }
+
+    public ArrayList<Node> getClosestNodes(Node node, ArrayList<Node> tsp) {
+        BigDecimal[] distanceRow = distances[node.index];
+
+        TreeMap<BigDecimal, Node> map = new TreeMap<>();
+
+
+        for (int i=0; i<distanceRow.length; i++) {
+            int finalI = i;
+            Predicate<Node> predicate = c-> c.index == finalI;
+            map.put(distanceRow[i], tsp.stream().filter(predicate).findFirst().get());
+        }
+
+        return new ArrayList<Node>(map.values());
+    }
+
 
 }

@@ -1,6 +1,7 @@
 package utils;
 
 import core.*;
+import exceptions.NodeNotFoundException;
 import org.apache.commons.io.FileUtils;
 import exceptions.MaxWeightException;
 
@@ -11,7 +12,6 @@ import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Random;
-import javafx.util.Pair;
 
 
 /**
@@ -140,6 +140,7 @@ public class Helper {
 
         System.out.println("Creating routes from an instance...\n");
 
+        DistanceMatrix distances = DistanceMatrix.getInstance();
 
         RouteList routes = new RouteList();
 
@@ -155,7 +156,7 @@ public class Helper {
         int routeSize = tspSize/instance.routeCount;
 
 
-        while (tsp.size() - 1 >= 0) {
+        while (tsp.size() - 1 >= 0 && routes.size() < instance.routeCount) {
 
             if (route.nodeList.size() < routeSize) {
 
@@ -189,6 +190,43 @@ public class Helper {
             } catch (MaxWeightException e) {}
             route = new Route(instance.maxWeight);
         }
+
+        // recover all remaining nodes from temporal route and tsp
+        ArrayList<Node> remainingNodes = new ArrayList<>();
+        ArrayList<Node> nodesToCheckInOrder = new ArrayList<>();
+
+        if (route.nodeList.size() != 0) {
+            for (Node node : route.nodeList) remainingNodes.add(node);
+        }
+
+        route = new Route(instance.maxWeight);
+
+        while (tsp.size()-1 >= 0) {
+            remainingNodes.add(tsp.get(0));
+            tsp.remove(0);
+        }
+
+        while (remainingNodes.size() > 0) {
+            nodesToCheckInOrder = distances.getClosestNodes(remainingNodes.get(0), instance.completeTSP);
+
+            for (Node node : nodesToCheckInOrder) {
+                if (remainingNodes.contains(node)) continue;
+                try {
+                   if (canRelocate(remainingNodes.get(0), node.getRoute(), node.getRoute().getIndexByNode(node))) {
+
+                       node.getRoute().nodeList.add(node.getRoute().getIndexByNode(node), remainingNodes.get(0));
+
+                   }
+                } catch (NodeNotFoundException e) {
+                    e.printStackTrace();
+                }
+                remainingNodes.remove(0);
+                nodesToCheckInOrder = new ArrayList<>();
+            }
+
+        }
+
+        ///////////////////////////////////////////////////////////
 
         ///////////////////////////////////// SCRAPPED NODES MANAGEMENT //////////////////////////////////////////////
 
@@ -247,6 +285,68 @@ public class Helper {
     }
 
 
+    public boolean canRelocate(Node node, Route route, int position) {
+
+        if (isDebug) System.out.println("\nTrying to relocate " + node.index );
+
+        //if trying to relocate a node with itself
+        if (node.getRoute() == route &&  (route.nodeList.get(position).index == node.index || position == (route.nodeList.indexOf(node)+1))) {
+            if (isDebug) System.out.println("Relocate is impossible! Trying to relocate in the same position (position or position+1)!\n");
+            return false;
+        }
+
+
+        if(node.getRoute() == route && node.getType() != route.nodeList.get(position).getType()){
+
+            if (isDebug) System.out.println("Relocate is impossible! Trying to relocate node of different types on same route!\n");
+            return false;
+
+        }
+
+        //if trying to relocate in place of the first warehouse
+        if (position == 0) {
+            // if (isDebug) System.out.println("Relocate is impossible! Trying to put something before first WAREHOUSE\n");
+            return false;
+        }
+
+        if (node.getType() == Values.nodeType.WAREHOUSE) {
+            //if (isDebug) System.out.println("Relocate is impossible! Node to relocate is WAREHOUSE\n");
+            return false;
+        }
+
+        Values.nodeType nodeType = node.getType();
+
+        Values.nodeType previousType = route.nodeList.get(position - 1).getType();
+        Values.nodeType nextType = route.nodeList.get(position).getType();
+
+        //if (isDebug) System.out.println("Node Type: " + nodeType.toString() + " | Previous Type: " + previousType.toString() + " | Next Type: " + nextType.toString());
+
+
+        //if nodes have different types
+        if (nodeType != route.nodeList.get(position).getType()) {
+            if (nodeType == Values.nodeType.LINEHAUL && previousType == Values.nodeType.BACKHAUL /*&& nextType != Values.nodeType.LINEHAUL*/) {
+                if (isDebug) System.out.println("Relocate is impossible! Trying to put a LINEHAUL in an invalid position\n");
+                return false;
+            }
+            if (nodeType == Values.nodeType.BACKHAUL && /*previousType != Values.nodeType.BACKHAUL &&*/ nextType == Values.nodeType.LINEHAUL) {
+                if (isDebug) System.out.println("Relocate is impossible! Trying to put a BACKHAUL in an invalid position\n");
+                return false;
+            }
+        }
+
+
+
+        int actualTypeWeight = (nodeType == Values.nodeType.LINEHAUL ? route.weightLinehaul : route.weightBackhaul) + node.weight;
+
+        if (actualTypeWeight <= route.MAX_WEIGHT) {
+            if (isDebug) System.out.println("Relocate is possible! Checking if it's worth...\n");
+        } else {
+            if (isDebug) System.out.println("Relocate is impossible!\n");
+        }
+
+        return actualTypeWeight <= route.MAX_WEIGHT;
+
+    }
 
 
     private Route routeBuilder(Route route, Node warehouse) throws MaxWeightException {
@@ -283,7 +383,6 @@ public class Helper {
         }
         return index;
     }
-
 
 
 
