@@ -1,28 +1,30 @@
 package utils;
 
 import core.*;
-import exceptions.NodeNotFoundException;
 import org.apache.commons.io.FileUtils;
 import exceptions.MaxWeightException;
 
 import java.io.*;
-import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Random;
 
-
 /**
- * Created by loriz on 4/13/17.
+ * This class contains several helper methods used by different classes to perform the two phases algorithm.
  */
 public class Helper {
 
-    private static final String PATH = "/home/pippo/Documents/ROProject/Results/";
+    private static final String PATH = "Results/";
 
     private Boolean isDebug = Values.isDebug();
 
+    /**
+     * fileToInstance(String fileName) reads the txt file containing the instance and parses it in order to work with them.
+     * @param fileName
+     * @return Parsed instance
+     */
     public Instance fileToInstance(String fileName) {
 
         Instance instance = new Instance();
@@ -118,24 +120,27 @@ public class Helper {
             System.out.println(
                     "Error reading file '"
                             + fileName + "'");
-            // Or we could just do this:
-            // ex.printStackTrace();
         }
 
         return instance;
 
     }
 
-
-
+    /**
+     * initTSP(Instance instance) creates 3 different TSP, complete, backHaul only and lineHaul only
+     * @param instance
+     */
     public void initTSP(Instance instance){
         instance.completeTSP=instance.createTSPFromNodes(instance.nodesList,instance.indexesCompleteTSP);
         instance.backHaulTSP=instance.createTSPFromNodes(instance.nodesList,instance.indexesBackHaulTSP);
         instance.lineHaulTSP=instance.createTSPFromNodes(instance.nodesList,instance.indexesLineHaulTSP);
     }
 
-
-
+    /**
+     * createRoutesFromInstance(Instance instance) given the parsed instance, returns all the valid initial routes.
+     * @param instance
+     * @return RouteList which contains all the built routes
+     */
     public RouteList createRoutesFromInstance(Instance instance)  {
 
         System.out.println("Creating routes from an instance...\n");
@@ -153,17 +158,21 @@ public class Helper {
 
         int tspSize = tsp.size();
 
+        //Default size of the routes
         int routeSize = tspSize/instance.routeCount;
 
-
+        //While we have at least one node in the tsp and tbe number of built routes is less than the given number of routes
         while (tsp.size() - 1 >= 0 && routes.size() < instance.routeCount) {
 
+            //If current route isn't filled yet
             if (route.nodeList.size() < routeSize) {
 
+                //Try to fill it with another node
                 try {
                     route.addNode(tsp.get(0));
                     tsp.remove(0);
                 } catch (MaxWeightException e) {
+                    //If not possible, try to create a new route
                     try {
                         route = routeBuilder(route, warehouse);
                         routes.add(route);
@@ -172,7 +181,7 @@ public class Helper {
                 }
 
             } else {
-
+                //If it's filled indeed, try to create a new route
                 try {
                     route = routeBuilder(route, warehouse);
                     routes.add(route);
@@ -183,59 +192,67 @@ public class Helper {
 
         }
 
-        if (routes.size() < instance.routeCount) {
+        /*if (routes.size() < instance.routeCount) {
             try {
                 route = routeBuilder(route, warehouse);
                 routes.add(route);
             } catch (MaxWeightException e) {}
             route = new Route(instance.maxWeight);
-        }
+        }*/
 
-        // recover all remaining nodes from temporal route and tsp
+        //Recover all remaining nodes from temporal route and tsp
         ArrayList<Node> remainingNodes = new ArrayList<>();
         ArrayList<Node> nodesToCheckInOrder = new ArrayList<>();
 
+        //Let's add all the discarded nodes inside an array of nodes
         if (route.nodeList.size() != 0) {
             for (Node node : route.nodeList) remainingNodes.add(node);
         }
 
+        //While the tsp isn't empty, let's add the current node into remainingNodes
         while (tsp.size()-1 >= 0) {
             remainingNodes.add(tsp.get(0));
             tsp.remove(0);
         }
 
+        //Used to exit from the while. It's decremented each time we are done analyzing a node.
         int steps = remainingNodes.size();
 
         while (steps > 0) {
+            //Let's get the closer nodes to the current one by distance. They are sorted by distance ascending.
             nodesToCheckInOrder = distances.getClosestNodes(remainingNodes.get(0), instance.completeTSP);
 
             for (Node node : nodesToCheckInOrder) {
+                //If the current node and the other remaining nodes are compared, skip
                 if (remainingNodes.contains(node)) continue;
                 try {
-                   if (canPositionate(remainingNodes.get(0), node.getRoute(), node.getRoute().getIndexByNode(node))) {
+                    //Let's try to relocate the current discarded node into the route of the current closest node
+                    if (canPositionate(remainingNodes.get(0), node.getRoute(), node.getRoute().getIndexByNode(node))) {
 
-                       node.getRoute().nodeList.add(node.getRoute().getIndexByNode(node), remainingNodes.get(0));
-                       remainingNodes.get(0).setRoute(node.getRoute());
-                       if(remainingNodes.get(0).getType() == Values.nodeType.LINEHAUL) {
-                           node.getRoute().weightLinehaul += remainingNodes.get(0).getWeight();
-                       } else {
-                           node.getRoute().weightBackhaul += remainingNodes.get(0).getWeight();
-                       }
-                       node.getRoute().forceUpdate();
-                       remainingNodes.remove(0);
-                       break;
+                        //If it's possible indeed, update all the data
+                        node.getRoute().nodeList.add(node.getRoute().getIndexByNode(node), remainingNodes.get(0));
+                        remainingNodes.get(0).setRoute(node.getRoute());
+                        if(remainingNodes.get(0).getType() == Values.nodeType.LINEHAUL) {
+                            node.getRoute().weightLinehaul += remainingNodes.get(0).getWeight();
+                        } else {
+                            node.getRoute().weightBackhaul += remainingNodes.get(0).getWeight();
+                        }
+                        node.getRoute().forceUpdate();
 
-                   }
+                        //Remove the node from the remaining nodes
+                        remainingNodes.remove(0);
+                        break;
+
+                    }
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
 
+            //Let's go to the next node
             steps--;
 
         }
-
-        ///////////////////////////////////////////////////////////
 
         ///////////////////////////////////// SCRAPPED NODES MANAGEMENT //////////////////////////////////////////////
 
@@ -293,7 +310,14 @@ public class Helper {
         return routes;
     }
 
-
+    /**
+     * canPositionate(Node node, Route route, int position) tests if it is possible to relocate a given discarded node
+     * inside a given route, given the position of the examinated node inside the latter.
+     * @param node discarded node
+     * @param route route containing analyzed node.
+     * @param position position of the node in the latter route. This node is the closest to node.
+     * @return true or false if it's possible or not
+     */
     public boolean canPositionate(Node node, Route route, int position) {
 
         if (isDebug) System.out.println("\nTrying to positionate " + node.getIndex() );
@@ -314,9 +338,6 @@ public class Helper {
         Values.nodeType previousType = route.nodeList.get(position - 1).getType();
         Values.nodeType nextType = route.nodeList.get(position).getType();
 
-        //if (isDebug) System.out.println("Node Type: " + nodeType.toString() + " | Previous Type: " + previousType.toString() + " | Next Type: " + nextType.toString());
-
-
         //if nodes have different types
         if (nodeType != route.nodeList.get(position).getType()) {
             if (nodeType == Values.nodeType.LINEHAUL && previousType == Values.nodeType.BACKHAUL /*&& nextType != Values.nodeType.LINEHAUL*/) {
@@ -329,8 +350,7 @@ public class Helper {
             }
         }
 
-
-
+        //Check actual weight to satisfy the weight constraint
         int actualTypeWeight = (nodeType == Values.nodeType.LINEHAUL ? route.weightLinehaul : route.weightBackhaul) + node.getWeight();
 
         if (actualTypeWeight <= route.MAX_WEIGHT) {
@@ -343,7 +363,13 @@ public class Helper {
 
     }
 
-
+    /**
+     * routeBuilder(Route route, Node warehouse) shuffles a given route in order to randomize the routes.
+     * @param route route to shuffle
+     * @param warehouse
+     * @return shuffled route
+     * @throws MaxWeightException
+     */
     private Route routeBuilder(Route route, Node warehouse) throws MaxWeightException {
 
         long seed = System.nanoTime();
@@ -367,9 +393,13 @@ public class Helper {
         return route;
     }
 
-
-
-
+    /**
+     * getRouteIndexByNode(RouteList routes, Node node) returns index of given route in the set of all routes
+     * containing the passed node
+     * @param routes
+     * @param node
+     * @return index of the route containing the passed node
+     */
     public int getRouteIndexByNode(RouteList routes, Node node) {
         int index = -1;
         for (Route route : routes) {
@@ -379,8 +409,12 @@ public class Helper {
         return index;
     }
 
-
-
+    /**
+     * getLightestRoute(RouteList routes, Values.nodeType type) returns index of lightestRoute
+     * @param routes set of all routes
+     * @param type type of a given node
+     * @return index of the lightest route in the routes set
+     */
     public int getLightestRoute(RouteList routes, Values.nodeType type) {
 
         int oldWeight = -1;
@@ -400,9 +434,13 @@ public class Helper {
         return routes.indexOf(chosenRoute);
     }
 
-
-
-
+    /**
+     * relocateScrapped(Route route, RouteList routes) tries to relocate a node inside a given route
+     * into another route respecting all the constraints
+     * @param route current route
+     * @param routes set of all routes
+     * @throws Exception
+     */
     public void relocateScrapped(Route route, RouteList routes) throws Exception {
 
         ArrayList<Node> mNodes = new ArrayList<>(route.nodeList);
@@ -422,9 +460,13 @@ public class Helper {
 
     }
 
-
-
-
+    /**
+     * relocateScrapped(Node node, RouteList routes) tries to relocate passed node
+     * into another route respecting all the constraints
+     * @param node
+     * @param routes
+     * @throws Exception
+     */
     public void relocateScrapped(Node node, RouteList routes) throws Exception {
 
         boolean relocated = false;
@@ -447,6 +489,11 @@ public class Helper {
 
     }
 
+    /**
+     * createSnapshot(RouteList routes) creates string containing the set of routes in order to pretty print them
+     * @param routes
+     * @return string containing the set of routes
+     */
     public String createSnapshot(RouteList routes){
 
         StringBuilder sb = new StringBuilder();
@@ -471,6 +518,11 @@ public class Helper {
         return sb.toString();
     }
 
+    /**
+     * createSnapshot(Route route) creates string containing the set of nodes in the nodeList of a route
+     * @param route
+     * @return string containing the set of nodes in the nodeList of a route
+     */
     public String createSnapshot(Route route) {
 
         StringBuilder sb = new StringBuilder();
@@ -486,6 +538,10 @@ public class Helper {
 
     }
 
+    /**
+     * printRoutes(RouteList routes) prints all the routes
+     * @param routes
+     */
     public void printRoutes(RouteList routes) {
 
         System.out.print("\n");
@@ -506,6 +562,10 @@ public class Helper {
 
     }
 
+    /**
+     * printRoute(Route route) prints a route
+     * @param route
+     */
     public void printRoute(Route route) {
 
         for (Node n : route.nodeList) {
@@ -517,21 +577,20 @@ public class Helper {
 
     }
 
-
+    /**
+     * writeToFile(ArrayList<ResultData> routesData, long time, String fileName) write results on file
+     * @param routesData
+     * @param time
+     * @param fileName
+     */
     public void writeToFile(ArrayList<ResultData> routesData, long time, String fileName){
         File file = new File(PATH + fileName);
         ArrayList<String> data=new ArrayList<>();
         ArrayList<String> routeNodes=new ArrayList<>();
 
-
-
-
-
         for (int i = 0; i <routesData.size() ; i++) {
             routeNodes.clear();
-
             data.add("Route "+i+" cost: "+routesData.get(i).getRouteCost()+" \nweight LINEHAUL :"+routesData.get(i).getWeightLH()+" \nweight BACKHAUL: "+routesData.get(i).getWeightBH()+"\nRoute: "+routesData.get(i).getRouteAsString()+"\n\n");
-
         }
 
         data.add("Objective function: "+routesData.get(0).getTotalObjectiveFunction()+"\n");
