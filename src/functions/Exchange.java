@@ -14,7 +14,10 @@ import java.util.Collections;
 import java.util.TreeMap;
 
 /**
- * Created by andream16 on 25.04.17.
+ * This class implements the Exchange Algorithm. Given all the routes and the tsp, it finds the best exchange possible.
+ * While the objective functions isn't anymore minimized, for each route, for each node in the route,
+ * tries to exchange the current node with all the other ones but WAREHOUSE nodes.
+ * It executes only a real exchange if the objective function is minimized and all the constraints are satisfied.
  */
 public class Exchange {
 
@@ -25,22 +28,37 @@ public class Exchange {
     RouteList routes;
     Helper helper;
 
+    /**
+     * Exchange(RouteList routes, Helper helper, ArrayList<Node> completeTSP) is the default constructor.
+     * For Exchange to be complete and correct, its properties must be initialized upon its creation.
+     * @param routes is a RouteList containing all the routes available.
+     * @param helper is an helper class which contains helper methods used by Exchange.
+     * @param completeTSP contains all the nodes in the TSP.
+     */
     public Exchange(RouteList routes, Helper helper, ArrayList<Node> completeTSP){
         this.routes = routes;
         this.helper = helper;
         this.tsp = completeTSP;
     }
 
+    /**
+     * findBestExchange() finds the best relocate given the initial routes
+     * @return RouteList containing all the routes after the best relocate
+     * @throws MaxWeightException
+     * @throws NodeNotFoundException
+     */
     public RouteList findBestExchange() throws MaxWeightException, NodeNotFoundException {
 
         System.out.println("//////////////////////////////////////////////////////////////////\nStarting Exchange...\n");
 
-        // /ALWAYS take the warehouse
+        //ALWAYS take the warehouse
         tsp.get(0).take();
 
+        //Used to understand if is needed to repeat the algorithm or not
         boolean isOptimized = false;
         int steps = 0;
 
+        //While isOptimized is false
         while (!isOptimized){
 
             isOptimized = true;
@@ -52,7 +70,6 @@ public class Exchange {
                 Route route = routes.get(routeIndex);
                 ArrayList<Node> currentNodes = route.nodeList;
                 int currentRouteSize = currentNodes.size();
-                BigDecimal routeWeight = route.getActualDistance();
 
                 //For each node in current route except first and last (WAREHOUSE)
                 for(int nodeIndex=1; nodeIndex <= currentRouteSize-2; nodeIndex++){
@@ -65,25 +82,18 @@ public class Exchange {
                         //Get Current Route
                         Route currentRoute = routes.get(currentRouteIndex);
 
-                        //Get currentRoute actual distance
-                        BigDecimal currentRouteActualDistance = currentRoute.getActualDistance();
-
-                        //Get Route's Actual Distance + Original Route's one
-                        BigDecimal currentActualDistance = currentRouteActualDistance.add(routeWeight);
-
                         //For each node inside currentRoute
                         for(int currentRouteNodeIndex = 1; currentRouteNodeIndex <= currentRoute.nodeList.size()-2; currentRouteNodeIndex++){
 
                             //Get currentRoute node
                             Node currentRouteNode = currentRoute.nodeList.get(currentRouteNodeIndex);
 
-
+                            //Get old objective function value
                             BigDecimal oldObjFun = routes.getObjectiveFunction();
 
                             if (isDebug) System.out.println("Simulating exchange of node " + currentNode.getIndex() + "(" +currentNode.getType() + ") from route " + routes.indexOf(currentNode.getRoute())
                                     + " with node" + currentRouteNode.getIndex() + "(" +currentRouteNode.getType() + ") from route " + routes.indexOf(currentRouteNode.getRoute()));
                             BigDecimal newObjFun = testSwap(currentNode, currentRouteNode);
-
 
                             // ex1.compareTo(ex2)
                             // returns -1 if ex2 > ex1
@@ -112,15 +122,15 @@ public class Exchange {
                             isOptimized = false;
                             if (printRoutesInDebug) helper.printRoutes(routes);
 
+                            //Since we've made a move, we have to check again all the other nodes, then, we release them
                             for (Node node : tsp) {
                                 if (node.getType() == Values.nodeType.WAREHOUSE) continue;
                                 node.release();
                             }
-
-
                         } catch (SwapFailedException e) {}
                     } else {
 
+                        //If at least one of the  nodes haven't been taken, then, we haven't optimized yet. Else, we are done.
                         tsp.get(tsp.indexOf(currentNode)).take();
 
                         for (Node node : tsp) {
@@ -132,7 +142,7 @@ public class Exchange {
 
                     }
 
-             
+
                 }
 
             }
@@ -140,6 +150,7 @@ public class Exchange {
 
         System.out.println("\nExchange successfully terminated!\nExchange moves done: " + steps + "\nObjective Function: " + routes.getObjectiveFunction().toString() + "\n");
 
+        //We release all the nodes since we may use the relocate after.
         for (Node node : tsp) {
             if (node.getType() == Values.nodeType.WAREHOUSE) continue;
             node.release();
@@ -149,14 +160,22 @@ public class Exchange {
 
     }
 
+    /**
+     * testSwap(Node currentNode, Node currentRouteNode) tests if it is possible to exchange two nodes
+     * @return new objective function value or null
+     * @param currentNode currentNode to check
+     * @param currentRouteNode node of the current node to analyze
+     */
     @Nullable
     private BigDecimal testSwap(Node currentNode, Node currentRouteNode) {
         BigDecimal newObjFun = null;
 
+        //It's possible to swap them if they respect all the constraints. If it's so indeed.
         if( canSwap(currentNode, currentRouteNode) && canSwap(currentRouteNode, currentNode) ){
 
             newObjFun = new BigDecimal(0);
 
+            //Calculate new Objective function Value given this exchange.
             for (Route inner : routes) {
                 if (inner != currentNode.getRoute() && inner != currentRouteNode.getRoute()) {
                     newObjFun = newObjFun.add(inner.getActualDistance());
@@ -173,13 +192,21 @@ public class Exchange {
             }
 
         }
+
         return newObjFun;
     }
 
-    // TODO: Highly experimental! To be deeply tested (all tests succeded so far).
-    // canSwap MUST BE CALLED with the node of the calling route as first parameter
+    /**
+     * canSwap(Node internal, Node external) checks if it's possible to exchange two nodes
+     * @return true or false whether is possible to exchange two nodes or not
+     * @param internal is a node of the current route
+     * @param external is another node that may be on a different route
+     *
+     * MUST BE CALLED with the node of the calling route as first parameter
+     */
     public boolean canSwap(Node internal, Node external) {
 
+        //Get the types of the two nodes
         Values.nodeType inType = internal.getType();
         Values.nodeType exType = external.getType();
 
@@ -221,6 +248,12 @@ public class Exchange {
 
     }
 
+    /**
+     * swapNodes(Node first, Node second) exchange two nodes if it's possible
+     * @param first a Node
+     * @param second another Node
+     * @throws SwapFailedException
+     */
     public void swapNodes(Node first, Node second) throws SwapFailedException {
         // if called with nodes of the same route, call the appropriate function
         if (first.getRoute() == second.getRoute() && canSwap(first, second) && canSwap(second, first)) {
@@ -250,8 +283,15 @@ public class Exchange {
         }
     }
 
+    /**
+     * simulateExchange(Node first, Node second) simulates the exchange between two nodes on different routes
+     * @return the hypothetical value of the objective function given by this virtual exchange.
+     * @param first a Node
+     * @param second another Node
+     */
     private BigDecimal simulateExchange(Node first, Node second) {
 
+        //If they belong to the same route, let's call the appropriate function
         if (first.getRoute() == second.getRoute()) return simulateExchangeSiblings(first, second);
 
         DistanceMatrix distances = DistanceMatrix.getInstance();
@@ -263,6 +303,7 @@ public class Exchange {
         Node actual;
         Node next;
 
+        //Calculate new virtual objective function value given by the virtual exchange
         for (int index = 0; index < firstRoute.nodeList.size() - 1; index++) {
 
             actual = firstRoute.nodeList.get(index);
@@ -280,6 +321,12 @@ public class Exchange {
 
     }
 
+    /**
+     * simulateExchangeSiblings(Node first, Node second) simulates the exchange between two nodes on the same route
+     * @return the hypothetical value of the objective function given by this virtual exchange.
+     * @param first a Node
+     * @param second another Node
+     */
     private BigDecimal simulateExchangeSiblings(Node first, Node second) {
 
         DistanceMatrix distances = DistanceMatrix.getInstance();
@@ -292,8 +339,7 @@ public class Exchange {
         Node actual;
         Node next;
 
-
-
+        //Calculate new virtual objective function value given by the virtual exchange
         for (int index = 0; index < route.nodeList.size() - 1; index++) {
 
             actual = route.nodeList.get(index);
