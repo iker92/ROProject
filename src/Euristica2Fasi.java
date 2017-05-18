@@ -15,7 +15,7 @@ import java.util.ArrayList;
 
 public class Euristica2Fasi {
 
-    private static final String FILE = "F2";
+    private static final String FILE = "A1";
 
     private static final String SUFFIX = ".txt";
 
