@@ -192,13 +192,13 @@ public class Helper {
 
         }
 
-        /*if (routes.size() < instance.routeCount) {
+        if (routes.size() < instance.routeCount) {
             try {
                 route = routeBuilder(route, warehouse);
                 routes.add(route);
             } catch (MaxWeightException e) {}
             route = new Route(instance.maxWeight);
-        }*/
+        }
 
         //Recover all remaining nodes from temporal route and tsp
         ArrayList<Node> remainingNodes = new ArrayList<>();

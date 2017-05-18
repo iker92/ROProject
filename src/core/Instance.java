@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 /**
  * Instance is the class which holds all the information bond to a single Instance of the problem to optimize.
- * These informations are usually retrieved from a .txt file given as a Linehaul/Backhaul transportation problem.
+ * These information are usually retrieved from a .txt file given as a Linehaul/Backhaul transportation problem.
  */
 public class Instance {
 
