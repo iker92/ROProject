@@ -4,6 +4,15 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 
+/**
+ * Euristica2Fasi was developed with passion for RO course as part of the CS Master Degree of the University of Cagliari
+ * by Cristin Sanna, Andrea Medda, Alessio Pili and Marco Loriga.
+ *
+ * This program requires two Apache's commons-io and OpenJDK's javafx to run correctly.
+ * These libraries can be found as .jar(s) ready to be imported in the base folder of the project.
+ */
+
+
 public class Euristica2Fasi {
 
     private static final String FILE = "F2";
