@@ -1,7 +1,7 @@
 package core;
 
 /**
- * Values is a central class which holds some informations which are part of the core of all the program and,
+ * Values is a central class which holds some information which are part of the core of all the program and,
  * by consequence, used everywhere.
  */
 public class Values {
