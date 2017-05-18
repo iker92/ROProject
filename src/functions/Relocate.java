@@ -41,7 +41,6 @@ public class Relocate {
     }
 
     /**
-     *
      * @return RouteList final list of routes after the best Relocate move
      * @throws MaxWeightException
      * @throws NodeNotFoundException

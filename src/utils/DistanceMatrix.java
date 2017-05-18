@@ -64,24 +64,13 @@ public class DistanceMatrix {
         int nodesSize = nodes.size();
         distances = new BigDecimal[nodesSize][nodesSize];
 
-        System.out.printf("\t\t");
-
-        for( int i=0; i<nodesSize; i++) {
-            System.out.printf(i + "\t\t");
-        }
-
-        System.out.printf("\n");
-
-
         for( int i=0; i<nodesSize; i++){
-            System.out.printf(i + "\t");
 
             for( int j=0; j<nodesSize; j++){
                 distances[i][j] = BigDecimal.valueOf(Math.sqrt(abs(pow((nodes.get(i).getCoordinates().x - nodes.get(j).getCoordinates().x), 2) + abs(pow((nodes.get(i).getCoordinates().y - nodes.get(j).getCoordinates().y), 2)))));
-                System.out.printf("%.2f\t",distances[i][j]);
             }
-            System.out.print("\n\n");
         }
+        System.out.println("\n");
     }
 
     public BigDecimal getDistance (int node_1, int node_2){
