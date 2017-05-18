@@ -56,7 +56,7 @@ public class Relocate {
                 TreeMap<BigDecimal, Pair<Route, Integer>> bestMove = new TreeMap(Collections.reverseOrder());
 
                 Route route = routes.get(routeIndex);
-                ArrayList<Node> currentNodes = route.nodeList;
+                ArrayList<Node> currentNodes = route.getNodeList();
 
                 //For each node in current route except first and last (WAREHOUSE)
                 for (int nodeIndex = 1; nodeIndex < currentNodes.size() - 1; nodeIndex++)
@@ -70,15 +70,15 @@ public class Relocate {
                         Route currentRoute = routes.get(currentRouteIndex);
 
                         //For each node inside currentRoute
-                        for(int currentRouteNodeIndex = 1; currentRouteNodeIndex < currentRoute.nodeList.size() - 1; currentRouteNodeIndex++){
+                        for(int currentRouteNodeIndex = 1; currentRouteNodeIndex < currentRoute.getNodeList().size() - 1; currentRouteNodeIndex++){
 
                             //Get currentRoute node
-                            Node currentRouteNode = currentRoute.nodeList.get(currentRouteNodeIndex);
+                            Node currentRouteNode = currentRoute.getNodeList().get(currentRouteNodeIndex);
 
                             Route currentInnerRoute;
 
                             if (currentRouteNode.getType() == Values.nodeType.WAREHOUSE) {
-                                currentInnerRoute = currentRoute.nodeList.get(currentRouteNodeIndex - 1).getRoute();
+                                currentInnerRoute = currentRoute.getNodeList().get(currentRouteNodeIndex - 1).getRoute();
                             } else {
                                 currentInnerRoute =  currentRouteNode.getRoute();
                             }
@@ -173,9 +173,9 @@ public class Relocate {
                     if (isDebug) if (isDebug) System.out.println("Simulate removal of " + currentNode.getIndex() + " from route " + routes.indexOf(currentNode.getRoute()));
                     newObjFun = newObjFun.add(simulateRemovalOfNode(currentNode));
                 } else {
-                    if (isDebug) System.out.println("Simulate addition of " + currentNode.getIndex() + " in route " + routes.indexOf(currentInnerRoute)+ " with position " + innerNodeIndex/*currentInnerRoute.nodeList.indexOf(currentInnerNode)*/);
+                    if (isDebug) System.out.println("Simulate addition of " + currentNode.getIndex() + " in route " + routes.indexOf(currentInnerRoute)+ " with position " + innerNodeIndex/*currentInnerRoute.getNodeList().indexOf(currentInnerNode)*/);
 
-                    newObjFun = newObjFun.add(simulateAdditionOfNode(currentNode, currentInnerRoute, innerNodeIndex/*currentInnerRoute.nodeList.indexOf(currentInnerNode)*/));
+                    newObjFun = newObjFun.add(simulateAdditionOfNode(currentNode, currentInnerRoute, innerNodeIndex/*currentInnerRoute.getNodeList().indexOf(currentInnerNode)*/));
                     // newObjFun = newObjFun.add(simulatremainingNodeseAdditionOfNode(currentNode, inner, innerNodeIndex));
                 }
             }
@@ -190,11 +190,11 @@ public class Relocate {
 
         // if the nodes are on the same route, use the arraylist directly and force update the obj function
         if (node.getRoute() == route) {
-            int oldIndex = route.nodeList.indexOf(node);
+            int oldIndex = route.getNodeList().indexOf(node);
 
 
-            route.nodeList.add(index, node);
-            route.nodeList.remove(index < oldIndex ? oldIndex + 1 : oldIndex );
+            route.getNodeList().add(index, node);
+            route.getNodeList().remove(index < oldIndex ? oldIndex + 1 : oldIndex );
 
             route.forceUpdate();
 
@@ -213,7 +213,7 @@ public class Relocate {
 
     private BigDecimal simulateAdditionOfNode(Node node, Route route, int index) {
 
-        ArrayList<Node> listOfNodes = new ArrayList<>(route.nodeList);
+        ArrayList<Node> listOfNodes = new ArrayList<>(route.getNodeList());
 
         listOfNodes.add(index, node);
 
@@ -232,11 +232,11 @@ public class Relocate {
 
         ArrayList<Integer> listOfNodes = new ArrayList<>();
 
-        for (int nodeIndex = 0; nodeIndex <= node.getRoute().nodeList.size()-1; nodeIndex++) {
+        for (int nodeIndex = 0; nodeIndex <= node.getRoute().getNodeList().size()-1; nodeIndex++) {
 
-            if (node.getRoute().nodeList.get(nodeIndex).getIndex() == node.getIndex()) continue;
+            if (node.getRoute().getNodeList().get(nodeIndex).getIndex() == node.getIndex()) continue;
 
-            listOfNodes.add(node.getRoute().nodeList.get(nodeIndex).getIndex());
+            listOfNodes.add(node.getRoute().getNodeList().get(nodeIndex).getIndex());
         }
 
         BigDecimal distance = new BigDecimal(0);
@@ -249,13 +249,13 @@ public class Relocate {
 
     private BigDecimal simulateInternalRelocation(Node node, int index) {
 
-        int oldIndex = node.getRoute().nodeList.indexOf(node);
+        int oldIndex = node.getRoute().getNodeList().indexOf(node);
 
         Route routeNode = node.getRoute();
 
         ArrayList<Node> listOfNodes = new ArrayList<>();
 
-        for (Node inNode : routeNode.nodeList) {
+        for (Node inNode : routeNode.getNodeList()) {
             if (inNode == node) continue;
             listOfNodes.add(inNode);
         }
@@ -279,22 +279,22 @@ public class Relocate {
         DistanceMatrix distances = DistanceMatrix.getInstance();
         Route firstRoute = node.getRoute();
 
-        int nodeIndex = firstRoute.nodeList.indexOf(node);
+        int nodeIndex = firstRoute.getNodeList().indexOf(node);
         BigDecimal actualDistanceFirst = new BigDecimal(0);
 
         Node actual;
         Node next;
 
-        for (int innerIndex = 0; innerIndex < route.nodeList.size() - 1; innerIndex++) {
+        for (int innerIndex = 0; innerIndex < route.getNodeList().size() - 1; innerIndex++) {
 
-            actual = route.nodeList.get(innerIndex);
-            next = route.nodeList.get(innerIndex + 1);
+            actual = route.getNodeList().get(innerIndex);
+            next = route.getNodeList().get(innerIndex + 1);
 
             //TODO probably all wrong, check!
 
             // simulate skip of node
-            if (nodeIndex == innerIndex + 1) next = route.nodeList.get(innerIndex + 2);
-            if (nodeIndex == innerIndex) actual = route.nodeList.get(innerIndex - 1);
+            if (nodeIndex == innerIndex + 1) next = route.getNodeList().get(innerIndex + 2);
+            if (nodeIndex == innerIndex) actual = route.getNodeList().get(innerIndex - 1);
 
             // simulate insertion of node
             if (index == innerIndex + 1) next = node;
@@ -313,13 +313,13 @@ public class Relocate {
         if (isDebug) System.out.println("\nTrying to relocate " + node.getIndex() + " from Route" + routes.indexOf(node.getRoute()) + " to Route " + routes.indexOf(route) + " in position " + position);
 
         //if trying to relocate a node with itself
-        if (node.getRoute() == route &&  (route.nodeList.get(position).getIndex() == node.getIndex() || position == (route.nodeList.indexOf(node)+1))) {
+        if (node.getRoute() == route &&  (route.getNodeList().get(position).getIndex() == node.getIndex() || position == (route.getNodeList().indexOf(node)+1))) {
             if (isDebug) System.out.println("Relocate is impossible! Trying to relocate in the same position (position or position+1)!\n");
             return false;
         }
 
 
-        if(node.getRoute() == route && node.getType() != route.nodeList.get(position).getType()){
+        if(node.getRoute() == route && node.getType() != route.getNodeList().get(position).getType()){
 
             if (isDebug) System.out.println("Relocate is impossible! Trying to relocate node of different types on same route!\n");
             return false;
@@ -342,23 +342,23 @@ public class Relocate {
         Values.nodeType previousTypeExtRoute = Values.nodeType.LINEHAUL;
         Values.nodeType nextTypeExtRoute = Values.nodeType.LINEHAUL;
 
-        previousTypeExtRoute = node.getRoute().nodeList.get(node.getRoute().nodeList.indexOf(node) - 1).getType();
-        nextTypeExtRoute = node.getRoute().nodeList.get(node.getRoute().nodeList.indexOf(node) + 1).getType();
+        previousTypeExtRoute = node.getRoute().getNodeList().get(node.getRoute().getNodeList().indexOf(node) - 1).getType();
+        nextTypeExtRoute = node.getRoute().getNodeList().get(node.getRoute().getNodeList().indexOf(node) + 1).getType();
 
 
-        Values.nodeType previousType = route.nodeList.get(position - 1).getType();
-        Values.nodeType nextType = route.nodeList.get(position).getType();
+        Values.nodeType previousType = route.getNodeList().get(position - 1).getType();
+        Values.nodeType nextType = route.getNodeList().get(position).getType();
 
         //if (isDebug) System.out.println("Node Type: " + nodeType.toString() + " | Previous Type: " + previousType.toString() + " | Next Type: " + nextType.toString());
 
         //if trying to relocate the only node in a route
-        if (node.getRoute().nodeList.size() == 3 || (nodeType == Values.nodeType.LINEHAUL && nextTypeExtRoute != Values.nodeType.LINEHAUL && previousTypeExtRoute == Values.nodeType.WAREHOUSE)) {
+        if (node.getRoute().getNodeList().size() == 3 || (nodeType == Values.nodeType.LINEHAUL && nextTypeExtRoute != Values.nodeType.LINEHAUL && previousTypeExtRoute == Values.nodeType.WAREHOUSE)) {
             if (isDebug) System.out.println("Relocate is impossible! Trying to relocate the only node in the route (or the only LINEHAUL)\n");
             return false;
         }
 
         //if nodes have different types
-        if (nodeType != route.nodeList.get(position).getType()) {
+        if (nodeType != route.getNodeList().get(position).getType()) {
             if (nodeType == Values.nodeType.LINEHAUL && previousType == Values.nodeType.BACKHAUL /*&& nextType != Values.nodeType.LINEHAUL*/) {
                 if (isDebug) System.out.println("Relocate is impossible! Trying to put a LINEHAUL in an invalid position\n");
                 return false;

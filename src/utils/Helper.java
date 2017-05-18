@@ -19,7 +19,7 @@ import java.util.Random;
  */
 public class Helper {
 
-    private static final String PATH = "/home/pippo/Documents/ROProject/Results/";
+    private static final String PATH = "Results/";
 
     private Boolean isDebug = Values.isDebug();
 
@@ -158,7 +158,7 @@ public class Helper {
 
         while (tsp.size() - 1 >= 0 && routes.size() < instance.routeCount) {
 
-            if (route.nodeList.size() < routeSize) {
+            if (route.getNodeList().size() < routeSize) {
 
                 try {
                     route.addNode(tsp.get(0));
@@ -195,8 +195,8 @@ public class Helper {
         ArrayList<Node> remainingNodes = new ArrayList<>();
         ArrayList<Node> nodesToCheckInOrder = new ArrayList<>();
 
-        if (route.nodeList.size() != 0) {
-            for (Node node : route.nodeList) remainingNodes.add(node);
+        if (route.getNodeList().size() != 0) {
+            for (Node node : route.getNodeList()) remainingNodes.add(node);
         }
 
         while (tsp.size()-1 >= 0) {
@@ -214,7 +214,7 @@ public class Helper {
                 try {
                    if (canPositionate(remainingNodes.get(0), node.getRoute(), node.getRoute().getIndexByNode(node))) {
 
-                       node.getRoute().nodeList.add(node.getRoute().getIndexByNode(node), remainingNodes.get(0));
+                       node.getRoute().getNodeList().add(node.getRoute().getIndexByNode(node), remainingNodes.get(0));
                        remainingNodes.get(0).setRoute(node.getRoute());
                        if(remainingNodes.get(0).getType() == Values.nodeType.LINEHAUL) {
                            node.getRoute().weightLinehaul += remainingNodes.get(0).getWeight();
@@ -311,14 +311,14 @@ public class Helper {
 
         Values.nodeType nodeType = node.getType();
 
-        Values.nodeType previousType = route.nodeList.get(position - 1).getType();
-        Values.nodeType nextType = route.nodeList.get(position).getType();
+        Values.nodeType previousType = route.getNodeList().get(position - 1).getType();
+        Values.nodeType nextType = route.getNodeList().get(position).getType();
 
         //if (isDebug) System.out.println("Node Type: " + nodeType.toString() + " | Previous Type: " + previousType.toString() + " | Next Type: " + nextType.toString());
 
 
         //if nodes have different types
-        if (nodeType != route.nodeList.get(position).getType()) {
+        if (nodeType != route.getNodeList().get(position).getType()) {
             if (nodeType == Values.nodeType.LINEHAUL && previousType == Values.nodeType.BACKHAUL /*&& nextType != Values.nodeType.LINEHAUL*/) {
                 if (isDebug) System.out.println("Relocate is impossible! Trying to put a LINEHAUL in an invalid position\n");
                 return false;
@@ -347,9 +347,9 @@ public class Helper {
     private Route routeBuilder(Route route, Node warehouse) throws MaxWeightException {
 
         long seed = System.nanoTime();
-        Collections.shuffle(route.nodeList, new Random(seed));
+        Collections.shuffle(route.getNodeList(), new Random(seed));
 
-        for (int nodeIndex = 0; nodeIndex < route.nodeList.size(); nodeIndex++) {
+        for (int nodeIndex = 0; nodeIndex < route.getNodeList().size(); nodeIndex++) {
             if (route.getNode(nodeIndex).getType() == Values.nodeType.BACKHAUL && route.getNode(nodeIndex).isTaken() == false) {
 
                 route.getNode(nodeIndex).take();
@@ -359,7 +359,7 @@ public class Helper {
             }
         }
 
-        for (Node n : route.nodeList) n.release();
+        for (Node n : route.getNodeList()) n.release();
 
         route.addNode(0, warehouse);
         route.addNode(warehouse);
@@ -373,7 +373,7 @@ public class Helper {
     public int getRouteIndexByNode(RouteList routes, Node node) {
         int index = -1;
         for (Route route : routes) {
-            index = (route.nodeList.contains(node) ? routes.indexOf(route) : -1);
+            index = (route.getNodeList().contains(node) ? routes.indexOf(route) : -1);
             if(index != -1) return index;
         }
         return index;
@@ -405,7 +405,7 @@ public class Helper {
 
     public void relocateScrapped(Route route, RouteList routes) throws Exception {
 
-        ArrayList<Node> mNodes = new ArrayList<>(route.nodeList);
+        ArrayList<Node> mNodes = new ArrayList<>(route.getNodeList());
 
         for (Node n : mNodes) {
 
@@ -416,7 +416,7 @@ public class Helper {
             } catch (Exception e) {}
         }
 
-        if (route.nodeList.size() != 0) {
+        if (route.getNodeList().size() != 0) {
             throw new Exception("!!! Cannot relocate all the nodes !!!");
         }
 
@@ -431,10 +431,10 @@ public class Helper {
 
         for (Route r : routes) {
 
-            if (r.nodeList.contains(node)) continue;
+            if (r.getNodeList().contains(node)) continue;
 
             try {
-                r.addNode( (node.getType() == Values.nodeType.BACKHAUL? r.nodeList.size()-1 : 1), node);
+                r.addNode( (node.getType() == Values.nodeType.BACKHAUL? r.getNodeList().size()-1 : 1), node);
                 relocated = true;
                 break;
             } catch (MaxWeightException e) {}
@@ -457,7 +457,7 @@ public class Helper {
         for (Route r : routes) {
             sb.append(routes.indexOf(r) + "  | ");
 
-            for (Node n : r.nodeList) {
+            for (Node n : r.getNodeList()) {
                 sb.append(n.getIndex() + (n.getType().toString().substring(0, 1)) + "\t  ");
             }
             sb.append("\n");
@@ -475,7 +475,7 @@ public class Helper {
 
         StringBuilder sb = new StringBuilder();
 
-        for (Node n : route.nodeList) {
+        for (Node n : route.getNodeList()) {
             sb.append(n.getIndex() + (n.getType().toString().substring(0, 1)) + "\t");
         }
 
@@ -494,7 +494,7 @@ public class Helper {
         for (Route r : routes) {
             System.out.print(routes.indexOf(r) + "  | ");
 
-            for (Node n : r.nodeList) {
+            for (Node n : r.getNodeList()) {
                 System.out.print(n.getIndex() + (n.getType().toString().substring(0, 1)) + "\t");
             }
             System.out.print("\n");
@@ -508,7 +508,7 @@ public class Helper {
 
     public void printRoute(Route route) {
 
-        for (Node n : route.nodeList) {
+        for (Node n : route.getNodeList()) {
             System.out.print(n.getIndex() + (n.getType().toString().substring(0, 1)) + "\t");
         }
 

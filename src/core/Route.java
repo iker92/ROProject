@@ -12,26 +12,42 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 /**
- * Created by loriz on 4/13/17.
+ * Route is the class which represents a Route of the problem and its characteristics, such as the nodes who compose it,
+ * the weights of all BackHauls and LineHauls, the cost/objective function of the Route etc.
+ * In this class are also defined some Route-oriented methods such as addNode and removeNode and their variation, which behave
+ * as a check to ensure that the Routes are sane (for instance, avoiding to exceed the maximum weights, set the Route of new or removed
+ * nodes etc.)
  */
 public class Route {
+
 
     public int MAX_WEIGHT = -1;
 
     private RouteListener mRouteListener = null;
     public int weightLinehaul = 0;
     public int weightBackhaul = 0;
-    public ArrayList<Node> nodeList = new ArrayList<>();
+    private ArrayList<Node> nodeList = new ArrayList<>();
     private DistanceMatrix distances = null;
     private BigDecimal actualDistance;
-    private Helper helper;
-    Route newRoute = null;
 
 
+    /**
+     * setOnRouteChangeListener relies on the Listener interface to communicate with the RouteList it belongs to to request
+     * a global objective function update.
+     * @param listener
+     */
+    public void setOnRouteChangeListener(RouteListener listener) {
+        mRouteListener = listener;
+    }
+
+
+    /**
+     * Route(int maxWeight) is the default constructor, which creates an empty Route, sets its max weight and recovers
+     * the instance of DistanceMatrix.
+     * @param maxWeight
+     */
     public Route(int maxWeight) {
         MAX_WEIGHT = maxWeight;
-
-        helper = new Helper();
 
         distances = DistanceMatrix.getInstance();
         if (distances == null) {
@@ -39,12 +55,14 @@ public class Route {
         }
     }
 
-    public void setOnRouteChangeListener(RouteListener listener) {
-        mRouteListener = listener;
-    }
 
+    /**
+     * getCopy() is the method which returns a copy of the actual Route. Remember that all Nodes are used by reference, this
+     * doesn't duplicate them.
+     * @return
+     */
     public Route getCopy(){
-        newRoute = new Route(MAX_WEIGHT);
+        Route newRoute = new Route(MAX_WEIGHT);
         newRoute.nodeList = new ArrayList<>(this.nodeList);
         newRoute.actualDistance = this.actualDistance;
         newRoute.distances = this.distances;
@@ -55,6 +73,15 @@ public class Route {
         return newRoute;
     }
 
+
+    /////////////////////////////////////////// METOD TO RETRIEVE NODES ////////////////////////////////////////////////
+
+    /**
+     * getNode(int position) is a method which returns the Node occupying the position "position" in the Route. If the position
+     * is not found, returns null
+     * @param position is the index of the desired node
+     * @return the Node at position position if present, else null
+     */
     @Nullable
     public Node getNode(int position) {
         if (nodeList.size() != 0 && nodeList.size() > position) {
@@ -65,29 +92,50 @@ public class Route {
         return null;
     }
 
-    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 
     ///////////////////////////////////////////// METHODS TO ADD NODES ///////////////////////////////////////////////
 
+    /**
+     * addNode(int position, Node node) is the method which adds the passed Node in passed position if possible.
+     * This method proceeds to addition only if:
+     * - the addition of the node wouldn't exceed the Route nodeType's actual weight (LINEHAUL or BACKHAUL)
+     * When the addition is possible, the methods proceeds to remove the Node from the previous Route it belonged to (if any)
+     * and set its belonging to the actual Route.
+     * @throws MaxWeightException if trying to add a node which would exceed the maximum weight of the route
+     */
     public void addNode(int position, Node node) throws MaxWeightException{
+
         if ( (node.getType() == Values.nodeType.LINEHAUL ? weightLinehaul : weightBackhaul) + node.getWeight() > MAX_WEIGHT && !this.nodeList.contains(node)) {
             throw new MaxWeightException("Cannot add node to route! Weight would exceed the maximum weight!");
         } else {
+            //proceed to add the Node to the internal nodeList and update the weight of the same Type
             nodeList.add(position, node);
             if (node.getType() == Values.nodeType.LINEHAUL)  {weightLinehaul += node.getWeight();} else {weightBackhaul += node.getWeight();}
         }
 
+        //the Route of belonging is never set to the WAREHOUSE, beacuse it is a special nodes which belongs to every route
         if (node.getType() != Values.nodeType.WAREHOUSE) {
             if (node.getRoute() != null) {
+                //remove the Node from the previous Route
                 node.getRoute().removeNode(node);
             }
+            //assign the Node to this Route
             node.setRoute(this);
         }
 
+        //request an update of the Route distance (local objective function)
         updateRouteDistance();
     }
 
+
+    /**
+     * addNode(Node node) is the method which adds the passed Node to the internal nodeList
+     * This method proceeds to addition only if:
+     * - the addition of the node wouldn't exceed the Route nodeType's actual weight (LINEHAUL or BACKHAUL)
+     * When the addition is possible, the methods proceeds to remove the Node from the previous Route it belonged to (if any)
+     * and set its belonging to the actual Route.
+     * @throws MaxWeightException if trying to add a node which would exceed the maximum weight of the route
+     */
     public void addNode(Node node) throws MaxWeightException{
         if ( node.getRoute() != this && (node.getType() == Values.nodeType.LINEHAUL ? weightLinehaul : weightBackhaul) + node.getWeight() > MAX_WEIGHT ) {
             throw new MaxWeightException("Cannot add node to route! Weight would exceed the maximum weight!");
@@ -95,18 +143,21 @@ public class Route {
 
             if (node.getType() != Values.nodeType.WAREHOUSE) {
 
+                // manage the addition of the node in the last position (BEFORE the WAREHOUSE)
                 if (nodeList.size() != 0 && nodeList.get(nodeList.size()-1).getType() == Values.nodeType.WAREHOUSE) {
                     nodeList.add(nodeList.size()-1, node);
                 } else {
                     nodeList.add(node);
                 }
 
+                //adds the weight to the Route's one of the same Type
                 if (node.getType() == Values.nodeType.LINEHAUL) {
                     weightLinehaul += node.getWeight();
                 } else {
                     weightBackhaul += node.getWeight();
                 }
 
+                //remove Node from old Route if any and set it to the new one
                 if (node.getRoute() != null) {
                     node.getRoute().removeNode(node);
                 }
@@ -114,22 +165,26 @@ public class Route {
 
             } else {
 
+                //if the Node is a WAREHOUSE, just add it to the nodeList (no checks needed)
                 nodeList.add(node);
 
             }
 
-
+            //request an update of the local objective function
             updateRouteDistance();
         }
     }
 
-    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 
     ////////////////////////////////////////// METHODS TO REMOVE NODES ///////////////////////////////////////////////
 
+    /**
+     * removeNode(int position) removes the Node occupying the input position in the nodeList. If the position is not in the
+     * range of the nodeList, returns an error.
+     * This method also removes the Route reference from the Node and request an update of the objective function.
+     * @param position is the position of the Node to remove.
+     */
     public void removeNode(int position) {
-
 
         if (nodeList.size() > position) {
             if (nodeList.get(position).getType() == Values.nodeType.LINEHAUL)  {weightLinehaul -= nodeList.get(position).getWeight();} else {weightBackhaul -= nodeList.get(position).getWeight();}
@@ -142,6 +197,11 @@ public class Route {
     }
 
 
+    /**
+     * removeNode(Node node) removes the Node from the nodeList if present, else returns an error.
+     * This method also removes the Route reference from the Node and request an update of the objective function.
+     * @param node is the Node to remove.
+     */
     public void removeNode(Node node) {
         if (nodeList.contains(node)) {
             if (node.getType() == Values.nodeType.LINEHAUL)  {weightLinehaul -= node.getWeight();} else {weightBackhaul -= node.getWeight();}
@@ -153,14 +213,18 @@ public class Route {
         updateRouteDistance();
     }
 
-    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 
     ////////////////////////////////////////////// MOVEMENT METHODS //////////////////////////////////////////////////
 
+    /**
+     * swap(Node first, Node second) is a method which swaps two nodes in the same Route.
+     * This has some conditions to met such as:
+     * - the nodes must be on the same route
+     * - the nodes must not be WAREHOUSEs
+     * @param first is the first Node
+     * @param second is the secondo Node
+     */
     public void swap(Node first, Node second) {
-        //swap inside the same route
-
         try {
             if (first.getType() != Values.nodeType.WAREHOUSE && second.getType() != Values.nodeType.WAREHOUSE) {
 
@@ -183,11 +247,13 @@ public class Route {
         }
     }
 
-    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 
     ////////////////////////////////////////////// DISTANCE METHODS //////////////////////////////////////////////////
 
+    /**
+     * updateRouteDistance() is the method which updates the local Objective Function and requires a global objective function update
+     * to the RouteList via the implemented interface
+     */
     private void updateRouteDistance() {
 
         BigDecimal oldDistance = actualDistance;
@@ -208,15 +274,11 @@ public class Route {
 
     }
 
-    public void forceUpdate() {
-        updateRouteDistance();
-    }
 
-    public BigDecimal getActualDistance() {
-        return actualDistance;
-    }
+    public void forceUpdate() { updateRouteDistance(); }
 
-    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    public BigDecimal getActualDistance() { return actualDistance; }
 
 
     ///////////////////////////////////////////////// OTHER METHODS //////////////////////////////////////////////////
@@ -229,6 +291,7 @@ public class Route {
         }
     }
 
+
     public Node getNodeByIndex(int index) throws NodeNotFoundException {
         if (index >= 0 && index < nodeList.size()) {
             return nodeList.get(index);
@@ -237,12 +300,19 @@ public class Route {
         }
     }
 
-    public boolean canAdd(Node node) {
-        return ((node.getType() == Values.nodeType.LINEHAUL ? node.getWeight() + weightLinehaul : node.getWeight() + weightBackhaul) <= MAX_WEIGHT);
-    }
+
+    public ArrayList<Node> getNodeList() { return nodeList; }
 
 
-
+    /**
+     * validate() is the method which validates a route, by checking that:
+     * - first and last Nodes are WAREHOUSEs
+     * - there are always at least one LINEHAUL
+     * - the LINEHAULs are always before the BACKHAULs (if present)
+     * - there are no BACKHAUL-only Routes
+     * - there are no empty route
+     * @return true if the Route is valid
+     */
     public boolean validate() {
 
         boolean valid = true;
@@ -254,16 +324,21 @@ public class Route {
             if (nodeList.get(index).getType() == Values.nodeType.BACKHAUL && nodeList.get(index+1).getType() == Values.nodeType.LINEHAUL) valid = false;
         }
 
-        if(nodeList.get(1).getType() !=Values.nodeType.LINEHAUL) return false;
+        if(nodeList.get(1).getType() != Values.nodeType.LINEHAUL) return false;
 
         return valid;
 
     }
 
 
+    ////////////////////////////////////////////// INTERFACES //////////////////////////////////////////////////////////
 
+    /**
+     * RouteListener is an inner interface class that binds Route to its RouteList when implemented, allowing to update
+     * automatically the global objective function when the Route gets updated.
+     */
     public interface RouteListener {
-         void OnRouteChange(Route route, BigDecimal oldDistance);
+        void OnRouteChange(Route route, BigDecimal oldDistance);
     }
 
 }

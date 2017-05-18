@@ -50,7 +50,7 @@ public class Exchange {
                 TreeMap<BigDecimal, Node> bestMove = new TreeMap(Collections.reverseOrder());
 
                 Route route = routes.get(routeIndex);
-                ArrayList<Node> currentNodes = route.nodeList;
+                ArrayList<Node> currentNodes = route.getNodeList();
                 int currentRouteSize = currentNodes.size();
                 BigDecimal routeWeight = route.getActualDistance();
 
@@ -72,10 +72,10 @@ public class Exchange {
                         BigDecimal currentActualDistance = currentRouteActualDistance.add(routeWeight);
 
                         //For each node inside currentRoute
-                        for(int currentRouteNodeIndex = 1; currentRouteNodeIndex <= currentRoute.nodeList.size()-2; currentRouteNodeIndex++){
+                        for(int currentRouteNodeIndex = 1; currentRouteNodeIndex <= currentRoute.getNodeList().size()-2; currentRouteNodeIndex++){
 
                             //Get currentRoute node
-                            Node currentRouteNode = currentRoute.nodeList.get(currentRouteNodeIndex);
+                            Node currentRouteNode = currentRoute.getNodeList().get(currentRouteNodeIndex);
 
 
                             BigDecimal oldObjFun = routes.getObjectiveFunction();
@@ -191,8 +191,8 @@ public class Exchange {
             // if the first node passed is part of this route...
             if (internal.getRoute() != external.getRoute()) {
 
-                Node nextIntNode = internal.getRoute().nodeList.get(internal.getRoute().nodeList.indexOf(internal) + 1);
-                Node prevIntNode = internal.getRoute().nodeList.get(internal.getRoute().nodeList.indexOf(internal) - 1);
+                Node nextIntNode = internal.getRoute().getNodeList().get(internal.getRoute().getNodeList().indexOf(internal) + 1);
+                Node prevIntNode = internal.getRoute().getNodeList().get(internal.getRoute().getNodeList().indexOf(internal) - 1);
 
                 // if BACKHAUL -> LINEHAUL, the current internal prev cannot be BACKHAUL
                 // if LINEHAUL -> BACKHAUL, the current internal next cannot be LINEHAUL
@@ -230,8 +230,8 @@ public class Exchange {
             // check if swapping the nodes (second in place of the first and vice versa) would cause trouble
             if (canSwap(first, second) && canSwap(second, first)) {
 
-                int firstPosition = first.getRoute().nodeList.indexOf(first);
-                int secondPosition = second.getRoute().nodeList.indexOf(second);
+                int firstPosition = first.getRoute().getNodeList().indexOf(first);
+                int secondPosition = second.getRoute().getNodeList().indexOf(second);
 
                 Route firstRoute = first.getRoute();
                 Route secondRoute = second.getRoute();
@@ -257,16 +257,16 @@ public class Exchange {
         DistanceMatrix distances = DistanceMatrix.getInstance();
         Route firstRoute = first.getRoute();
 
-        int firstIndex = firstRoute.nodeList.indexOf(first);
+        int firstIndex = firstRoute.getNodeList().indexOf(first);
         BigDecimal actualDistanceFirst = new BigDecimal(0);
 
         Node actual;
         Node next;
 
-        for (int index = 0; index < firstRoute.nodeList.size() - 1; index++) {
+        for (int index = 0; index < firstRoute.getNodeList().size() - 1; index++) {
 
-            actual = firstRoute.nodeList.get(index);
-            next = firstRoute.nodeList.get(index + 1);
+            actual = firstRoute.getNodeList().get(index);
+            next = firstRoute.getNodeList().get(index + 1);
 
             if (firstIndex == index) actual = second;
 
@@ -285,8 +285,8 @@ public class Exchange {
         DistanceMatrix distances = DistanceMatrix.getInstance();
         Route route = first.getRoute();
 
-        int firstIndex = route.nodeList.indexOf(first);
-        int secondIndex = route.nodeList.indexOf(second);
+        int firstIndex = route.getNodeList().indexOf(first);
+        int secondIndex = route.getNodeList().indexOf(second);
         BigDecimal actualDistanceFirst = new BigDecimal(0);
 
         Node actual;
@@ -294,16 +294,16 @@ public class Exchange {
 
 
 
-        for (int index = 0; index < route.nodeList.size() - 1; index++) {
+        for (int index = 0; index < route.getNodeList().size() - 1; index++) {
 
-            actual = route.nodeList.get(index);
-            next = route.nodeList.get(index + 1);
+            actual = route.getNodeList().get(index);
+            next = route.getNodeList().get(index + 1);
 
-            if (index == firstIndex) actual = route.nodeList.get(secondIndex);
-            if (index == secondIndex) actual = route.nodeList.get(firstIndex);
+            if (index == firstIndex) actual = route.getNodeList().get(secondIndex);
+            if (index == secondIndex) actual = route.getNodeList().get(firstIndex);
 
-            if (index + 1 == firstIndex) next = route.nodeList.get(secondIndex);
-            if (index + 1 == secondIndex) next = route.nodeList.get(firstIndex);
+            if (index + 1 == firstIndex) next = route.getNodeList().get(secondIndex);
+            if (index + 1 == secondIndex) next = route.getNodeList().get(firstIndex);
 
             actualDistanceFirst = actualDistanceFirst.add(distances.getDistance(actual, next));
 
