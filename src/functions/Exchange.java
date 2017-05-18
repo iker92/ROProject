@@ -42,8 +42,8 @@ public class Exchange {
     }
 
     /**
-     * findBestExchange() finds the best relocate given the initial routes
-     * @return RouteList containing all the routes after the best relocate
+     * findBestExchange() finds the best exchange given the initial routes
+     * @return RouteList containing all the routes after the best exchange
      * @throws MaxWeightException
      * @throws NodeNotFoundException
      */

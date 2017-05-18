@@ -9,7 +9,6 @@ import javafx.util.Pair;
 import exceptions.MaxWeightException;
 import exceptions.NodeNotFoundException;
 import exceptions.RouteSizeException;
-
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -17,22 +16,27 @@ import java.util.TreeMap;
 
 /**
  * Class Relocate implements relocate algorithm. For each route, for each node in current route, we check first
- * if is possibile to perform the move respecting constraints, than we simulate the move checking current objective function and the simulated one
+ * if is possible to perform the move respecting constraints, then we simulate the move checking current objective function and the simulated one
  * with the virtual movement. If it is worth, the relocate move is made and the objective function is updated
  */
-
 public class Relocate {
 
     private static Boolean isDebug = Values.isDebug();
     private static Boolean printRoutesInDebug = Values.printRoutesInDebug();
 
-
     DistanceMatrix distances;
     RouteList routes;
-
     Helper helper;
     ArrayList<Node> tsp;
 
+    /**
+     * Relocate(...) is the default constructor for this class.
+     * For Relocate to be complete and correct, its properties must be initialized upon its creation.
+     * @param distances is the instance of DistanceMatrix
+     * @param routes is a RouteList containing all the routes available.
+     * @param helper is an helper class which contains helper methods used by Exchange.
+     * @param tsp contains all the nodes in the TSP.
+     */
     public Relocate(DistanceMatrix distances, RouteList routes, Helper helper, ArrayList<Node> tsp) {
         this.distances = distances;
         this.routes = routes;
@@ -41,6 +45,7 @@ public class Relocate {
     }
 
     /**
+     * findBestRelocate() finds the best relocate given the initial routes
      * @return RouteList final list of routes after the best Relocate move
      * @throws MaxWeightException
      * @throws NodeNotFoundException
@@ -97,8 +102,6 @@ public class Relocate {
 
                             // simulate relocate move
                             BigDecimal newObjFun = testRelocate(currentNode, currentInnerRoute, currentRouteNodeIndex);
-
-
 
                             // ex1.compareTo(ex2)
                             // returns -1 if ex2 > ex1
@@ -164,11 +167,11 @@ public class Relocate {
     }
 
     /**
-     * TestRelocate check and simultae relocate move.
+     * TestRelocate check and simulate relocate move using the various simulate methods inside this class.
      * @param currentNode node we want to relocate
-     * @param currentInnerRoute route we want to put currentNode
+     * @param currentInnerRoute route we want to put currentNode into
      * @param innerNodeIndex position where currentNode will be placed
-     * @return
+     * @return the calculated virtual objective function
      */
     @Nullable
     private BigDecimal testRelocate(Node currentNode, Route currentInnerRoute, int innerNodeIndex) {
@@ -200,8 +203,6 @@ public class Relocate {
 
                     newObjFun = newObjFun.add(simulateAdditionOfNode(currentNode, currentInnerRoute, innerNodeIndex));
 
-                    newObjFun = newObjFun.add(simulateAdditionOfNode(currentNode, currentInnerRoute, innerNodeIndex));
-
                 }
             }
         }
@@ -210,7 +211,7 @@ public class Relocate {
     }
 
     /**
-     * relocateNode performs the relocate move.
+     * relocateNode(...) performs the relocate move given the node to relocate and the position where it needs to be placed.
      * @param node node we want to relocate
      * @param route route we want to put node
      * @param index position where node will be placed
@@ -233,7 +234,6 @@ public class Relocate {
             try {
                 route.addNode(index, node);
             } catch (MaxWeightException e) {
-                System.err.println("!!! SOMETHING HAS GONE HORRIBLY WRONG !!!");
             }
 
         }
@@ -241,7 +241,7 @@ public class Relocate {
     }
 
     /**
-     * simulateAdditionOfNode simulate relocate move of the node in a route different from its own
+     * simulateAdditionOfNode(...) simulate relocate move of the node in a route different from its own
      * @param node node we want to relocate
      * @param route route we want to put node
      * @param index position where node will be placed
@@ -265,7 +265,7 @@ public class Relocate {
     }
 
     /**
-     * simulateRemovalOfNode simulate the removal of the node from its route, before performing the movement
+     * simulateRemovalOfNode(...) simulate the removal of the node from its route, before performing the movement
      * @param node node to remove
      * @return updated cost of the route
      */
@@ -292,7 +292,7 @@ public class Relocate {
     }
 
     /**
-     * simulateInternalRelocation simulate the relocate move of the node on its route
+     * simulateInternalRelocation(...) simulate the relocate move of the node in its route
      * @param node node we want to relocate
      * @param index position where node will be placed
      * @return updated cost of the route after the simulation
@@ -323,13 +323,12 @@ public class Relocate {
     }
 
     /**
-     * canRelocate check if the relocate move of the node to the position in ruote satisfies constraints of the route
+     * canRelocate(...) check if the relocate move of the node in the position of the ruote satisfies its constraints
      * @param node node we want to relocate
      * @param route route we want to put node
      * @param position position where node will be placed
      * @return true if move is possible, false otherwise
      */
-
     public boolean canRelocate(Node node, Route route, int position) {
 
         if (isDebug) System.out.println("\nTrying to relocate " + node.getIndex() + " from Route" + routes.indexOf(node.getRoute()) + " to Route " + routes.indexOf(route) + " in position " + position);
