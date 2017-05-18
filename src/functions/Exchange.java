@@ -2,11 +2,11 @@ package functions;
 
 import com.sun.istack.internal.Nullable;
 import core.*;
+import exceptions.MovementFailedException;
 import utils.DistanceMatrix;
 import utils.Helper;
 import exceptions.MaxWeightException;
 import exceptions.NodeNotFoundException;
-import exceptions.SwapFailedException;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -127,7 +127,9 @@ public class Exchange {
                                 if (node.getType() == Values.nodeType.WAREHOUSE) continue;
                                 node.release();
                             }
-                        } catch (SwapFailedException e) {}
+
+
+                        } catch (MovementFailedException e) {}
                     } else {
 
                         //If at least one of the  nodes haven't been taken, then, we haven't optimized yet. Else, we are done.
@@ -248,13 +250,16 @@ public class Exchange {
 
     }
 
+
     /**
      * swapNodes(Node first, Node second) exchange two nodes if it's possible
      * @param first a Node
      * @param second another Node
-     * @throws SwapFailedException
+     * @throws MovementFailedException
      */
-    public void swapNodes(Node first, Node second) throws SwapFailedException {
+
+    public void swapNodes(Node first, Node second) throws MovementFailedException {
+
         // if called with nodes of the same route, call the appropriate function
         if (first.getRoute() == second.getRoute() && canSwap(first, second) && canSwap(second, first)) {
             first.getRoute().swap(first,second);
@@ -276,7 +281,7 @@ public class Exchange {
                     firstRoute.addNode(firstPosition, second);
                     secondRoute.addNode(secondPosition, first);
                 } catch (MaxWeightException e) {
-                    throw new SwapFailedException("!!! Swap failed! !!!");
+                    throw new MovementFailedException("!!! Swap failed! !!!");
                 }
 
             }

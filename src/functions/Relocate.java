@@ -2,13 +2,13 @@ package functions;
 
 import com.sun.istack.internal.Nullable;
 import core.*;
+import exceptions.MovementFailedException;
 import utils.DistanceMatrix;
 import utils.Helper;
 import javafx.util.Pair;
 import exceptions.MaxWeightException;
 import exceptions.NodeNotFoundException;
 import exceptions.RouteSizeException;
-import exceptions.SwapFailedException;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -16,8 +16,11 @@ import java.util.Collections;
 import java.util.TreeMap;
 
 /**
- * Created by pippo on 13/04/17.
+ * Class Relocate implements relocate algorithm. For each route, for each node in current route, we check first
+ * if is possibile to perform the move respecting constraints, than we simulate the move checking current objective function and the simulated one
+ * with the virtual movement. If it is worth, the relocate move is made and the objective function is updated
  */
+
 public class Relocate {
 
     private static Boolean isDebug = Values.isDebug();
@@ -37,6 +40,13 @@ public class Relocate {
         this.tsp = tsp;
     }
 
+    /**
+     *
+     * @return RouteList final list of routes after the best Relocate move
+     * @throws MaxWeightException
+     * @throws NodeNotFoundException
+     * @throws RouteSizeException
+     */
     public RouteList findBestRelocate() throws MaxWeightException, NodeNotFoundException, RouteSizeException {
         boolean isOptimized = false;
         int steps = 0;
@@ -86,6 +96,7 @@ public class Relocate {
 
                             BigDecimal oldObjFun = routes.getObjectiveFunction();
 
+                            // simulate relocate move
                             BigDecimal newObjFun = testRelocate(currentNode, currentInnerRoute, currentRouteNodeIndex);
 
 
@@ -105,10 +116,12 @@ public class Relocate {
                         }
 
                     }
+
                     if(!bestMove.isEmpty()){
                         //Get the best node from it
                         BigDecimal bestMapResult = bestMove.lastKey();
                         try {
+                            //do the move with the best node in the map, according to smallest objective functions based on simulation moves
                             relocateNode(currentNode, bestMove.get(bestMapResult).getKey(),bestMove.get(bestMapResult).getValue());
                             steps++;
                             System.out.println("Best move chosen! Relocated node " + currentNode.getIndex() + " inside route " + routes.indexOf(bestMove.get(bestMapResult).getKey()));
@@ -116,15 +129,18 @@ public class Relocate {
                             isOptimized = false;
                             if (printRoutesInDebug) helper.printRoutes(routes);
 
+                            //since we've made a move, we have to check again all other nodes, then, we release them
                             for (Node node : tsp) {
                                 if (node.getType() == Values.nodeType.WAREHOUSE) continue;
                                 node.release();
                             }
 
-                        } catch (SwapFailedException e) { }
+                        } catch (MovementFailedException e) { }
                     } else {
+                        //the node is optimized, so we take him
                         tsp.get(tsp.indexOf(currentNode)).take();
 
+                        //if at least one of the nodes of complete tsp haven't been taken, we haven't optimized yet. Else, we are done.
                         for (Node node : tsp) {
                             if (node.isTaken() == false) {
                                 isOptimized = false;
@@ -139,7 +155,7 @@ public class Relocate {
         }
 
         System.out.println("\nRelocate successfully terminated!\nRelocate moves done: " + steps + "\nObjective Function: " + routes.getObjectiveFunction().toString() + "\n");
-
+        //we release all the nodes for further use by Exchange algorithm
         for (Node node : tsp) {
             if (node.getType() == Values.nodeType.WAREHOUSE) continue;
             node.release();
@@ -148,24 +164,32 @@ public class Relocate {
         return routes;
     }
 
+    /**
+     * TestRelocate check and simultae relocate move.
+     * @param currentNode node we want to relocate
+     * @param currentInnerRoute route we want to put currentNode
+     * @param innerNodeIndex position where currentNode will be placed
+     * @return
+     */
     @Nullable
     private BigDecimal testRelocate(Node currentNode, Route currentInnerRoute, int innerNodeIndex) {
 
         BigDecimal newObjFun = null;
 
-
+        //check if all the parameters satisfy constraints
         if (canRelocate(currentNode, currentInnerRoute, innerNodeIndex)) {
-            //Current Route Actual Distance
 
             newObjFun = new BigDecimal(0);
-
+            //for all routes
             for (Route inner : routes) {
+                //if the current route is not the node's route or the currentRoute we simply add to objective function the cost of the route
                 if (inner != currentNode.getRoute() && inner != currentInnerRoute)
                 {
                     newObjFun = newObjFun.add(inner.getActualDistance());
                     continue;
                 }
-
+                //depends on situation, we simulate the node move on its route, on different route
+                //and the removal of the node from its route before the movement
                 if (inner == currentNode.getRoute() && inner == currentInnerRoute) {
                     if (isDebug) System.out.println("Simulate internal relocation of " + currentNode.getIndex() + " in position " + innerNodeIndex + " inside " + routes.indexOf(currentNode.getRoute()));
                     newObjFun = newObjFun.add(simulateInternalRelocation(currentNode, innerNodeIndex));
@@ -175,8 +199,8 @@ public class Relocate {
                 } else {
                     if (isDebug) System.out.println("Simulate addition of " + currentNode.getIndex() + " in route " + routes.indexOf(currentInnerRoute)+ " with position " + innerNodeIndex/*currentInnerRoute.nodeList.indexOf(currentInnerNode)*/);
 
-                    newObjFun = newObjFun.add(simulateAdditionOfNode(currentNode, currentInnerRoute, innerNodeIndex/*currentInnerRoute.nodeList.indexOf(currentInnerNode)*/));
-                    // newObjFun = newObjFun.add(simulatremainingNodeseAdditionOfNode(currentNode, inner, innerNodeIndex));
+                    newObjFun = newObjFun.add(simulateAdditionOfNode(currentNode, currentInnerRoute, innerNodeIndex));
+
                 }
             }
         }
@@ -184,15 +208,19 @@ public class Relocate {
 
     }
 
-
-    public void relocateNode(Node node, Route route, int index) throws SwapFailedException
+    /**
+     * relocateNode performs the relocate move.
+     * @param node node we want to relocate
+     * @param route route we want to put node
+     * @param index position where node will be placed
+     * @throws MovementFailedException
+     */
+    public void relocateNode(Node node, Route route, int index) throws MovementFailedException
     {
 
         // if the nodes are on the same route, use the arraylist directly and force update the obj function
         if (node.getRoute() == route) {
             int oldIndex = route.nodeList.indexOf(node);
-
-
             route.nodeList.add(index, node);
             route.nodeList.remove(index < oldIndex ? oldIndex + 1 : oldIndex );
 
@@ -211,13 +239,22 @@ public class Relocate {
 
     }
 
+    /**
+     * simulateAdditionOfNode simulate relocate move of the node in a route different from its own
+     * @param node node we want to relocate
+     * @param route route we want to put node
+     * @param index position where node will be placed
+     * @return cost of the route after the simulation
+     */
     private BigDecimal simulateAdditionOfNode(Node node, Route route, int index) {
 
+        //we take route's nodeList and we add the node to her
         ArrayList<Node> listOfNodes = new ArrayList<>(route.nodeList);
 
         listOfNodes.add(index, node);
 
         BigDecimal distance = new BigDecimal(0);
+        //update the cost of the route
         for (int routeIndex = 0; routeIndex < listOfNodes.size()-1; routeIndex++) {
             distance = distance.add(distances.getDistance(listOfNodes.get(routeIndex), listOfNodes.get(routeIndex + 1)));
         }
@@ -226,19 +263,25 @@ public class Relocate {
 
     }
 
+    /**
+     * simulateRemovalOfNode simulate the removal of the node from its route, before performing the movement
+     * @param node node to remove
+     * @return updated cost of the route
+     */
     private BigDecimal simulateRemovalOfNode(Node node) {
         DistanceMatrix distances = DistanceMatrix.getInstance();
 
 
         ArrayList<Integer> listOfNodes = new ArrayList<>();
 
+        //we put all the nodes in nodeList but node in the ArrayList
         for (int nodeIndex = 0; nodeIndex <= node.getRoute().nodeList.size()-1; nodeIndex++) {
 
             if (node.getRoute().nodeList.get(nodeIndex).getIndex() == node.getIndex()) continue;
 
             listOfNodes.add(node.getRoute().nodeList.get(nodeIndex).getIndex());
         }
-
+        // we calculate the cost of the ArrayList created above
         BigDecimal distance = new BigDecimal(0);
         for (int routeIndex = 0; routeIndex < listOfNodes.size()-1; routeIndex++) {
             distance = distance.add(distances.getDistance(listOfNodes.get(routeIndex), listOfNodes.get(routeIndex + 1)));
@@ -247,6 +290,12 @@ public class Relocate {
         return distance;
     }
 
+    /**
+     * simulateInternalRelocation simulate the relocate move of the node on its route
+     * @param node node we want to relocate
+     * @param index position where node will be placed
+     * @return updated cost of the route after the simulation
+     */
     private BigDecimal simulateInternalRelocation(Node node, int index) {
 
         int oldIndex = node.getRoute().nodeList.indexOf(node);
@@ -262,7 +311,7 @@ public class Relocate {
 
         listOfNodes.add(oldIndex < index ? index - 1 : index, node);
 
-
+        //when the internal move is made, we calculate the new cost of the route
         BigDecimal distance = new BigDecimal(0);
         for (int routeIndex = 0; routeIndex < listOfNodes.size()-1; routeIndex++) {
             distance = distance.add(distances.getDistance(listOfNodes.get(routeIndex), listOfNodes.get(routeIndex + 1)));
@@ -272,41 +321,13 @@ public class Relocate {
 
     }
 
-
-/* commented for now, all is handled in simulaterelocate
-    private BigDecimal simulateRelocateSiblings(Node node, Route route, int index) {
-
-        DistanceMatrix distances = DistanceMatrix.getInstance();
-        Route firstRoute = node.getRoute();
-
-        int nodeIndex = firstRoute.nodeList.indexOf(node);
-        BigDecimal actualDistanceFirst = new BigDecimal(0);
-
-        Node actual;
-        Node next;
-
-        for (int innerIndex = 0; innerIndex < route.nodeList.size() - 1; innerIndex++) {
-
-            actual = route.nodeList.get(innerIndex);
-            next = route.nodeList.get(innerIndex + 1);
-
-            //TODO probably all wrong, check!
-
-            // simulate skip of node
-            if (nodeIndex == innerIndex + 1) next = route.nodeList.get(innerIndex + 2);
-            if (nodeIndex == innerIndex) actual = route.nodeList.get(innerIndex - 1);
-
-            // simulate insertion of node
-            if (index == innerIndex + 1) next = node;
-            if (index == innerIndex) actual = node;
-
-            actualDistanceFirst = actualDistanceFirst.add(distances.getDistance(actual, next));
-
-        }
-        return actualDistanceFirst;
-
-    }
-*/
+    /**
+     * canRelocate check if the relocate move of the node to the position in ruote satisfies constraints of the route
+     * @param node node we want to relocate
+     * @param route route we want to put node
+     * @param position position where node will be placed
+     * @return true if move is possible, false otherwise
+     */
 
     public boolean canRelocate(Node node, Route route, int position) {
 
@@ -317,8 +338,7 @@ public class Relocate {
             if (isDebug) System.out.println("Relocate is impossible! Trying to relocate in the same position (position or position+1)!\n");
             return false;
         }
-
-
+        //if trying to relocate the node in the position and there relies a node with different type of the node to move, we can't do the movement
         if(node.getRoute() == route && node.getType() != route.nodeList.get(position).getType()){
 
             if (isDebug) System.out.println("Relocate is impossible! Trying to relocate node of different types on same route!\n");
@@ -328,12 +348,12 @@ public class Relocate {
 
         //if trying to relocate in place of the first warehouse
         if (position == 0) {
-            // if (isDebug) System.out.println("Relocate is impossible! Trying to put something before first WAREHOUSE\n");
+            if (isDebug) System.out.println("Relocate is impossible! Trying to put something before first WAREHOUSE\n");
             return false;
         }
 
         if (node.getType() == Values.nodeType.WAREHOUSE) {
-            //if (isDebug) System.out.println("Relocate is impossible! Node to relocate is WAREHOUSE\n");
+            if (isDebug) System.out.println("Relocate is impossible! Node to relocate is WAREHOUSE\n");
             return false;
         }
 
@@ -348,8 +368,6 @@ public class Relocate {
 
         Values.nodeType previousType = route.nodeList.get(position - 1).getType();
         Values.nodeType nextType = route.nodeList.get(position).getType();
-
-        //if (isDebug) System.out.println("Node Type: " + nodeType.toString() + " | Previous Type: " + previousType.toString() + " | Next Type: " + nextType.toString());
 
         //if trying to relocate the only node in a route
         if (node.getRoute().nodeList.size() == 3 || (nodeType == Values.nodeType.LINEHAUL && nextTypeExtRoute != Values.nodeType.LINEHAUL && previousTypeExtRoute == Values.nodeType.WAREHOUSE)) {
@@ -373,6 +391,7 @@ public class Relocate {
 
         int actualTypeWeight = (nodeType == Values.nodeType.LINEHAUL ? route.weightLinehaul : route.weightBackhaul) + node.getWeight();
 
+        //check if the weight after the movement is always less than MAXWEIGHT
         if (actualTypeWeight <= route.MAX_WEIGHT) {
             if (isDebug) System.out.println("Relocate is possible! Checking if it's worth...\n");
         } else {
