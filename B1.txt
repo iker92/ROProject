@@ -1,0 +1,67 @@
+Route 0 cost: 524.067039602812676 
+weight LINEHAUL :652 
+weight BACKHAUL: 1464
+Route: 0W	24L	21L	4B	3B	8B	0W	
+
+
+
+
+Route 1 cost: 420.337518558150485 
+weight LINEHAUL :1175 
+weight BACKHAUL: 542
+Route: 0W	16L	11L	20L	10B	1B	0W	
+
+
+
+
+Route 2 cost: 443.68757083554324 
+weight LINEHAUL :1571 
+weight BACKHAUL: 0
+Route: 0W	29L	25L	30L	0W	
+
+
+
+
+Route 3 cost: 388.159319459342256 
+weight LINEHAUL :1235 
+weight BACKHAUL: 1157
+Route: 0W	27L	26L	6B	9B	0W	
+
+
+
+
+Route 4 cost: 600.86857714524937 
+weight LINEHAUL :1522 
+weight BACKHAUL: 1508
+Route: 0W	22L	23L	18L	2B	7B	0W	
+
+
+
+
+Route 5 cost: 262.04265270047858 
+weight LINEHAUL :732 
+weight BACKHAUL: 0
+Route: 0W	12L	17L	15L	0W	
+
+
+
+
+Route 6 cost: 373.65210846429177 
+weight LINEHAUL :1561 
+weight BACKHAUL: 557
+Route: 0W	14L	19L	5B	0W	
+
+
+
+
+Route 7 cost: 216.80804928226809 
+weight LINEHAUL :1392 
+weight BACKHAUL: 0
+Route: 0W	13L	28L	0W	
+
+
+
+
+Objective function: 3229.622836048136467
+
+Execution time is 0.03835 seconds

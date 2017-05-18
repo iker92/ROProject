@@ -19,7 +19,7 @@ import java.util.Random;
  */
 public class Helper {
 
-    private static final String PATH = "/home/andream16/Documents/devStuff/ROProject/Results/";
+    private static final String PATH = "/home/pippo/Documents/ROProject/Results/";
 
     private Boolean isDebug = Values.isDebug();
 

@@ -254,7 +254,7 @@ public class Route {
             if (nodeList.get(index).getType() == Values.nodeType.BACKHAUL && nodeList.get(index+1).getType() == Values.nodeType.LINEHAUL) valid = false;
         }
 
-        if(this.nodeList.get(1).getType() == Values.nodeType.BACKHAUL) return false;
+        if(nodeList.get(1).getType() !=Values.nodeType.LINEHAUL) return false;
 
         return valid;
 
