@@ -308,7 +308,7 @@ public class Exchange {
         Node actual; 
         Node next;
 
-         //Calculate new virtual objective function value given by the virtual exchange
+        //Calculate new virtual objective function value given by the virtual exchange
         for (int index = 0; index < firstRoute.getNodeList().size() - 1; index++) {
 
             actual = firstRoute.getNodeList().get(index);
@@ -346,10 +346,8 @@ public class Exchange {
 
         //Calculate new virtual objective function value given by the virtual exchange
         for (int index = 0; index < route.getNodeList().size() - 1; index++) {
-
             actual = route.getNodeList().get(index);
             next = route.getNodeList().get(index + 1);
-
             if (index == firstIndex) actual = route.getNodeList().get(secondIndex);
             if (index == secondIndex) actual = route.getNodeList().get(firstIndex);
 

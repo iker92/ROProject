@@ -201,6 +201,8 @@ public class Relocate {
 
                     newObjFun = newObjFun.add(simulateAdditionOfNode(currentNode, currentInnerRoute, innerNodeIndex));
 
+                    newObjFun = newObjFun.add(simulateAdditionOfNode(currentNode, currentInnerRoute, innerNodeIndex));
+
                 }
             }
         }
@@ -327,7 +329,7 @@ public class Relocate {
      * @param route route we want to put node
      * @param position position where node will be placed
      * @return true if move is possible, false otherwise
-    */
+     */
 
     public boolean canRelocate(Node node, Route route, int position) {
 
