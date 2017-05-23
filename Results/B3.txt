@@ -4,14 +4,10 @@ weight BACKHAUL: 2006
 Route: 0W	26L	27L	29L	30L	25L	16L	11L	20L	10B	4B	3B	8B	1B	0W	
 
 
-
-
 Route 1 cost: 59530.2175575482217 
 weight LINEHAUL :2254 
 weight BACKHAUL: 2665
 Route: 0W	12L	17L	15L	22L	18L	23L	7B	2B	9B	6B	0W	
-
-
 
 
 Route 2 cost: 57119.3506348539214 
@@ -20,8 +16,8 @@ weight BACKHAUL: 557
 Route: 0W	21L	13L	28L	24L	14L	19L	5B	0W	
 
 
-
-
 Objective function: 175004.4196339004093
 
-Execution time is 0.24902 seconds
+Difference of 3.2710843% respect to best solution 169372
+
+Execution time is 0.40097 seconds

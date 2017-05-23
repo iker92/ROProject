@@ -19,7 +19,7 @@ Route: 0W	22L	1B	0W
 Route 3 cost: 35882.222478545787 
 weight LINEHAUL :1217 
 weight BACKHAUL: 0
-Route: 0W	6L	19L	23L	0W	
+Route: 0W	23L	19L	6L	0W	
 
 
 Route 4 cost: 39465.854211187281 
@@ -50,4 +50,4 @@ Objective function: 237090.1412604544074
 
 Difference of 3.0854428% respect to best solution 229886
 
-Execution time is 0.47720 seconds
+Execution time is 0.41451 seconds

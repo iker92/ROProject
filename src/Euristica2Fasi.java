@@ -28,7 +28,7 @@ import java.util.HashMap;
 public class Euristica2Fasi {
 
     //Change to use other files
-    private static final String FILE = "A1";
+    private static final String FILE = "N6";
 
     private static final String SUFFIX = ".txt";
 
