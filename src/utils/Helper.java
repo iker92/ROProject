@@ -601,8 +601,6 @@ public class Helper {
         data.add("Difference of "+values.getValue()+" respect to best solution "+ values.getKey()+"\n");
         NumberFormat formatter = new DecimalFormat("#0.00000");
         data.add("Execution time is " + formatter.format((time) / 1000000000d) + " seconds");
-
-
         try {
 
             FileUtils.writeLines(file,data);
@@ -611,13 +609,19 @@ public class Helper {
         }
     }
 
-
+    /**
+     * compareValues(..) compare our final obj. function to the best one from literature,
+     * giving also the difference in percentage between them
+     * @param fileName filename of bestSolution file
+     * @param objFunction our final obj. function
+     * @return
+     */
     public Pair<BigDecimal,String> compareValues(String fileName, BigDecimal objFunction) {
 
             String solutionFile = "Solutions/Detailed_Solution_" + fileName;
-            String value="0.0";
+            Pair<BigDecimal,String> values = null;
+            String valueString="0.0";
             try {
-                // FileReader reads text files in the default encoding.
                 FileReader fileReader =
                         new FileReader(solutionFile);
 
@@ -625,9 +629,10 @@ public class Helper {
                 BufferedReader bufferedReader =
                         new BufferedReader(fileReader);
                 String line;
+                //retrieve from bestSolution file obj. function
                 while ((line = bufferedReader.readLine()) != null) {
                     if(line.contains("Total Cost = ")){
-                        value =line.split("Total Cost = " )[1];
+                        valueString =line.split("Total Cost = " )[1];
                         break;
                     }
                 }
@@ -642,12 +647,13 @@ public class Helper {
                 e.printStackTrace();
             }
 
-            float val=Float.parseFloat(value);
-            BigDecimal bestObjFunction=new BigDecimal(val);
-            Pair<BigDecimal,String> values = null;
+            float value=Float.parseFloat(valueString);
+            BigDecimal bestObjFunction=new BigDecimal(value);
 
-        float percent=abs((bestObjFunction.floatValue()- objFunction.floatValue()))/((bestObjFunction.floatValue() + objFunction.floatValue())/2) * 100;
-        values=new Pair<>(bestObjFunction,new String(percent+"%"));
+            //calculate percentage
+            float percent=abs((bestObjFunction.floatValue()- objFunction.floatValue()))/((bestObjFunction.floatValue() + objFunction.floatValue())/2) * 100;
+
+            values=new Pair<>(bestObjFunction,new String(percent+"%"));
 
         return values;
 
