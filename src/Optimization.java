@@ -15,9 +15,10 @@ import java.util.HashMap;
 
 import javafx.util.Pair;
 
-
 /**
- * Created by loriz on 14/05/17.
+ * Optimization is the class which (as the name says) starts the optimization process of the transportation problem.
+ * It's role is to call the adequate functions the correct number of times in the correct order and retrieving the best result
+ * the optimization process could produce.
  */
 public class Optimization {
 
@@ -25,11 +26,22 @@ public class Optimization {
     private final Helper helper;
     private final int NUMBER_OF_TIMES = 10;
 
+
+    /**
+     * Optimization() is the default constructor and initializes the class by passing the instance to base the optimization upon.
+     * @param instance is the input instance
+     */
     public Optimization(Instance instance) {
         this.instance = instance;
         this.helper = new Helper();
     }
 
+
+    /**
+     * doRelocateExchange() is the method which optimizes the current Routes by executing in order the doBestRelocate()
+     * and the doBestExchange() a chosen number of times. Then, automatically chooses the best result and presents it to the user.
+     * @return the OptimizationResult calculated
+     */
     public OptimizationResult doRelocateExchange() {
 
         System.out.println("********************************************************");
@@ -74,7 +86,6 @@ public class Optimization {
             resultList.add(new OptimizationResult(oldOF, initialSnap, relocateSnap, exchangeSnap, finalSnap));
         }
 
-
         OptimizationResult best = resultList.get(0);
 
         for (OptimizationResult result : resultList) {
@@ -103,6 +114,12 @@ public class Optimization {
         return best;
     }
 
+
+    /**
+     * doExchangeRelocate() is the method which optimizes the current Routes by executing in order the doBestExchange()
+     * and the doBestRelocate() a chosen number of times. Then, automatically chooses the best result and presents it to the user.
+     * @return the OptimizationResult calculated
+     */
     public OptimizationResult doExchangeRelocate() {
 
         System.out.println("********************************************************");
@@ -145,7 +162,6 @@ public class Optimization {
             resultList.add(new OptimizationResult(oldOF, initialSnap, relocateSnap, exchangeSnap, finalSnap));
         }
 
-
         OptimizationResult best = resultList.get(0);
 
         for (OptimizationResult result : resultList) {
@@ -174,7 +190,16 @@ public class Optimization {
         return best;
     }
 
-    
+
+    /**
+     * doBestRelocate() method instances Relocate class and executes the search for the best set of Relocate moves to optimize
+     * the paths of the Routes
+     * @param distances is the instance of DistanceMatrix
+     * @param routes is the RouteList to optimize
+     * @param helper is the instance of the Helper
+     * @param tsp is the tsp as ArrayList of Nodes
+     * @return
+     */
     private RouteList doBestRelocate(DistanceMatrix distances, RouteList routes, Helper helper, ArrayList<Node> tsp) {
 
         Relocate relocate = new Relocate(distances,routes,helper, tsp);
@@ -193,6 +218,14 @@ public class Optimization {
     }
 
 
+    /**
+     * doBestExchange() method instances Exchange class and executes the search for the best set of Relocate moves to optimize
+     * the paths of the Routes
+     * @param routes is the RouteList to optimize
+     * @param helper is the instance of the Helper
+     * @param completeTSP is the tsp as ArrayList of Nodes
+     * @return
+     */
     private RouteList doBestExchange(RouteList routes, Helper helper, ArrayList<Node> completeTSP) {
 
         Exchange exchange = new Exchange(routes, helper, completeTSP);
@@ -205,14 +238,14 @@ public class Optimization {
         } catch (NodeNotFoundException e) {
             e.printStackTrace();
         }
-
         return optRoutes;
-
     }
 
 
+    /**
+     * OptimizationResult is a POJO class to hold in one place all the information about a certain step of the optimization
+     */
     public class OptimizationResult {
-
 
         public final BigDecimal oldOF;
         public final Pair<String, BigDecimal> initial;
@@ -229,7 +262,4 @@ public class Optimization {
             this.data = data;
         }
     }
-
-
-
 }

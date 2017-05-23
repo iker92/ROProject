@@ -20,7 +20,10 @@ import java.util.ArrayList;
 public class Euristica2Fasi {
 
     //Change to use other files
+
     private static final String FILE = "A2";
+
+
 
     private static final String SUFFIX = ".txt";
 
