@@ -1,15 +1,18 @@
 package utils;
 
 import core.*;
+import javafx.util.Pair;
 import org.apache.commons.io.FileUtils;
 import exceptions.MaxWeightException;
 
 import java.io.*;
+import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Random;
+import java.util.*;
+
+import static java.lang.Math.abs;
+import static java.lang.Math.log;
 
 /**
  * This class contains several helper methods used by different classes to perform the two phases algorithm.
@@ -583,19 +586,22 @@ public class Helper {
      * @param time
      * @param fileName
      */
-    public void writeToFile(ArrayList<ResultData> routesData, long time, String fileName){
+    public void writeToFile(ArrayList<ResultData> routesData, long time, String fileName,String fileNameBestSolution){
         File file = new File(PATH + fileName);
         ArrayList<String> data=new ArrayList<>();
         ArrayList<String> routeNodes=new ArrayList<>();
+        Pair<BigDecimal,String> values=compareValues(fileNameBestSolution,routesData.get(0).getTotalObjectiveFunction());
 
         for (int i = 0; i <routesData.size() ; i++) {
             routeNodes.clear();
-            data.add("Route "+i+" cost: "+routesData.get(i).getRouteCost()+" \nweight LINEHAUL :"+routesData.get(i).getWeightLH()+" \nweight BACKHAUL: "+routesData.get(i).getWeightBH()+"\nRoute: "+routesData.get(i).getRouteAsString()+"\n\n");
+            data.add("Route "+i+" cost: "+routesData.get(i).getRouteCost()+" \nweight LINEHAUL :"+routesData.get(i).getWeightLH()+" \nweight BACKHAUL: "+routesData.get(i).getWeightBH()+"\nRoute: "+routesData.get(i).getRouteAsString());
         }
 
         data.add("Objective function: "+routesData.get(0).getTotalObjectiveFunction()+"\n");
+        data.add("Difference of "+values.getValue()+" respect to best solution "+ values.getKey()+"\n");
         NumberFormat formatter = new DecimalFormat("#0.00000");
         data.add("Execution time is " + formatter.format((time) / 1000000000d) + " seconds");
+
 
         try {
 
@@ -606,4 +612,44 @@ public class Helper {
     }
 
 
+    public Pair<BigDecimal,String> compareValues(String fileName, BigDecimal objFunction) {
+
+            String solutionFile = "Solutions/Detailed_Solution_" + fileName;
+            String value="0.0";
+            try {
+                // FileReader reads text files in the default encoding.
+                FileReader fileReader =
+                        new FileReader(solutionFile);
+
+                // Always wrap FileReader in BufferedReader.
+                BufferedReader bufferedReader =
+                        new BufferedReader(fileReader);
+                String line;
+                while ((line = bufferedReader.readLine()) != null) {
+                    if(line.contains("Total Cost = ")){
+                        value =line.split("Total Cost = " )[1];
+                        break;
+                    }
+                }
+
+                bufferedReader.close();
+            }
+            catch(FileNotFoundException ex) {
+                System.out.println(
+                        "Unable to open file '" +
+                                fileName + "'");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            float val=Float.parseFloat(value);
+            BigDecimal bestObjFunction=new BigDecimal(val);
+            Pair<BigDecimal,String> values = null;
+
+        float percent=abs((bestObjFunction.floatValue()- objFunction.floatValue()))/((bestObjFunction.floatValue() + objFunction.floatValue())/2) * 100;
+        values=new Pair<>(bestObjFunction,new String(percent+"%"));
+
+        return values;
+
+    }
 }

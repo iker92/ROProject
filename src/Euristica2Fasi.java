@@ -1,8 +1,16 @@
 import core.*;
+import javafx.util.Pair;
 import utils.Helper;
+
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * Euristica2Fasi was developed with passion for RO course as part of the CS Master Degree of the University of Cagliari
@@ -44,15 +52,15 @@ public class Euristica2Fasi {
 
         endTime = System.nanoTime();
         long executionTime = endTime - startTime;
-
         //Write the best result obtained
-        if(results.get(0).exchange.getValue().compareTo(results.get(1).relocate.getValue()) == 1){
-            helper.writeToFile(results.get(1).data, executionTime, instance1.fileName);
+        if (results.get(0).exchange.getValue().compareTo(results.get(1).relocate.getValue()) == 1) {
+            helper.writeToFile(results.get(1).data, executionTime, instance1.fileName,fileName);
         } else {
-            helper.writeToFile(results.get(0).data, executionTime, instance1.fileName);
+            helper.writeToFile(results.get(0).data, executionTime, instance1.fileName,fileName);
         }
         NumberFormat formatter = new DecimalFormat("#0.00000");
         System.out.println("\nExecution time is " + formatter.format((executionTime) / 1000000000d) + " seconds");
-
     }
+
+
 }
