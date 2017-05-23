@@ -45,7 +45,7 @@ public class Optimization {
             ArrayList<ResultData> finalSnap = new ArrayList<>();
 
             //initial route
-            RouteList routes = helper.createRoutesFromInstance(instance);
+            RouteList routes = helper.createRoutesFromInstance(instance,i);
             Pair initialSnap = new Pair(helper.createSnapshot(routes), routes.getObjectiveFunction());
 
 
@@ -118,7 +118,7 @@ public class Optimization {
             ArrayList<ResultData> finalSnap = new ArrayList<>();
 
             //initial route
-            RouteList routes = helper.createRoutesFromInstance(instance);
+            RouteList routes = helper.createRoutesFromInstance(instance,i);
             Pair initialSnap = new Pair(helper.createSnapshot(routes), routes.getObjectiveFunction());
 
 

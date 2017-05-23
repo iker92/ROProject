@@ -1,31 +1,31 @@
-Route 0 cost: 17931.1621114531571 
-weight LINEHAUL :1606 
+Route 0 cost: 37032.3155871003919 
+weight LINEHAUL :1583 
+weight BACKHAUL: 235
+Route: 0W	15L	12L	27L	1B	0W	
+
+
+
+
+Route 1 cost: 23727.1094415434520 
+weight LINEHAUL :1565 
 weight BACKHAUL: 0
-Route: 0W	15L	37L	21L	0W	
+Route: 0W	37L	14L	30L	0W	
 
 
 
 
-Route 1 cost: 27707.2400249024905 
-weight LINEHAUL :1653 
-weight BACKHAUL: 0
-Route: 0W	14L	30L	11L	0W	
-
-
-
-
-Route 2 cost: 29656.4231328930924 
-weight LINEHAUL :1559 
+Route 2 cost: 32214.7034922365819 
+weight LINEHAUL :1699 
 weight BACKHAUL: 527
-Route: 0W	28L	16L	9L	2B	0W	
+Route: 0W	21L	9L	16L	2B	0W	
 
 
 
 
-Route 3 cost: 17697.4936186370215 
-weight LINEHAUL :1417 
+Route 3 cost: 29464.4844537673737 
+weight LINEHAUL :1687 
 weight BACKHAUL: 0
-Route: 0W	10L	25L	33L	0W	
+Route: 0W	11L	28L	10L	33L	0W	
 
 
 
@@ -38,26 +38,26 @@ Route: 0W	19L	35L	38L	0W
 
 
 
-Route 5 cost: 28681.106799584659 
-weight LINEHAUL :1113 
+Route 5 cost: 31045.5370832573475 
+weight LINEHAUL :1339 
 weight BACKHAUL: 362
-Route: 0W	36L	29L	7B	0W	
+Route: 0W	25L	18L	7B	0W	
 
 
 
 
-Route 6 cost: 26424.9180375716834 
-weight LINEHAUL :1318 
-weight BACKHAUL: 0
-Route: 0W	18L	34L	0W	
+Route 6 cost: 33858.9184287511850 
+weight LINEHAUL :1217 
+weight BACKHAUL: 428
+Route: 0W	29L	34L	5B	0W	
 
 
 
 
-Route 7 cost: 31073.4614959668451 
+Route 7 cost: 25470.1384338827354 
 weight LINEHAUL :1490 
-weight BACKHAUL: 1160
-Route: 0W	31L	23L	5B	4B	0W	
+weight BACKHAUL: 732
+Route: 0W	23L	31L	4B	0W	
 
 
 
@@ -70,22 +70,22 @@ Route: 0W	13L	24L	8B	0W
 
 
 
-Route 9 cost: 37887.151720325996 
-weight LINEHAUL :1665 
+Route 9 cost: 21775.4122544067003 
+weight LINEHAUL :1092 
 weight BACKHAUL: 0
-Route: 0W	12L	27L	20L	22L	0W	
+Route: 0W	22L	36L	0W	
 
 
 
 
-Route 10 cost: 48458.5408987072728 
-weight LINEHAUL :1545 
-weight BACKHAUL: 1471
-Route: 0W	32L	26L	17L	1B	6B	3B	0W	
+Route 10 cost: 47898.5245530632051 
+weight LINEHAUL :1694 
+weight BACKHAUL: 1236
+Route: 0W	32L	26L	17L	20L	3B	6B	0W	
 
 
 
 
-Objective function: 333355.5356018935562
+Objective function: 350325.1814898603112
 
-Execution time is 0.35684 seconds
+Execution time is 0.30872 seconds

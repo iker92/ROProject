@@ -200,8 +200,6 @@ public class Relocate {
 
                     newObjFun = newObjFun.add(simulateAdditionOfNode(currentNode, currentInnerRoute, innerNodeIndex));
 
-                    newObjFun = newObjFun.add(simulateAdditionOfNode(currentNode, currentInnerRoute, innerNodeIndex));
-
                 }
             }
         }

@@ -3,6 +3,7 @@ package utils;
 import core.*;
 import org.apache.commons.io.FileUtils;
 import exceptions.MaxWeightException;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.*;
 import java.text.DecimalFormat;
@@ -141,7 +142,7 @@ public class Helper {
      * @param instance
      * @return RouteList which contains all the built routes
      */
-    public RouteList createRoutesFromInstance(Instance instance)  {
+    public RouteList createRoutesFromInstance(Instance instance,int step)  {
 
         System.out.println("Creating routes from an instance...\n");
 
@@ -160,36 +161,62 @@ public class Helper {
 
         //Default size of the routes
         int routeSize = tspSize/instance.routeCount;
+        if (step !=0) routes.clear();
+            while (tsp.size() - 1 >= 0 && routes.size() < instance.routeCount) {
+                //If current route isn't filled yet
+                if (route.getNodeList().size() < routeSize) {
+                    switch (step+1) {
+                        case 1:
+                            System.out.println("---------First iteration!---------");
+                            routes = firstIteration(tsp, routes, instance, warehouse, route);
+                            break;
+                        case 2:
+                            System.out.println("---------Second iteration!---------");
+                            routes = secondIteration(tsp, routes, instance, warehouse, route);
+                            break;
+                       /* case 3:
+                            //TO DO :: aggiunge sempre stessa route, non ho voglia di controllare
+                            System.out.println("---------Third iteration!---------");
 
-        //While we have at least one node in the tsp and tbe number of built routes is less than the given number of routes
-        while (tsp.size() - 1 >= 0 && routes.size() < instance.routeCount) {
+                                int routesSize=routes.size();
+                              //  routes = thirdIteration(tsp,routes, instance, warehouse, route);
 
-            //If current route isn't filled yet
-            if (route.getNodeList().size() < routeSize) {
+                            break;
+                            */
+                        default:
+                            try {
+                                route.addNode(tsp.get(0));
+                                tsp.remove(0);
+                            } catch (MaxWeightException e) {
+                                //If not possible, try to create a new route
+                                try {
+                                    route = routeBuilder(route, warehouse);
+                                    routes.add(route);
+                                } catch (MaxWeightException e1) {
+                                    return null;
+                                }
+                                route = new Route(instance.maxWeight);
+                            }
+                            break;
+                    }   //Try to fill it with another node
+                        } else {
+                        //If it's filled indeed, try to create a new route
+                        try {
+                            route = routeBuilder(route, warehouse);
 
-                //Try to fill it with another node
-                try {
-                    route.addNode(tsp.get(0));
-                    tsp.remove(0);
-                } catch (MaxWeightException e) {
-                    //If not possible, try to create a new route
-                    try {
-                        route = routeBuilder(route, warehouse);
-                        routes.add(route);
-                    } catch (MaxWeightException e1) {}
-                    route = new Route(instance.maxWeight);
+                                routes.add(route);
+
+                        } catch (MaxWeightException e) {
+                        }
+                        route = new Route(instance.maxWeight);
+
+
                 }
 
-            } else {
-                //If it's filled indeed, try to create a new route
-                try {
-                    route = routeBuilder(route, warehouse);
-                    routes.add(route);
-                } catch (MaxWeightException e) {}
-                route = new Route(instance.maxWeight);
+        }
 
-            }
-
+        for (int i = 1; i <instance.completeTSP.size() ; i++) {
+            instance.completeTSP.get(i).release();
         }
 
         if (routes.size() < instance.routeCount) {
@@ -310,6 +337,78 @@ public class Helper {
         return routes;
     }
 
+    @Nullable
+    private RouteList firstIteration(ArrayList<Node> tsp, RouteList routes, Instance instance, Node warehouse, Route route) {
+
+        try {
+            route.addNode(tsp.get(0));
+            tsp.remove(0);
+        } catch (MaxWeightException e) {
+            //If not possible, try to create a new route
+            try {
+                route = routeBuilder(route, warehouse);
+                routes.add(route);
+            } catch (MaxWeightException e1) {return null;}
+            route = new Route(instance.maxWeight);
+        }
+        return routes;
+    }
+
+    @Nullable
+    private RouteList secondIteration(ArrayList<Node> tsp, RouteList routes, Instance instance, Node warehouse, Route route) {
+
+    try {
+            route.addNode(tsp.get(tsp.size() - 1));
+            tsp.remove(tsp.size() - 1);
+
+    } catch (MaxWeightException e) {
+        //If not possible, try to create a new route
+        try {
+            route = routeBuilder(route, warehouse);
+            routes.add(route);
+        } catch (MaxWeightException e1) {
+            return null;
+        }
+        route = new Route(instance.maxWeight);
+}
+        return routes;
+    }
+
+    @Nullable
+  /*  private RouteList thirdIteration(ArrayList<Node> tsp, RouteList routes, Instance instance, Node warehouse, Route route) {
+
+        Random random = new Random();
+        int randomIndex = random.nextInt(10);
+        Node currNode=tsp.get(0);
+
+        ArrayList<Node> closestNodes = new ArrayList<>();
+        closestNodes = DistanceMatrix.getInstance().getClosestNodes(currNode, instance.completeTSP);
+
+        try {
+
+            if (closestNodes.get(randomIndex).isTaken()){
+                System.out.println("Node is already taken!!!");
+            }else {
+                route.addNode(currNode);
+                route.addNode(closestNodes.get(randomIndex));
+                closestNodes.get(randomIndex).take();
+                tsp.remove(currNode);
+            }
+
+        } catch (MaxWeightException e) {
+            //If not possible, try to create a new route
+            try {
+                route = routeBuilder(route, warehouse);
+
+                    routes.add(route);
+
+            } catch (MaxWeightException e1) {
+                return null;
+            }
+            route = new Route(instance.maxWeight);
+        }
+        return routes;
+    }*/
     /**
      * canPositionate(Node node, Route route, int position) tests if it is possible to relocate a given discarded node
      * inside a given route, given the position of the examinated node inside the latter.
